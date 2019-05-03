@@ -1,0 +1,19 @@
+[package]
+authors = ["Hugo Ledoux <h.ledoux@tudelft.nl>"]
+name    = "startin"
+version = "0.1.0"
+edition = "2018"
+
+
+[dependencies]
+startin = "0.3.0"
+
+
+[dependencies.pyo3]
+version = "0.7.0-alpha.1"
+features = ["extension-module"]
+startin = "0.3.0"
+
+[lib]
+name = "startin"
+crate-type = ["cdylib"]
