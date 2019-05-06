@@ -1,5 +1,5 @@
 use pyo3::prelude::*;
-use pyo3::wrap_pyfunction;
+// use pyo3::wrap_pyfunction;
 
 extern crate startin;
 
@@ -25,12 +25,71 @@ impl DT {
         };
     }
 
+    fn get_snap_tolerance(&self) -> PyResult<f64> {
+        Ok(self.t.get_snap_tolerance())
+    }
+    fn set_snap_tolerance(&mut self, snaptol: f64) {
+        self.t.set_snap_tolerance(snaptol);
+    }
+
     fn number_of_vertices(&self) -> PyResult<usize> {
         Ok(self.t.number_of_vertices())
     }
-
     fn number_of_triangles(&self) -> PyResult<usize> {
         Ok(self.t.number_of_triangles())
+    }
+
+    fn all_vertices(&self) -> PyResult<Vec<Vec<f64>>> {
+        Ok(self.t.all_vertices())
+    }
+
+    fn get_point(&self, v: usize) -> PyResult<Vec<f64>> {
+        Ok(self.t.get_point(v))
+    }
+
+    // fn all_triangles(&self) -> PyResult<Vec<Vec<usize>>> {
+    //     let mut trs: Vec<Vec<usize>> = Vec::with_capacity(self.t.number_of_triangles());
+    //     for each in self.t.all_triangles() {
+    //         let mut tr = Vec::with_capacity(3);
+    //         tr.push(each.tr0);
+    //         tr.push(each.tr1);
+    //         tr.push(each.tr2);
+    //         trs.push(tr);
+    //     }
+    //     Ok(trs)
+    // }
+
+    fn convex_hull(&self) -> PyResult<Vec<usize>> {
+        Ok(self.t.convex_hull())
+    }
+    fn is_vertex_convex_hull(&self, v: usize) -> PyResult<bool> {
+        Ok(self.t.is_vertex_convex_hull(v))
+    }
+
+    fn incident_triangles_to_vertex(&self, v: usize) -> PyResult<Vec<Vec<usize>>> {
+        let re = self.t.incident_triangles_to_vertex(v);
+        let mut trs: Vec<Vec<usize>> = Vec::with_capacity(re.len());
+        for each in re {
+            let mut tr = Vec::with_capacity(3);
+            tr.push(each.tr0);
+            tr.push(each.tr1);
+            tr.push(each.tr2);
+            trs.push(tr);
+        }
+        Ok(trs)
+    }
+
+    fn adjacent_vertices_to_vertex(&self, v: usize) -> PyResult<Vec<usize>> {
+        Ok(self.t.adjacent_vertices_to_vertex(v))
+    }
+
+    fn is_triangle(&self, t: Vec<usize>) -> PyResult<bool> {
+        let tr = startin::Triangle {
+            tr0: t[0],
+            tr1: t[1],
+            tr2: t[2],
+        };
+        Ok(self.t.is_triangle(&tr))
     }
 }
 
