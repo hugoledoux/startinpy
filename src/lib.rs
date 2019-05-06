@@ -25,6 +25,10 @@ impl DT {
         };
     }
 
+    fn insert(&mut self, pts: Vec<Vec<f64>>) {
+        self.t.insert(&pts);
+    }
+
     fn get_snap_tolerance(&self) -> PyResult<f64> {
         Ok(self.t.get_snap_tolerance())
     }
@@ -47,17 +51,17 @@ impl DT {
         Ok(self.t.get_point(v))
     }
 
-    // fn all_triangles(&self) -> PyResult<Vec<Vec<usize>>> {
-    //     let mut trs: Vec<Vec<usize>> = Vec::with_capacity(self.t.number_of_triangles());
-    //     for each in self.t.all_triangles() {
-    //         let mut tr = Vec::with_capacity(3);
-    //         tr.push(each.tr0);
-    //         tr.push(each.tr1);
-    //         tr.push(each.tr2);
-    //         trs.push(tr);
-    //     }
-    //     Ok(trs)
-    // }
+    fn all_triangles(&self) -> PyResult<Vec<Vec<usize>>> {
+        let mut trs: Vec<Vec<usize>> = Vec::with_capacity(self.t.number_of_triangles());
+        for each in self.t.all_triangles() {
+            let mut tr = Vec::with_capacity(3);
+            tr.push(each.tr0);
+            tr.push(each.tr1);
+            tr.push(each.tr2);
+            trs.push(tr);
+        }
+        Ok(trs)
+    }
 
     fn convex_hull(&self) -> PyResult<Vec<usize>> {
         Ok(self.t.convex_hull())
