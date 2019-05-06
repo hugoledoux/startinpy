@@ -95,6 +95,18 @@ impl DT {
         };
         Ok(self.t.is_triangle(&tr))
     }
+
+    fn locate(&self, px: f64, py: f64) -> PyResult<Vec<usize>> {
+        let re = self.t.locate(px, py);
+        let mut tr: Vec<usize> = Vec::new();
+        if re.is_some() {
+            let t = re.unwrap();
+            tr.push(t.tr0);
+            tr.push(t.tr1);
+            tr.push(t.tr2);
+        }
+        Ok(tr)
+    }
 }
 
 #[pymodule]
