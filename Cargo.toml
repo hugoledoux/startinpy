@@ -6,7 +6,7 @@ edition = "2018"
 
 
 [dependencies]
-startin = "0.3.0"
+startin = "0.3.1"
 
 
 [dependencies.pyo3]
