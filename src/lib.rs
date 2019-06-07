@@ -25,11 +25,17 @@ impl DT {
         };
     }
 
-    fn remove(&mut self, v: usize) -> PyResult<bool> {
+    fn remove(&mut self, v: usize) -> PyResult<i8> {
         let re = self.t.remove(v);
         match re {
-            Ok(_x) => return Ok(true),
-            Err(_x) => return Ok(false),
+            Ok(_x) => return Ok(1),
+            Err(_x) => {
+                if _x == "Cannot remove the infinite vertex" {
+                    return Ok(0);
+                } else {
+                    return Ok(-1);
+                }
+            }
         };
     }
 
