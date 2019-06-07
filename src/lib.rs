@@ -25,6 +25,14 @@ impl DT {
         };
     }
 
+    fn remove(&mut self, v: usize) -> PyResult<bool> {
+        let re = self.t.remove(v);
+        match re {
+            Ok(_x) => return Ok(true),
+            Err(_x) => return Ok(false),
+        };
+    }
+
     fn insert(&mut self, pts: Vec<Vec<f64>>) {
         self.t.insert(&pts);
     }

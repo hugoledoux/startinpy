@@ -35,6 +35,9 @@ pts.append([0.1, 0.8, 44])
 t = startin.DT()
 t.insert(pts)
 
+#-- remove vertex #4
+t.remove(4)
+
 print("# vertices:", t.number_of_vertices())
 print("# triangles:", t.number_of_triangles())
 
