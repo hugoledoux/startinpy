@@ -1,12 +1,12 @@
 [package]
 authors = ["Hugo Ledoux <h.ledoux@tudelft.nl>"]
 name    = "startin"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2018"
 
 
 [dependencies]
-startin = "0.4.0"
+startin = "0.4.1"
 
 
 [dependencies.pyo3]
