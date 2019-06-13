@@ -31,4 +31,4 @@ script:
   - cibuildwheel --output-dir wheelhouse
   - export TWINE_PASSWORD=$TWINE_PASSWORD
   - python -m pip install twine
-  - python -m twine upload wheelhouse/*.whl --repository-url https://test.pypi.org/legacy/ --verbose
+  - python -m twine upload wheelhouse/*.whl --verbose

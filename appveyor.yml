@@ -27,7 +27,7 @@ install:
 build_script:
   - cibuildwheel --output-dir wheelhouse
   - python -m pip install twine
-  - python -m twine upload "wheelhouse/*.whl" --repository-url https://test.pypi.org/legacy/ --username %TWINE_USERNAME% --password %TWINE_PASSWORD%
+  - python -m twine upload "wheelhouse/*.whl" --username %TWINE_USERNAME% --password %TWINE_PASSWORD%
 
 artifacts:
   - path: "wheelhouse\\*.whl"
