@@ -70,7 +70,7 @@ tests_require = install_requires + ["pytest", "pytest-benchmark"]
 
 setup(
     name="startin",
-    version="0.1.4",
+    version="0.4.2",
     classifiers=[
         "License :: OSI Approved :: MIT License",
         "Development Status :: 3 - Alpha",
