@@ -1,5 +1,6 @@
 
-# startin_python
+startin_python
+==============
 
 |License: MIT| |image1|
 
@@ -8,8 +9,8 @@ Python bindings for `startin <https://github.com/hugoledoux/startin>`_, a Delaun
 Installation
 ------------
 
-pip
-===
+**pip**
+
 
 To install the latest release:
 
@@ -18,8 +19,8 @@ To install the latest release:
     pip install cjio
 
 
-Development
-===========
+**Development**
+
 
 You need to install `Rust <https://www.rust-lang.org/>`_ and then
 
