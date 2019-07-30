@@ -32,6 +32,7 @@ You need to install `Rust <https://www.rust-lang.org/>`_ and then
 Move to another folder, and
 
 .. code:: python
+
     import startin
     dt = startin.DT()
     dt.insert_one_pt(1.0, 2.0, 33.2)
