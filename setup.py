@@ -68,9 +68,18 @@ setup_requires = ["setuptools-rust>=0.10.1", "wheel"]
 install_requires = []
 tests_require = install_requires + ["pytest", "pytest-benchmark"]
 
+with open("README.rst", "r") as fh:
+    long_description = fh.read()
+
 setup(
     name="startin",
-    version="0.4.2",
+    version="0.4.5",
+    description='Python bindings of startin (written in Rust)',
+    long_description=long_description,
+    long_description_content_type="text/x-rst",
+    url='https://github.com/hugoledoux/startin_python',
+    author='Hugo Ledoux',
+    author_email='h.ledoux@tudelft.nl',
     classifiers=[
         "License :: OSI Approved :: MIT License",
         "Development Status :: 3 - Alpha",

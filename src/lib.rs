@@ -62,16 +62,22 @@ impl DT {
     }
 
     fn get_point(&self, v: usize) -> PyResult<Vec<f64>> {
-        Ok(self.t.get_point(v))
+        let re = self.t.get_point(v);
+        if re.is_some() {
+            Ok(self.t.get_point(v).unwrap())
+        } else {
+            let pt = vec![-99999.99999, -99999.99999, -99999.99999];
+            Ok(pt)
+        }
     }
 
     fn all_triangles(&self) -> PyResult<Vec<Vec<usize>>> {
         let mut trs: Vec<Vec<usize>> = Vec::with_capacity(self.t.number_of_triangles());
         for each in self.t.all_triangles() {
             let mut tr = Vec::with_capacity(3);
-            tr.push(each.tr0);
-            tr.push(each.tr1);
-            tr.push(each.tr2);
+            tr.push(each.v[0]);
+            tr.push(each.v[1]);
+            tr.push(each.v[2]);
             trs.push(tr);
         }
         Ok(trs)
@@ -86,26 +92,36 @@ impl DT {
 
     fn incident_triangles_to_vertex(&self, v: usize) -> PyResult<Vec<Vec<usize>>> {
         let re = self.t.incident_triangles_to_vertex(v);
-        let mut trs: Vec<Vec<usize>> = Vec::with_capacity(re.len());
-        for each in re {
-            let mut tr = Vec::with_capacity(3);
-            tr.push(each.tr0);
-            tr.push(each.tr1);
-            tr.push(each.tr2);
-            trs.push(tr);
+        if re.is_some() {
+            let l = re.unwrap();
+            let mut trs: Vec<Vec<usize>> = Vec::with_capacity(l.len());
+            for each in l {
+                let mut tr = Vec::with_capacity(3);
+                tr.push(each.v[0]);
+                tr.push(each.v[1]);
+                tr.push(each.v[2]);
+                trs.push(tr);
+            }
+            Ok(trs)
+        } else {
+            let trs: Vec<Vec<usize>> = Vec::new();
+            Ok(trs)
         }
-        Ok(trs)
     }
 
     fn adjacent_vertices_to_vertex(&self, v: usize) -> PyResult<Vec<usize>> {
-        Ok(self.t.adjacent_vertices_to_vertex(v))
+        let re = self.t.adjacent_vertices_to_vertex(v);
+        if re.is_some() {
+            Ok(re.unwrap())
+        } else {
+            let l: Vec<usize> = Vec::new();
+            Ok(l)
+        }
     }
 
     fn is_triangle(&self, t: Vec<usize>) -> PyResult<bool> {
         let tr = startin::Triangle {
-            tr0: t[0],
-            tr1: t[1],
-            tr2: t[2],
+            v: [t[0], t[1], t[2]],
         };
         Ok(self.t.is_triangle(&tr))
     }
@@ -115,9 +131,9 @@ impl DT {
         let mut tr: Vec<usize> = Vec::new();
         if re.is_some() {
             let t = re.unwrap();
-            tr.push(t.tr0);
-            tr.push(t.tr1);
-            tr.push(t.tr2);
+            tr.push(t.v[0]);
+            tr.push(t.v[1]);
+            tr.push(t.v[2]);
         }
         Ok(tr)
     }
