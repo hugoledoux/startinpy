@@ -16,7 +16,7 @@ To install the latest release:
 
 .. code:: console
 
-    pip install cjio
+    pip install startin
 
 
 **Development**
