@@ -86,8 +86,18 @@ impl DT {
     fn convex_hull(&self) -> PyResult<Vec<usize>> {
         Ok(self.t.convex_hull())
     }
+
     fn is_vertex_convex_hull(&self, v: usize) -> PyResult<bool> {
         Ok(self.t.is_vertex_convex_hull(v))
+    }
+
+    fn closest_point(&self, px: f64, py: f64) -> PyResult<usize> {
+        let re = self.t.closest_point(px, py);
+        if re.is_none() == true {
+            return Err(PyErr::new::<exceptions::IOError, _>("Outside CH"));
+        } else {
+            Ok(re.unwrap())
+        }
     }
 
     fn incident_triangles_to_vertex(&self, v: usize) -> PyResult<Vec<Vec<usize>>> {
