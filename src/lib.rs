@@ -137,6 +137,30 @@ impl DT {
         }
         Ok(tr)
     }
+
+    fn interpolate_nn(&self, px: f64, py: f64) -> PyResult<f64> {
+        let re = self.t.interpolate_nn(px, py);
+        if re.is_none() {
+            return Err(PyErr::new::<exceptions::IOError, _>("Outside CH"));
+        }
+        Ok(re.unwrap())
+    }
+
+    fn interpolate_tin_linear(&self, px: f64, py: f64) -> PyResult<f64> {
+        let re = self.t.interpolate_tin_linear(px, py);
+        if re.is_none() {
+            return Err(PyErr::new::<exceptions::IOError, _>("Outside CH"));
+        }
+        Ok(re.unwrap())
+    }
+
+    fn interpolate_laplace(&mut self, px: f64, py: f64) -> PyResult<f64> {
+        let re = self.t.interpolate_laplace(px, py);
+        if re.is_none() {
+            return Err(PyErr::new::<exceptions::IOError, _>("Outside CH"));
+        }
+        Ok(re.unwrap())
+    }
 }
 
 #[pymodule]
