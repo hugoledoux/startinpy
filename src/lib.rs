@@ -172,6 +172,14 @@ impl DT {
         }
         Ok(re.unwrap())
     }
+
+    fn write_obj(&self, path: String) -> PyResult<()> {
+        let re = self.t.write_obj(path.to_string(), false);
+        if re.is_err() {
+            return Err(PyErr::new::<exceptions::IOError, _>("Invalid path"));
+        }
+        Ok(())
+    }
 }
 
 #[pymodule]
