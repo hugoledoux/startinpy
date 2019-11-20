@@ -73,7 +73,7 @@ with open("README.rst", "r") as fh:
 
 setup(
     name="startin",
-    version="0.4.6",
+    version="0.4.7",
     description='Python bindings of startin (written in Rust)',
     long_description=long_description,
     long_description_content_type="text/x-rst",
