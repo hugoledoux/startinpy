@@ -38,6 +38,12 @@ Move to another folder, and
     dt.insert_one_pt(1.0, 2.0, 33.2)
 
 
+Documentation
+-------------
+
+Simple documentation of the API is available in the folder /docs/
+
+
 A full simple example
 ---------------------
 

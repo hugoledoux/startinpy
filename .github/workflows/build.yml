@@ -1,0 +1,80 @@
+name: Build Python bindings
+
+on:
+  release:
+    types: [created]
+
+
+jobs:
+
+  Windows:
+    runs-on: windows-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: [3.8]
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install maturin
+    - name: Install cargo night
+      run: |
+        rustup toolchain install nightly
+        rustup default nightly
+    - name: Do the work mate
+      run: |
+        maturin publish --no-sdist -u hledoux -p ${{ secrets. PASSWORD_TEST_PYPI }} -r https://test.pypi.org/legacy/
+
+  MacOS:
+    runs-on: macos-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: [3.6, 3.7, 3.8]
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install maturin
+    - name: Install cargo night
+      run: |
+        rustup toolchain install nightly
+        rustup default nightly
+    - name: Do the work mate
+      run: |
+        maturin publish --no-sdist -u hledoux -p ${{ secrets. PASSWORD_TEST_PYPI }} -r https://test.pypi.org/legacy/
+
+  Linux:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: [3.6, 3.7, 3.8]
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install maturin
+    - name: Install cargo night
+      run: |
+        rustup toolchain install nightly
+        rustup default nightly
+    - name: Do the work mate
+      run: |
+        maturin publish -u hledoux -p ${{ secrets. PASSWORD_TEST_PYPI }} -r https://test.pypi.org/legacy/
