@@ -1,8 +1,6 @@
 name: Build Python bindings
 
-on:
-  release:
-    types: [created]
+on: [push]
 
 jobs:
 
