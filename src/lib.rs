@@ -3,6 +3,9 @@ use pyo3::prelude::*;
 
 extern crate startin;
 
+extern crate las;
+use las::Read;
+
 #[pyclass(unsendable)]
 struct DT {
     t: startin::Triangulation,
@@ -40,6 +43,22 @@ impl DT {
 
     fn insert(&mut self, pts: Vec<Vec<f64>>) {
         self.t.insert(&pts);
+    }
+
+    fn read_las(&mut self, path: String) -> PyResult<()> {
+        let re = las::Reader::from_path(path);
+        if re.is_err() {
+            return Err(PyErr::new::<exceptions::IOError, _>(
+                "Invalid path for LAS/LAZ file.",
+            ));
+        }
+        let mut reader = re.unwrap();
+        let _count = reader.header().number_of_points();
+        for each in reader.points() {
+            let p = each.unwrap();
+            let _re = self.t.insert_one_pt(p.x, p.y, p.z);
+        }
+        Ok(())
     }
 
     fn get_snap_tolerance(&self) -> PyResult<f64> {
