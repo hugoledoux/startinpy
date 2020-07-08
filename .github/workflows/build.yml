@@ -22,10 +22,6 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install maturin
-    - name: Install cargo night
-      run: |
-        rustup toolchain install nightly
-        rustup default nightly
     - name: Do the work mate
       run: |
         maturin publish --no-sdist -u hledoux -p ${{ secrets.PASSWORD_PYPI }}
@@ -46,10 +42,6 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install maturin
-    - name: Install cargo night
-      run: |
-        rustup toolchain install nightly
-        rustup default nightly
     - name: Do the work mate
       run: |
         maturin publish --no-sdist -u hledoux -p ${{ secrets.PASSWORD_PYPI }}
@@ -70,10 +62,6 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install maturin
-    - name: Install cargo night
-      run: |
-        rustup toolchain install nightly
-        rustup default nightly
     - name: Do the work mate
       run: |
         maturin publish -u hledoux -p ${{ secrets.PASSWORD_PYPI }}
