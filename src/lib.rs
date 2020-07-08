@@ -1,6 +1,6 @@
+use pyo3::exceptions;
 use pyo3::prelude::*;
 // use pyo3::wrap_pyfunction;
-use pyo3::exceptions;
 
 extern crate startin;
 
@@ -12,10 +12,9 @@ struct DT {
 #[pymethods]
 impl DT {
     #[new]
-    fn new(obj: &PyRawObject) {
-        obj.init(DT {
-            t: startin::Triangulation::new(),
-        });
+    fn new() -> Self {
+        let tmp = startin::Triangulation::new();
+        DT { t: tmp }
     }
 
     fn insert_one_pt(&mut self, px: f64, py: f64, pz: f64) -> PyResult<usize> {
@@ -183,8 +182,7 @@ impl DT {
 }
 
 #[pymodule]
-fn startin(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
+fn startin(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<DT>()?;
-
     Ok(())
 }
