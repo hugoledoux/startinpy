@@ -21,15 +21,11 @@ To install the latest release:
 
 **Development**
 
-
-You need to install `Rust <https://www.rust-lang.org/>`_ and then
-
-.. code:: console
-
-    cargo build
-    python setup.py install
-
-Move to another folder, and
+  1. install `Rust <https://www.rust-lang.org/>`_ (v1.39+)
+  2. install `maturin <https://github.com/PyO3/maturin>`_ 
+  3. `cargo build`
+  4. `maturin development`
+  5. move to another folder, and
 
 .. code:: python
 
@@ -41,7 +37,7 @@ Move to another folder, and
 Documentation
 -------------
 
-Simple documentation of the API is available in the folder /docs/
+Simple documentation of the API is available in the folder `/docs/`
 
 
 A full simple example

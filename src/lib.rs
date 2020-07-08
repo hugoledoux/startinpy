@@ -1,10 +1,9 @@
 use pyo3::exceptions;
 use pyo3::prelude::*;
-// use pyo3::wrap_pyfunction;
 
 extern crate startin;
 
-#[pyclass]
+#[pyclass(unsendable)]
 struct DT {
     t: startin::Triangulation,
 }

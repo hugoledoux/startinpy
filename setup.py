@@ -4,9 +4,9 @@ import setuptools
 with open("README.rst", "r") as fh:
     long_description = fh.read()
 
-setup(
+setuptools.setup(
     name="startin",
-    version="0.6.0",
+    version="0.6.1",
     description='Python bindings of startin (written in Rust)',
     long_description=long_description,
     long_description_content_type="text/x-rst",
@@ -23,7 +23,7 @@ setup(
         "Operating System :: MacOS :: MacOS X",
     ],
     packages=["startin"],
-    python_requires='>=3.5',
+    python_requires='>=3.6',
 )
 
 

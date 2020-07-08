@@ -10,7 +10,7 @@ startin = "0.4.7"
 
 
 [dependencies.pyo3]
-version = "0.9"
+version = "0.11"
 features = ["extension-module"]
 
 
