@@ -2,6 +2,7 @@
 authors = ["Hugo Ledoux <h.ledoux@tudelft.nl>"]
 name    = "startin"
 version = "0.6.1"
+license = "MIT"
 edition = "2018"
 
 
@@ -21,3 +22,4 @@ crate-type = ["cdylib"]
 
 [package.metadata.maturin]
 requires-dist = ["toml==0.10.0"]
+classifier=["License :: OSI Approved :: MIT License"]
