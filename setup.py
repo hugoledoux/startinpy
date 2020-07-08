@@ -1,13 +1,20 @@
-import setuptools
-
+from setuptools import setup
+import toml
 
 with open("README.rst", "r") as fh:
     long_description = fh.read()
 
-setuptools.setup(
+with open("Cargo.toml") as fp:
+    f = toml.load(fp)
+    version = f["package"]["version"]
+    description = f["package"]["description"]
+
+
+
+setup(
     name="startin",
-    version="0.6.1",
-    description='Python bindings of startin (written in Rust)',
+    version=version,
+    description=description,
     long_description=long_description,
     long_description_content_type="text/x-rst",
     url='https://github.com/hugoledoux/startin_python',

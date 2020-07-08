@@ -2,7 +2,12 @@
 authors = ["Hugo Ledoux <h.ledoux@tudelft.nl>"]
 name    = "startin"
 version = "0.6.1"
+authors = ["Hugo Ledoux <h.ledoux@tudelft.nl>"]
 license = "MIT"
+homepage="https://github.com/hugoledoux/startin_python"
+repository="https://github.com/hugoledoux/startin_python"
+documentation="https://github.com/hugoledoux/startin_python"
+description = "A Delaunay triangulator for terrains"
 edition = "2018"
 
 
