@@ -1,7 +1,7 @@
 from setuptools import setup
 import toml
 
-with open("README.rst", "r") as fh:
+with open("README.md", "r") as fh:
     long_description = fh.read()
 
 with open("Cargo.toml") as fp:
@@ -16,18 +16,12 @@ setup(
     version=version,
     description=description,
     long_description=long_description,
-    long_description_content_type="text/x-rst",
+    long_description_content_type="text/x-md",
     url='https://github.com/hugoledoux/startin_python',
     author='Hugo Ledoux',
     author_email='h.ledoux@tudelft.nl',
     classifiers=[
         "License :: OSI Approved :: MIT License",
-        "Development Status :: 3 - Alpha",
-        "Intended Audience :: Developers",
-        "Programming Language :: Python",
-        "Programming Language :: Rust",
-        "Operating System :: POSIX",
-        "Operating System :: MacOS :: MacOS X",
     ],
     packages=["startin"],
     python_requires='>=3.6',

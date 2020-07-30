@@ -1,19 +1,18 @@
 [package]
-authors = ["Hugo Ledoux <h.ledoux@tudelft.nl>"]
 name    = "startin"
-version = "0.6.1"
+version = "0.6.5"
 authors = ["Hugo Ledoux <h.ledoux@tudelft.nl>"]
 license = "MIT"
 homepage="https://github.com/hugoledoux/startin_python"
 repository="https://github.com/hugoledoux/startin_python"
-documentation="https://github.com/hugoledoux/startin_python"
 description = "A Delaunay triangulator for terrains"
+readme = "README.md"
 edition = "2018"
 
 
 [dependencies]
 startin = "0.4.7"
-las = { version = "0.7", features = ["laz"] }
+las = { version = "0.7.1", features = ["laz"] }
 
 
 [dependencies.pyo3]
