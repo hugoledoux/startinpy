@@ -1,8 +1,8 @@
 
+[![GitHub license](https://img.shields.io/github/license/hugoledoux/startin_python)](https://github.com/hugoledoux/startin_python/blob/master/LICENSE) [![PyPI version](https://badge.fury.io/py/startin.svg)](https://pypi.org/project/startin/)
+
 startin_python
 ==============
-
-|License: MIT| |image1|
 
 Python bindings for [startin](https://github.com/hugoledoux/startin), a Delaunay triangulator for the modelling of terrains.
 
@@ -13,7 +13,7 @@ Installation
 pip
 ---
 
-To install the latest release: `pip install simplaz`
+To install the latest release: `pip install startin`
 
 
 Development
@@ -35,7 +35,6 @@ Example
 =======
 
 ```python
-
 import startin
 
 pts = []
@@ -74,18 +73,9 @@ for each in t.all_vertices():
     print(each)
 print("--- Vertices/ ---")
 
-
 alltr = t.all_triangles()
 print(alltr[3])
 ```
-
-
-
-.. |License: MIT| image:: https://img.shields.io/badge/License-MIT-yellow.svg
-   :target: https://github.com/hugoledoux/startin_python/blob/master/LICENSE
-.. |image1| image:: https://badge.fury.io/py/startin.svg
-   :target: https://badge.fury.io/py/startin
-
 
 
 

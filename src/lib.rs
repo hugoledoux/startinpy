@@ -6,19 +6,35 @@ extern crate startin;
 extern crate las;
 use las::Read;
 
+/// A Delaunay triangulator where the input are 2.5D points,
+/// the DT is computed in 2D but the elevation of the vertices are kept.
+/// This is used mostly for the modelling of terrains.
+/// This is the Python bindings of Rust's startin:
+/// (https://github.com/hugoledoux/startin)
+#[pymodule]
+fn startin(_py: Python, m: &PyModule) -> PyResult<()> {
+    m.add_class::<DT>()?;
+    Ok(())
+}
+
 #[pyclass(unsendable)]
-struct DT {
+/// A Delaunay triangulation (DT), containing vertices+triangles
+pub struct DT {
     t: startin::Triangulation,
 }
 
 #[pymethods]
 impl DT {
+    /// Constructor for a DT (returns an empty DT)
     #[new]
     fn new() -> Self {
         let tmp = startin::Triangulation::new();
         DT { t: tmp }
     }
 
+    /// Insert one new point in the DT.
+    /// If there is a point at the same location (based on 2D tolerance), then
+    /// the point is not inserted.
     fn insert_one_pt(&mut self, px: f64, py: f64, pz: f64) -> PyResult<usize> {
         let re = self.t.insert_one_pt(px, py, pz);
         match re {
@@ -197,10 +213,4 @@ impl DT {
         }
         Ok(())
     }
-}
-
-#[pymodule]
-fn startin(_py: Python, m: &PyModule) -> PyResult<()> {
-    m.add_class::<DT>()?;
-    Ok(())
 }

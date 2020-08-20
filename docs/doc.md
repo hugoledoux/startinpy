@@ -1,70 +1,75 @@
 
-### dt.adjacent_vertices_to_vertex(i)
+### adjacent_vertices_to_vertex(i)
   returns a list of vertex indices that are adjacent to vertex i
 
-### dt.all_triangles()                 
+### all_triangles()                 
   returns a list of Triangles (which is a list with 3 indices)
 
-### dt.all_vertices()                  
+### all_vertices()                  
   returns a list of all vertices in the DT
 
-### dt.closest_point(x, y)                 
+### closest_point(x, y)                 
   returns the closest vertex index to (x,y) (distance in 2D)
 
-### dt.convex_hull()                   
+### convex_hull()                   
   returns the convex hull as a list of vertex indices
 
-### dt.get_point(i)
+### get_point(i)
   returns the point at the index i                     
 
-### dt.get_snap_tolerance()            
+### get_snap_tolerance()            
   returns the snap tolerance (2 vertices closer will be the same)
 
-### dt.incident_triangles_to_vertex(i)  
+### incident_triangles_to_vertex(i)  
   returns a list of Triangles incident to vertex i
 
-### dt.insert([ [ax, ay, az], [bx, by, bz] ])
+### insert([ [ax, ay, az], [bx, by, bz] ])
   calls insert_one_pt() for each vertex in the list
   returns nothing                        
 
-### dt.insert_one_pt(x, y, z)   
+### insert_one_pt(x, y, z)   
   returns the index of the vertex inserted (an already exisiting one is possible)             
 
-### dt.interpolate_laplace(x, y)
+### interpolate_laplace(x, y)
   returns the value, interpolated with the Laplace method, at location (x, y)  
   an error is thrown if outside the DT         
 
-### dt.interpolate_nn(x, y)       
+### interpolate_nn(x, y)       
   returns the value, interpolated with the nearest neighbour method, at location (x, y)  
   an error is thrown if outside the DT         
 
-### dt.interpolate_tin_linear(x, y) 
+### interpolate_tin_linear(x, y) 
   returns the value, interpolated with the linear interpolation in TIN, at location (x, y)  
   an error is thrown if outside the DT         
 
-### dt.is_triangle([a, b, c])
+### is_triangle([a, b, c])
   returns true if triangle abc exists, false if not
 
-### dt.is_vertex_convex_hull(i)
+### is_vertex_convex_hull(i)
   returns true if vertex i is on the boundary of the convex hull, false if not   
 
-### dt.locate(x, y)
+### locate(x, y)
   returns the Triangle containing the point (x, y)
 
-### dt.number_of_triangles()
+### number_of_triangles()
   returns the number of Triangles in the DT
 
-### dt.number_of_vertices()
+### number_of_vertices()
   returns the number of vertices in the DT
 
-### dt.remove(i)
+### read_las(path_file)
+  reads the LAS/LAZ file "path_file" (a string) and inserts all the points in the DT
+  throws an error if the path is invalid
+
+### remove(i)
   removes/delete the vertex i from the DT, and updates it for the Delaunay criterion
   returns 1 if the operation was successful; and -1 if the vertex doesn't exist
 
-### dt.set_snap_tolerance(value)
-  sets the snap tolerance to this value (default=0.001)
+### set_snap_tolerance(value)
+  sets the snap tolerance (for insertion of points in the DT) to this value 
+  (default=0.001)
   returns nothing
 
-### dt.write_obj(path)
-  writes an OBJ of the DT to the path
+### write_obj(path)
+  writes an OBJ of the DT to the path (a string)
   throws an error if the path is invalid
