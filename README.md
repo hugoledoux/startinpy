@@ -31,8 +31,8 @@ Documentation
 Simple documentation of the API is available in the folder `/docs/`
 
 
-Example
-=======
+Examples
+========
 
 ```python
 import startin
@@ -75,6 +75,20 @@ print("--- Vertices/ ---")
 
 alltr = t.all_triangles()
 print(alltr[3])
+```
+
+It can read LAS/LAZ and output OBJ files too:
+
+```python
+import startin
+
+t = startin.DT()
+t.read_las("/home/elvis/myfile.laz")
+
+print("# vertices:", t.number_of_vertices())
+print("# triangles:", t.number_of_triangles())
+
+t.write_obj("/home/elvis/output.obj")
 ```
 
 
