@@ -206,8 +206,24 @@ impl DT {
         Ok(re.unwrap())
     }
 
+    fn interpolate_nni(&mut self, px: f64, py: f64) -> PyResult<f64> {
+        let re = self.t.interpolate_nni(px, py);
+        if re.is_none() {
+            return Err(PyErr::new::<exceptions::IOError, _>("Outside CH"));
+        }
+        Ok(re.unwrap())
+    }
+
     fn write_obj(&self, path: String) -> PyResult<()> {
         let re = self.t.write_obj(path.to_string(), false);
+        if re.is_err() {
+            return Err(PyErr::new::<exceptions::IOError, _>("Invalid path"));
+        }
+        Ok(())
+    }
+
+    fn write_geojson(&self, path: String) -> PyResult<()> {
+        let re = self.t.write_geojson(path.to_string());
         if re.is_err() {
             return Err(PyErr::new::<exceptions::IOError, _>("Invalid path"));
         }
