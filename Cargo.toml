@@ -22,7 +22,7 @@ features = ["extension-module"]
 
 
 [lib]
-name = "startin"
+name = "startinpy"
 crate-type = ["cdylib"]
 
 
