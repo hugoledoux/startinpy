@@ -121,6 +121,15 @@ impl DT {
         Ok(self.t.convex_hull())
     }
 
+    fn is_inside_convex_hull(&self, px: f64, py: f64) -> PyResult<bool> {
+        let re = self.t.locate(px, py);
+        if re.is_none() == true {
+            return Ok(false);
+        } else {
+            Ok(true)
+        }
+    }
+
     fn is_vertex_convex_hull(&self, v: usize) -> PyResult<bool> {
         Ok(self.t.is_vertex_convex_hull(v))
     }
