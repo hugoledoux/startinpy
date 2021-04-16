@@ -1,6 +1,5 @@
 
-[![GitHub license](https://img.shields.io/github/license/hugoledoux/startin_python)](https://github.com/hugoledoux/startin_python/blob/master/LICENSE) [![PyPI version](https://badge.fury.io/py/startin.svg)](https://pypi.org/project/startin/)
-
+[![GitHub license](https://img.shields.io/github/license/hugoledoux/startin_python)](https://github.com/hugoledoux/startin_python/blob/master/LICENSE) [![PyPI version](https://badge.fury.io/py/startinpy.svg)](https://badge.fury.io/py/startinpy)
 startinpy
 =========
 
