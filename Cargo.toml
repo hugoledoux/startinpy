@@ -11,8 +11,8 @@ edition = "2018"
 
 
 [dependencies]
-# startin = "0.4.7"
-startin = { path = "../startin" }
+startin = "0.5.0"
+# startin = { path = "../startin" }
 las = { version = "0.7.1", features = ["laz"] }
 
 
