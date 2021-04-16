@@ -17,7 +17,7 @@ setup(
     description=description,
     long_description=long_description,
     long_description_content_type="text/x-md",
-    url='https://github.com/hugoledoux/startin_python',
+    url='https://github.com/hugoledoux/startinpy',
     author='Hugo Ledoux',
     author_email='h.ledoux@tudelft.nl',
     classifiers=[
