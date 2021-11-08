@@ -52,10 +52,10 @@
   returns the Triangle containing the point (x, y)
 
 ### number_of_triangles()
-  returns the number of Triangles in the DT
+  returns the number of (finite) Triangles in the DT
 
 ### number_of_vertices()
-  returns the number of vertices in the DT
+  returns the number of (finite) vertices in the DT
 
 ### read_las(path_file)
   reads the LAS/LAZ file "path_file" (a string) and inserts all the points in the DT
