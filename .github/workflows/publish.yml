@@ -1,10 +1,8 @@
-name: Build Python bindings
+name: Publish Python bindings
 
 on:
-  push:
-  pull_request:
-  schedule:
-    - cron:  '0 6 * * 1' # Run every monday at 06:00 UTC
+ release:
+  types: [created]
 
 jobs:
   linux:
@@ -15,8 +13,8 @@ jobs:
       with:
         maturin-version: latest
         manylinux: auto
-        command: build
-        args: --release --no-sdist
+        command: publish
+        args: --no-sdist -u hledoux -p ${{ secrets.PASSWORD_PYPI }}
 
   windows:
     runs-on: windows-latest
@@ -25,8 +23,8 @@ jobs:
     - uses: messense/maturin-action@v1
       with:
         maturin-version: latest
-        command: build
-        args: --release --no-sdist
+        command: publish
+        args: --no-sdist -u hledoux -p ${{ secrets.PASSWORD_PYPI }}
 
   macos:
     runs-on: macos-latest
@@ -48,5 +46,5 @@ jobs:
     - uses: messense/maturin-action@v1
       with:
         maturin-version: latest
-        command: build
-        args: -i python --release --no-sdist --universal2
+        command: publish
+        args: -i python --no-sdist --universal2 -u hledoux -p ${{ secrets.PASSWORD_PYPI }}
