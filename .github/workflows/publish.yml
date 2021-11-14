@@ -7,12 +7,17 @@ on:
 jobs:
   linux:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: ['x86_64-unknown-linux-gnu', 'aarch64-unknown-linux-gnu']
+      fail-fast: false
     steps:
     - uses: actions/checkout@v2
     - uses: messense/maturin-action@v1
       with:
         maturin-version: latest
         manylinux: auto
+        target: ${{ matrix.target }}
         command: publish
         args: --no-sdist -u hledoux -p ${{ secrets.PASSWORD_PYPI }}
 
