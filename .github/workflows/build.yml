@@ -9,12 +9,17 @@ on:
 jobs:
   linux:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: ['x86_64-unknown-linux-gnu', 'aarch64-unknown-linux-gnu']
+      fail-fast: false
     steps:
     - uses: actions/checkout@v2
     - uses: messense/maturin-action@v1
       with:
         maturin-version: latest
         manylinux: auto
+        target: ${{ matrix.target }}
         command: build
         args: --release --no-sdist
 
@@ -30,16 +35,8 @@ jobs:
 
   macos:
     runs-on: macos-latest
-    strategy:
-      matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10"]
-      fail-fast: false
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
     - name: Install aarch64-apple-darwin toolchain
       uses: actions-rs/toolchain@v1
       with:
@@ -49,4 +46,4 @@ jobs:
       with:
         maturin-version: latest
         command: build
-        args: -i python --release --no-sdist --universal2
+        args: --release --no-sdist --universal2
