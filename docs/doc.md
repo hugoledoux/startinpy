@@ -3,10 +3,10 @@
   returns a list of vertex indices that are adjacent to vertex i
 
 ### all_triangles()                 
-  returns a list of Triangles (which is a list with 3 indices)
+  returns a list of (finite) Triangles (which is a list with 3 indices)
 
 ### all_vertices()                  
-  returns a list of all vertices in the DT
+  returns a list of all vertices in the DT (including the infinite one, vertex "0")
 
 ### closest_point(x, y)                 
   returns the closest vertex index to (x,y) (distance in 2D)
