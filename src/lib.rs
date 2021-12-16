@@ -64,7 +64,7 @@ impl DT {
     fn read_las(&mut self, path: String) -> PyResult<()> {
         let re = las::Reader::from_path(path);
         if re.is_err() {
-            return Err(PyErr::new::<exceptions::IOError, _>(
+            return Err(PyErr::new::<exceptions::PyIOError, _>(
                 "Invalid path for LAS/LAZ file.",
             ));
         }
@@ -137,7 +137,7 @@ impl DT {
     fn closest_point(&self, px: f64, py: f64) -> PyResult<usize> {
         let re = self.t.closest_point(px, py);
         if re.is_none() == true {
-            return Err(PyErr::new::<exceptions::IOError, _>("Outside CH"));
+            return Err(PyErr::new::<exceptions::PyIOError, _>("Outside CH"));
         } else {
             Ok(re.unwrap())
         }
@@ -194,7 +194,7 @@ impl DT {
     fn interpolate_nn(&self, px: f64, py: f64) -> PyResult<f64> {
         let re = self.t.interpolate_nn(px, py);
         if re.is_none() {
-            return Err(PyErr::new::<exceptions::IOError, _>("Outside CH"));
+            return Err(PyErr::new::<exceptions::PyIOError, _>("Outside CH"));
         }
         Ok(re.unwrap())
     }
@@ -202,7 +202,7 @@ impl DT {
     fn interpolate_tin_linear(&self, px: f64, py: f64) -> PyResult<f64> {
         let re = self.t.interpolate_tin_linear(px, py);
         if re.is_none() {
-            return Err(PyErr::new::<exceptions::IOError, _>("Outside CH"));
+            return Err(PyErr::new::<exceptions::PyIOError, _>("Outside CH"));
         }
         Ok(re.unwrap())
     }
@@ -210,7 +210,7 @@ impl DT {
     fn interpolate_laplace(&mut self, px: f64, py: f64) -> PyResult<f64> {
         let re = self.t.interpolate_laplace(px, py);
         if re.is_none() {
-            return Err(PyErr::new::<exceptions::IOError, _>("Outside CH"));
+            return Err(PyErr::new::<exceptions::PyIOError, _>("Outside CH"));
         }
         Ok(re.unwrap())
     }
@@ -218,7 +218,7 @@ impl DT {
     fn interpolate_nni(&mut self, px: f64, py: f64) -> PyResult<f64> {
         let re = self.t.interpolate_nni(px, py);
         if re.is_none() {
-            return Err(PyErr::new::<exceptions::IOError, _>("Outside CH"));
+            return Err(PyErr::new::<exceptions::PyIOError, _>("Outside CH"));
         }
         Ok(re.unwrap())
     }
@@ -226,7 +226,7 @@ impl DT {
     fn write_obj(&self, path: String) -> PyResult<()> {
         let re = self.t.write_obj(path.to_string(), false);
         if re.is_err() {
-            return Err(PyErr::new::<exceptions::IOError, _>("Invalid path"));
+            return Err(PyErr::new::<exceptions::PyIOError, _>("Invalid path"));
         }
         Ok(())
     }
@@ -234,7 +234,7 @@ impl DT {
     fn write_geojson(&self, path: String) -> PyResult<()> {
         let re = self.t.write_geojson(path.to_string());
         if re.is_err() {
-            return Err(PyErr::new::<exceptions::IOError, _>("Invalid path"));
+            return Err(PyErr::new::<exceptions::PyIOError, _>("Invalid path"));
         }
         Ok(())
     }
