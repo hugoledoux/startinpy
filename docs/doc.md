@@ -73,6 +73,10 @@
   (default=0.001)
   returns nothing
 
+### write_geojson(path)
+  writes an GeoJSON of the DT to the path (a string)
+  throws an error if the path is invalid
+
 ### write_obj(path)
   writes an OBJ of the DT to the path (a string)
   throws an error if the path is invalid
