@@ -42,6 +42,9 @@
   returns the value, interpolated with the linear interpolation in TIN, at location (x, y)  
   an error is thrown if outside the DT         
 
+### is_inside_convex_hull(x, y) 
+  returns true if (x,y) is inside the convex hull or on the boundary, false otherwise
+
 ### is_triangle([a, b, c])
   returns true if triangle abc exists, false if not
 
