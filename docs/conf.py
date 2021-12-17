@@ -21,7 +21,11 @@ copyright = '2021, Hugo Ledoux'
 author = 'Hugo Ledoux'
 
 # The full version, including alpha/beta/rc tags
-release = '0.17'
+import toml
+release = 'x'
+with open("../Cargo.toml") as fp:
+    f = toml.load(fp)
+    release = f["package"]["version"]
 
 
 # -- General configuration ---------------------------------------------------
