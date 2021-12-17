@@ -48,15 +48,19 @@ impl DT {
     /// Remove/delete the vertex vi (an index) from the DT, and update the DT for the Delaunay criterion.
     /// Returns 1 if the operation was successful; and -1 if the vertex doesn't exist.
     #[pyo3(text_signature = "($self, vi)")]
-    fn remove(&mut self, vi: usize) -> PyResult<i8> {
+    fn remove(&mut self, vi: usize) -> PyResult<()> {
         let re = self.t.remove(vi);
         match re {
-            Ok(_x) => return Ok(1),
+            Ok(_x) => return Ok(()),
             Err(_x) => {
                 if _x == "Cannot remove the infinite vertex" {
-                    return Ok(0);
+                    return Err(PyErr::new::<exceptions::PyIndexError, _>(
+                        "Invalid index, cannot remove infinite vertex.",
+                    ));
                 } else {
-                    return Ok(-1);
+                    return Err(PyErr::new::<exceptions::PyIndexError, _>(
+                        "Invalid index, vertex doesn't exist.",
+                    ));
                 }
             }
         };
@@ -116,15 +120,17 @@ impl DT {
         Ok(self.t.all_vertices())
     }
 
-    /// Return the point (x, y, z) for the vertex with index vi.  
+    /// Return the point (x, y, z) for the vertex with index vi.
+    /// Exception is thrown is vertex index is invalid.
     #[pyo3(text_signature = "($self, vi)")]
     fn get_point(&self, vi: usize) -> PyResult<Vec<f64>> {
         let re = self.t.get_point(vi);
         if re.is_some() {
             Ok(self.t.get_point(vi).unwrap())
         } else {
-            let pt = vec![-99999.99999, -99999.99999, -99999.99999];
-            Ok(pt)
+            return Err(PyErr::new::<exceptions::PyIndexError, _>(
+                "Invalid vertex index.",
+            ));
         }
     }
 
@@ -168,13 +174,16 @@ impl DT {
     fn closest_point(&self, x: f64, y: f64) -> PyResult<usize> {
         let re = self.t.closest_point(x, y);
         if re.is_none() == true {
-            return Err(PyErr::new::<exceptions::PyIOError, _>("Outside CH"));
+            return Err(PyErr::new::<exceptions::PyException, _>(
+                "(x, y) is outside the convex hull.",
+            ));
         } else {
             Ok(re.unwrap())
         }
     }
 
     /// Return a list of triangles incident to vertex vi (ordered CCW).
+    /// Exception thrown is vertex index is invalid.
     #[pyo3(text_signature = "($self, vi)")]
     fn incident_triangles_to_vertex(&self, vi: usize) -> PyResult<Vec<Vec<usize>>> {
         let re = self.t.incident_triangles_to_vertex(vi);
@@ -190,20 +199,23 @@ impl DT {
             }
             Ok(trs)
         } else {
-            let trs: Vec<Vec<usize>> = Vec::new();
-            Ok(trs)
+            return Err(PyErr::new::<exceptions::PyIndexError, _>(
+                "Invalid vertex index.",
+            ));
         }
     }
 
     /// Return a list of vertex indices that are adjacent to vertex vi.
+    /// Exception thrown is vertex index is invalid.
     #[pyo3(text_signature = "($self, vi)")]
     fn adjacent_vertices_to_vertex(&self, vi: usize) -> PyResult<Vec<usize>> {
         let re = self.t.adjacent_vertices_to_vertex(vi);
         if re.is_some() {
             Ok(re.unwrap())
         } else {
-            let l: Vec<usize> = Vec::new();
-            Ok(l)
+            return Err(PyErr::new::<exceptions::PyIndexError, _>(
+                "Invalid vertex index.",
+            ));
         }
     }
 
@@ -217,7 +229,7 @@ impl DT {
     }
 
     /// Returns the triangle containing the point (x, y) (projected to 2D),
-    /// if none than an empty list is returned.
+    /// An error is thrown if (x, y) is outside the convex hull.
     #[pyo3(text_signature = "($self, px, py)")]
     fn locate(&self, px: f64, py: f64) -> PyResult<Vec<usize>> {
         let re = self.t.locate(px, py);
@@ -227,18 +239,20 @@ impl DT {
             tr.push(t.v[0]);
             tr.push(t.v[1]);
             tr.push(t.v[2]);
+            return Ok(tr);
+        } else {
+            return Err(PyErr::new::<exceptions::PyException, _>("Outside CH"));
         }
-        Ok(tr)
     }
 
     /// Return the value interpolated with the nearest neighbour method,
     /// at location (x, y).
-    /// An error is thrown if (x, y) os outside the convex hull.
+    /// An error is thrown if (x, y) is outside the convex hull.
     #[pyo3(text_signature = "($self, x, y)")]
     fn interpolate_nn(&self, x: f64, y: f64) -> PyResult<f64> {
         let re = self.t.interpolate_nn(x, y);
         if re.is_none() {
-            return Err(PyErr::new::<exceptions::PyIOError, _>("Outside CH"));
+            return Err(PyErr::new::<exceptions::PyException, _>("Outside CH"));
         }
         Ok(re.unwrap())
     }
@@ -250,7 +264,7 @@ impl DT {
     fn interpolate_tin_linear(&self, x: f64, y: f64) -> PyResult<f64> {
         let re = self.t.interpolate_tin_linear(x, y);
         if re.is_none() {
-            return Err(PyErr::new::<exceptions::PyIOError, _>("Outside CH"));
+            return Err(PyErr::new::<exceptions::PyException, _>("Outside CH"));
         }
         Ok(re.unwrap())
     }
@@ -264,7 +278,7 @@ impl DT {
     fn interpolate_laplace(&mut self, x: f64, y: f64) -> PyResult<f64> {
         let re = self.t.interpolate_laplace(x, y);
         if re.is_none() {
-            return Err(PyErr::new::<exceptions::PyIOError, _>("Outside CH"));
+            return Err(PyErr::new::<exceptions::PyException, _>("Outside CH"));
         }
         Ok(re.unwrap())
     }
@@ -276,7 +290,7 @@ impl DT {
     fn interpolate_nni(&mut self, x: f64, y: f64) -> PyResult<f64> {
         let re = self.t.interpolate_nni(x, y);
         if re.is_none() {
-            return Err(PyErr::new::<exceptions::PyIOError, _>("Outside CH"));
+            return Err(PyErr::new::<exceptions::PyException, _>("Outside CH"));
         }
         Ok(re.unwrap())
     }
