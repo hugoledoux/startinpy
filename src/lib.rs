@@ -99,7 +99,7 @@ impl DT {
 
     /// Read the LAS/LAZ file (a string) and insert all the points in the DT.
     ///
-    /// :param path: full path (a string) on disk of the file to create
+    /// :param path: full path (a string) on disk of the file to read
     /// :return: throws an exception if the path is invalid
     /// :Example:
     ///
@@ -123,38 +123,34 @@ impl DT {
         Ok(())
     }
 
-    /// Set the snap tolerance (for insertion of points in the DT) to this value.
-    /// (default=0.001)
-    ///
-    /// :return: the snap tolerance
-    fn get_snap_tolerance(&self) -> PyResult<f64> {
-        Ok(self.t.get_snap_tolerance())
-    }
-
     /// Return the snap tolerance used (2 vertices closer than this will be the merged during insertion).
     /// (default=0.001)
     ///
-    /// :param snaptol: the snap tolerance (a float) to use
     /// :return: the snap tolerance
     /// :Example:
     ///
     /// >>> dt = startinpy.DT()
     /// >>> dt.set_snap_tolerance(0.005)
+    fn get_snap_tolerance(&self) -> PyResult<f64> {
+        Ok(self.t.get_snap_tolerance())
+    }
+
+    /// Set the snap tolerance (for insertion of points in the DT) to this value.
+    /// (default=0.001)
+    ///
+    /// :param snaptol: the snap tolerance to use (a positive float)
+    /// :return: -
     #[pyo3(text_signature = "($self, snaptol)")]
     fn set_snap_tolerance(&mut self, snaptol: f64) {
         self.t.set_snap_tolerance(snaptol);
     }
 
-    /// Return the number of (finite) vertices in the DT.
-    ///
-    /// :return: number of vertices    
+    /// :return: number of (finite) vertices    
     fn number_of_vertices(&self) -> PyResult<usize> {
         Ok(self.t.number_of_vertices())
     }
 
-    /// Return the number of (finite) triangles in the DT.
-    ///
-    /// :return: number of triangles    
+    /// :return: number of (finite) triangles    
     fn number_of_triangles(&self) -> PyResult<usize> {
         Ok(self.t.number_of_triangles())
     }
@@ -177,6 +173,10 @@ impl DT {
     ///
     /// :param vi: the index of the vertex
     /// :return: the point, a list [x, y, z].
+    /// :Example:
+    ///
+    /// >>> v = dt.get_point(4)
+    /// [13.0, 2.0, 11.11]
     #[pyo3(text_signature = "($self, vi)")]
     fn get_point(&self, vi: usize) -> PyResult<Vec<f64>> {
         let re = self.t.get_point(vi);
@@ -236,16 +236,18 @@ impl DT {
     ///
     /// :param vi: the vertex index
     /// :return: True if *vi* is on the boundary of the convex hull, False otherwise.
+    ///          Also False is returned if the vertex doesn't exist in the DT.
     #[pyo3(text_signature = "($self, vi)")]
     fn is_vertex_convex_hull(&self, vi: usize) -> PyResult<bool> {
         Ok(self.t.is_vertex_convex_hull(vi))
     }
 
     /// Return the closest vertex index to [x, y] (distance in 2D).
+    /// An Exception is thrown if [x, y] is outside the convex hull.
     ///
     /// :param x: the x-coordinate
     /// :param y: the y-coordinate
-    /// :return: the vertex index of the closest. An Exception is thrown is [x, y] is outside the convex hull.
+    /// :return: the vertex index of the closest.
     #[pyo3(text_signature = "($self, x, y)")]
     fn closest_point(&self, x: f64, y: f64) -> PyResult<usize> {
         let re = self.t.closest_point(x, y);
@@ -258,8 +260,17 @@ impl DT {
         }
     }
 
-    /// Return a list of triangles incident to vertex vi (ordered CCW).
-    /// Exception thrown is vertex index is invalid.
+    /// Return the triangles incident to vertex *vi*.
+    /// Exception thrown if vertex index doesn't exist in the DT.
+    ///
+    /// :param vi: the vertex index
+    /// :return: a list of triangles (ordered counter-clockwise)
+    ///
+    /// :Example:
+    ///
+    /// >>> tri = dt.incident_triangles_to_vertex(3)
+    /// >>> for i, dt in enumerate(tri):
+    /// >>>     print(i, t)    
     #[pyo3(text_signature = "($self, vi)")]
     fn incident_triangles_to_vertex(&self, vi: usize) -> PyResult<Vec<Vec<usize>>> {
         let re = self.t.incident_triangles_to_vertex(vi);
@@ -281,8 +292,12 @@ impl DT {
         }
     }
 
-    /// Return a list of vertex indices that are adjacent to vertex vi.
-    /// Exception thrown is vertex index is invalid.
+    /// Return a list of vertex indices that are adjacent to vertex *vi*,
+    /// that is those on the edges incident to *vi*.
+    /// An exception is thrown if *vi* does not exist in teh DT.
+    ///
+    /// :param vi: the vertex index
+    /// :return: a list of vertex indices (ordered counter-clockwise)
     #[pyo3(text_signature = "($self, vi)")]
     fn adjacent_vertices_to_vertex(&self, vi: usize) -> PyResult<Vec<usize>> {
         let re = self.t.adjacent_vertices_to_vertex(vi);
@@ -295,7 +310,10 @@ impl DT {
         }
     }
 
-    /// Return True if triangle [a, b, c] exists, False otherwise.
+    /// Verify if a triangle exists in the DT.
+    ///
+    /// :param t: the triangle, a list of 3 vertex indices
+    /// :return: True if t exists, False otherwise.
     #[pyo3(text_signature = "($self, t)")]
     fn is_triangle(&self, t: Vec<usize>) -> PyResult<bool> {
         let tr = startin::Triangle {
@@ -304,8 +322,12 @@ impl DT {
         Ok(self.t.is_triangle(&tr))
     }
 
-    /// Returns the triangle containing the point (x, y) (projected to 2D),
-    /// An error is thrown if (x, y) is outside the convex hull.
+    /// Locate the triangle containing the point [x, y] (projected to 2D).
+    /// An error is thrown if it is outside the convex hull.
+    ///
+    /// :param x: the x-coordinate
+    /// :param y: the y-coordinate
+    /// :return: the triangle.
     #[pyo3(text_signature = "($self, x, y)")]
     fn locate(&self, x: f64, y: f64) -> PyResult<Vec<usize>> {
         let re = self.t.locate(x, y);
@@ -321,9 +343,12 @@ impl DT {
         }
     }
 
-    /// Return the value interpolated with the nearest neighbour method,
-    /// at location (x, y).
-    /// An error is thrown if (x, y) is outside the convex hull.
+    /// Interpolation method: nearest neighbour (or closest method).
+    /// An Exception is thrown if [x, y] is outside the convex hull.    
+    ///
+    /// :param x: the x-coordinate
+    /// :param y: the y-coordinate
+    /// :return: the estimated value.
     #[pyo3(text_signature = "($self, x, y)")]
     fn interpolate_nn(&self, x: f64, y: f64) -> PyResult<f64> {
         let re = self.t.interpolate_nn(x, y);
@@ -333,9 +358,12 @@ impl DT {
         Ok(re.unwrap())
     }
 
-    /// Return the value interpolated with the linear interpolation in TIN method,
-    /// at location (x, y).
-    /// An error is thrown if (x, y) is outside the convex hull.
+    /// Interpolation method: linear interpolation in TIN.
+    /// An Exception is thrown if [x, y] is outside the convex hull.    
+    ///
+    /// :param x: the x-coordinate
+    /// :param y: the y-coordinate
+    /// :return: the estimated value.
     #[pyo3(text_signature = "($self, x, y)")]
     fn interpolate_tin_linear(&self, x: f64, y: f64) -> PyResult<f64> {
         let re = self.t.interpolate_tin_linear(x, y);
@@ -345,11 +373,14 @@ impl DT {
         Ok(re.unwrap())
     }
 
-    /// Return the value interpolated with the Laplace interpolation method
-    /// (http://dilbert.engr.ucdavis.edu/~suku/nem/index.html), which is a variation
-    /// of natural interpolation method with distances used instead of stolen areas.
+    /// Interpolation method: Laplace interpolation ([details about the method](http://dilbert.engr.ucdavis.edu/~suku/nem/index.html)).
+    /// This is a variation of natural interpolation method with distances used instead of stolen areas.
     /// Thus faster in practice.
-    /// An error is thrown if (x, y) is outside the convex hull.
+    /// An Exception is thrown if [x, y] is outside the convex hull.    
+    ///
+    /// :param x: the x-coordinate
+    /// :param y: the y-coordinate
+    /// :return: the estimated value.
     #[pyo3(text_signature = "($self, x, y)")]
     fn interpolate_laplace(&mut self, x: f64, y: f64) -> PyResult<f64> {
         let re = self.t.interpolate_laplace(x, y);
@@ -359,9 +390,12 @@ impl DT {
         Ok(re.unwrap())
     }
 
-    /// Return the value interpolated with the natural neighbour interpolation method,
-    /// at location (x, y).
-    /// An error is thrown if (x, y) is outside the convex hull.
+    /// Interpolation method: natural neighbour method (also called Sibson's method).
+    /// An Exception is thrown if [x, y] is outside the convex hull.    
+    ///
+    /// :param x: the x-coordinate
+    /// :param y: the y-coordinate
+    /// :return: the estimated value.
     #[pyo3(text_signature = "($self, x, y)")]
     fn interpolate_nni(&mut self, x: f64, y: f64) -> PyResult<f64> {
         let re = self.t.interpolate_nni(x, y);
@@ -372,7 +406,13 @@ impl DT {
     }
 
     /// Write an OBJ of the DT to the path (a string).
-    /// Throw an error if the path is invalid.
+    /// Throws an exception if the path is invalid.
+    ///
+    /// :param path: full path (a string) on disk of the file to create (will overwrite)
+    /// :return: -
+    /// :Example:
+    ///
+    /// >>> dt.write_obj("/home/elvis/myfile.obj")
     #[pyo3(text_signature = "($self, path)")]
     fn write_obj(&self, path: String) -> PyResult<()> {
         let re = self.t.write_obj(path.to_string(), false);
@@ -382,8 +422,14 @@ impl DT {
         Ok(())
     }
 
-    /// Write an GeoJSON of the DT to the path (a string).
-    /// Throw an error if the path is invalid.
+    /// Write a GeoJSON file of the DT (vertices+triangles) to the path (a string).
+    /// Throws an exception if the path is invalid.
+    ///
+    /// :param path: full path (a string) on disk of the file to create (will overwrite)
+    /// :return: -
+    /// :Example:
+    ///
+    /// >>> dt.write_obj("/home/elvis/myfile.geojson")
     #[pyo3(text_signature = "($self, path)")]
     fn write_geojson(&self, path: String) -> PyResult<()> {
         let re = self.t.write_geojson(path.to_string());
