@@ -33,9 +33,13 @@ impl DT {
     }
 
     /// Insert one new point in the DT.
-    /// Returns the index of the vertices.
     /// If there is a point at the same location (based on 2D tolerance),
     /// then the point is not inserted and the index of the already existing vertex is returned.
+    ///
+    /// :param x: x-coordinate of point to insert
+    /// :param y: y-coordinate of point to insert
+    /// :param z: z-coordinate of point to insert
+    /// :return: index of the vertex in the DT   
     #[pyo3(text_signature = "($self, x, y, z)")]
     fn insert_one_pt(&mut self, x: f64, y: f64, z: f64) -> PyResult<usize> {
         let re = self.t.insert_one_pt(x, y, z);
@@ -46,7 +50,16 @@ impl DT {
     }
 
     /// Remove/delete the vertex vi (an index) from the DT, and update the DT for the Delaunay criterion.
-    /// Returns 1 if the operation was successful; and -1 if the vertex doesn't exist.
+    ///
+    /// :param vi: index of vertex to delete
+    /// :return: (Exception is thrown if *vi* is invalid)
+    ///
+    /// :Example:
+    ///
+    /// >>> try:
+    /// >>>     t.remove(45)
+    /// >>> except Exception as e:
+    /// >>>     print(e)
     #[pyo3(text_signature = "($self, vi)")]
     fn remove(&mut self, vi: usize) -> PyResult<()> {
         let re = self.t.remove(vi);
@@ -67,14 +80,32 @@ impl DT {
     }
 
     /// Insert each point in the array of points (a 2D array) by calling insert_one_pt() for each.
-    /// Return nothing.           
+    ///
+    /// :param pts: a list of points (which is a list)
+    /// :return: --
+    ///      
+    /// :Example:
+    ///
+    /// >>> pts = []
+    /// >>> pts.append([0.0, 0.0, 11.11])
+    /// >>> pts.append([1.0, 0.3, 22.22])
+    /// >>> pts.append([12.3, 21.0, 4.52])
+    /// >>> dt = startinpy.DT()
+    /// >>> dt.insert(pts)
     #[pyo3(text_signature = "($self, pts)")]
     fn insert(&mut self, pts: Vec<Vec<f64>>) {
         self.t.insert(&pts);
     }
 
-    /// Read the LAS/LAZ file "path" (a string) and insert all the points in the DT.
-    /// Throws an error if the path is invalid.
+    /// Read the LAS/LAZ file (a string) and insert all the points in the DT.
+    ///
+    /// :param path: full path (a string) on disk of the file to create
+    /// :return: throws an exception if the path is invalid
+    /// :Example:
+    ///
+    /// >>> dt = startinpy.DT()
+    /// >>> dt.read_las("/home/elvis/myfile.laz")
+    /// >>> print("# vertices:", dt.number_of_vertices())
     #[pyo3(text_signature = "($self, path)")]
     fn read_las(&mut self, path: String) -> PyResult<()> {
         let re = las::Reader::from_path(path);
@@ -92,36 +123,60 @@ impl DT {
         Ok(())
     }
 
-    /// Return the snap tolerance (2 vertices closer than this will be the merged during insertion)
+    /// Set the snap tolerance (for insertion of points in the DT) to this value.
+    /// (default=0.001)
+    ///
+    /// :return: the snap tolerance
     fn get_snap_tolerance(&self) -> PyResult<f64> {
         Ok(self.t.get_snap_tolerance())
     }
 
-    /// Set the snap tolerance (for insertion of points in the DT) to this value.
+    /// Return the snap tolerance used (2 vertices closer than this will be the merged during insertion).
     /// (default=0.001)
-    /// Returns nothing.
+    ///
+    /// :param snaptol: the snap tolerance (a float) to use
+    /// :return: the snap tolerance
+    /// :Example:
+    ///
+    /// >>> dt = startinpy.DT()
+    /// >>> dt.set_snap_tolerance(0.005)
     #[pyo3(text_signature = "($self, snaptol)")]
     fn set_snap_tolerance(&mut self, snaptol: f64) {
         self.t.set_snap_tolerance(snaptol);
     }
 
     /// Return the number of (finite) vertices in the DT.
+    ///
+    /// :return: number of vertices    
     fn number_of_vertices(&self) -> PyResult<usize> {
         Ok(self.t.number_of_vertices())
     }
 
     /// Return the number of (finite) triangles in the DT.
+    ///
+    /// :return: number of triangles    
     fn number_of_triangles(&self) -> PyResult<usize> {
         Ok(self.t.number_of_triangles())
     }
 
     /// Return a list of all vertices in the DT (including the infinite one, vertex "0").
+    ///
+    /// :return: a list of points    
+    ///
+    /// :Example:
+    ///
+    /// >>> vertices = dt.all_vertices()
+    /// >>> for v in vertices:
+    /// >>>     print(v[0], v[1], v[2])
     fn all_vertices(&self) -> PyResult<Vec<Vec<f64>>> {
         Ok(self.t.all_vertices())
     }
 
-    /// Return the point (x, y, z) for the vertex with index vi.
-    /// Exception is thrown is vertex index is invalid.
+    /// Return the point for the vertex with index *vi*.
+    /// An exception is thrown if vertex index is invalid.
+    ///
+    /// :param vi: the index of the vertex
+    /// :return: the point, a list [x, y, z].
     #[pyo3(text_signature = "($self, vi)")]
     fn get_point(&self, vi: usize) -> PyResult<Vec<f64>> {
         let re = self.t.get_point(vi);
@@ -134,7 +189,15 @@ impl DT {
         }
     }
 
-    /// Return a list of (finite) triangles (which is a list with 3 indices)
+    /// Return a list of (finite) triangles.
+    ///
+    /// :return: a list of triangles    
+    ///
+    /// :Example:
+    ///
+    /// >>> triangles = dt.all_triangles()
+    /// >>> for t in triangles:
+    /// >>>     print(t[0], t[1], t[2])    
     fn all_triangles(&self) -> PyResult<Vec<Vec<usize>>> {
         let mut trs: Vec<Vec<usize>> = Vec::with_capacity(self.t.number_of_triangles());
         for each in self.t.all_triangles() {
@@ -147,15 +210,21 @@ impl DT {
         Ok(trs)
     }
 
-    /// Return the convex hull as a list of vertex indices (oriented CCW)
+    /// Return the convex hull as a list of vertex indices
+    ///
+    /// :return: a list of vertex indices, oriented counter-clockwise (CCW)
     fn convex_hull(&self) -> PyResult<Vec<usize>> {
         Ok(self.t.convex_hull())
     }
 
-    /// Return True if (x,y) is inside the convex hull or on its boundary, False otherwise.
-    #[pyo3(text_signature = "($self, px, py)")]
-    fn is_inside_convex_hull(&self, px: f64, py: f64) -> PyResult<bool> {
-        let re = self.t.locate(px, py);
+    /// Is the point [x, y] located inside the convex hull of the DT
+    ///
+    /// :param x: the x-coordinate
+    /// :param y: the y-coordinate
+    /// :return: True if [x,y] is inside the convex hull or on its boundary, False otherwise.
+    #[pyo3(text_signature = "($self, x, y)")]
+    fn is_inside_convex_hull(&self, x: f64, y: f64) -> PyResult<bool> {
+        let re = self.t.locate(x, y);
         if re.is_none() == true {
             return Ok(false);
         } else {
@@ -163,13 +232,20 @@ impl DT {
         }
     }
 
-    /// Return True if vertex vi is on the boundary of the convex hull, False otherwise.
+    /// Return True if vertex *vi* is on the boundary of the convex hull, False otherwise.
+    ///
+    /// :param vi: the vertex index
+    /// :return: True if *vi* is on the boundary of the convex hull, False otherwise.
     #[pyo3(text_signature = "($self, vi)")]
     fn is_vertex_convex_hull(&self, vi: usize) -> PyResult<bool> {
         Ok(self.t.is_vertex_convex_hull(vi))
     }
 
-    /// Returns the closest vertex index to (x,y) (distance in 2D).
+    /// Return the closest vertex index to [x, y] (distance in 2D).
+    ///
+    /// :param x: the x-coordinate
+    /// :param y: the y-coordinate
+    /// :return: the vertex index of the closest. An Exception is thrown is [x, y] is outside the convex hull.
     #[pyo3(text_signature = "($self, x, y)")]
     fn closest_point(&self, x: f64, y: f64) -> PyResult<usize> {
         let re = self.t.closest_point(x, y);
@@ -230,9 +306,9 @@ impl DT {
 
     /// Returns the triangle containing the point (x, y) (projected to 2D),
     /// An error is thrown if (x, y) is outside the convex hull.
-    #[pyo3(text_signature = "($self, px, py)")]
-    fn locate(&self, px: f64, py: f64) -> PyResult<Vec<usize>> {
-        let re = self.t.locate(px, py);
+    #[pyo3(text_signature = "($self, x, y)")]
+    fn locate(&self, x: f64, y: f64) -> PyResult<Vec<usize>> {
+        let re = self.t.locate(x, y);
         let mut tr: Vec<usize> = Vec::new();
         if re.is_some() {
             let t = re.unwrap();
