@@ -1,3 +1,4 @@
+use numpy::PyArray;
 use pyo3::exceptions;
 use pyo3::prelude::*;
 
@@ -168,6 +169,12 @@ impl DT {
         Ok(self.t.all_vertices())
     }
 
+    fn all_vertices2<'py>(&self, py: Python<'py>) -> PyResult<&'py PyArray<f64, numpy::Ix2>> {
+        let vs = self.t.all_vertices();
+        // let vs = vec![1.1, 2.1, 3.3];
+        Ok(PyArray::from_vec2(py, &vs).unwrap())
+    }
+
     /// Return the point for the vertex with index *vi*.
     /// An exception is thrown if vertex index is invalid.
     ///
@@ -208,6 +215,27 @@ impl DT {
             trs.push(tr);
         }
         Ok(trs)
+    }
+
+    /// Return a list of (finite) triangles.
+    ///
+    /// :return: a list of triangles    
+    ///
+    /// :Example:
+    ///
+    /// >>> triangles = dt.all_triangles()
+    /// >>> for t in triangles:
+    /// >>>     print(t[0], t[1], t[2])    
+    fn all_triangles2<'py>(&self, py: Python<'py>) -> PyResult<&'py PyArray<usize, numpy::Ix2>> {
+        let mut trs: Vec<Vec<usize>> = Vec::with_capacity(self.t.number_of_triangles());
+        for each in self.t.all_triangles() {
+            let mut tr = Vec::with_capacity(3);
+            tr.push(each.v[0]);
+            tr.push(each.v[1]);
+            tr.push(each.v[2]);
+            trs.push(tr);
+        }
+        Ok(PyArray::from_vec2(py, &trs).unwrap())
     }
 
     /// Return the convex hull as a list of vertex indices
