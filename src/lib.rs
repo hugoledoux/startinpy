@@ -41,6 +41,11 @@ impl DT {
     /// :param y: y-coordinate of point to insert
     /// :param z: z-coordinate of point to insert
     /// :return: index of the vertex in the DT   
+    /// :Example:
+    ///
+    /// >>> dt.insert_one_pt(3.2, 1.1, 17.0)
+    /// 5
+    /// (the vertex index in the DT is 5)
     #[pyo3(text_signature = "($self, x, y, z)")]
     fn insert_one_pt(&mut self, x: f64, y: f64, z: f64) -> PyResult<usize> {
         let re = self.t.insert_one_pt(x, y, z);
@@ -299,6 +304,12 @@ impl DT {
     /// >>> tri = dt.incident_triangles_to_vertex(3)
     /// >>> for i, dt in enumerate(tri):
     /// >>>     print(i, t)    
+    /// 0 [3, 4, 6]
+    /// 1 [3, 6, 7]
+    /// 2 [3, 7, 8]
+    /// 3 [3, 8, 2]
+    /// 4 [3, 2, 9]
+    /// 5 [3, 9, 4]
     #[pyo3(text_signature = "($self, vi)")]
     fn incident_triangles_to_vertex(&self, vi: usize) -> PyResult<Vec<Vec<usize>>> {
         let re = self.t.incident_triangles_to_vertex(vi);
