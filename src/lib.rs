@@ -33,6 +33,45 @@ impl DT {
         DT { t: tmp }
     }
 
+    /// Get the points [x, y, z] of all vertices in the DT (including the infinite one, vertex "0").
+    ///
+    /// :Example:
+    ///
+    /// >>> pts = dt.points
+    /// >>> print(pts.shape)
+    /// (102, 3) #-- this is a numpy array
+    /// >>> for p in pts:
+    /// >>>     print(p[0], p[1], p[2])
+    #[getter]
+    fn points<'py>(&self, py: Python<'py>) -> PyResult<&'py PyArray<f64, numpy::Ix2>> {
+        let vs = self.t.all_vertices();
+        Ok(PyArray::from_vec2(py, &vs).unwrap())
+    }
+
+    /// Get the triangles in the DT.
+    ///
+    /// :Example:
+    ///
+    /// >>> trs = dt.triangles
+    /// >>> print(trs.shape)
+    /// (224, 3) #-- this is a numpy array
+    /// >>> one_triangle = trs[22]
+    /// >>> first_vertex = one_triangle[0]
+    /// >>> print("x-coordinate of first vertex: ", dt.points[first_vertex])
+    /// x-coordinate of first vertex: [25.98 35.12 4.78]
+    #[getter]
+    fn triangles<'py>(&self, py: Python<'py>) -> PyResult<&'py PyArray<usize, numpy::Ix2>> {
+        let mut trs: Vec<Vec<usize>> = Vec::with_capacity(self.t.number_of_triangles());
+        for each in self.t.all_triangles() {
+            let mut tr = Vec::with_capacity(3);
+            tr.push(each.v[0]);
+            tr.push(each.v[1]);
+            tr.push(each.v[2]);
+            trs.push(tr);
+        }
+        Ok(PyArray::from_vec2(py, &trs).unwrap())
+    }
+
     /// Insert one new point in the DT.
     /// If there is a point at the same location (based on 2D tolerance),
     /// then the point is not inserted and the index of the already existing vertex is returned.
@@ -129,24 +168,22 @@ impl DT {
         Ok(())
     }
 
-    /// Return the snap tolerance used (2 vertices closer than this will be the merged during insertion).
+    /// Get/set the snap tolerance used to merge vertices during insertion.
+    /// Two vertices closer than this will be the merged during insertion.
     /// (default=0.001)
     ///
-    /// :return: the snap tolerance
     /// :Example:
     ///
     /// >>> dt = startinpy.DT()
-    /// >>> dt.set_snap_tolerance(0.005)
+    /// >>> dt.snap_tolerance = 0.05 #-- modify to 0.05unit
+    /// >>> print("The snap tolerance is:", dt.snap_tolerance)
+    /// The snap tolerance is: 0.05
+    #[getter(snap_tolerance)]
     fn get_snap_tolerance(&self) -> PyResult<f64> {
         Ok(self.t.get_snap_tolerance())
     }
 
-    /// Set the snap tolerance (for insertion of points in the DT) to this value.
-    /// (default=0.001)
-    ///
-    /// :param snaptol: the snap tolerance to use (a positive float)
-    /// :return: -
-    #[pyo3(text_signature = "($self, snaptol)")]
+    #[setter(snap_tolerance)]
     fn set_snap_tolerance(&mut self, snaptol: f64) {
         self.t.set_snap_tolerance(snaptol);
     }
@@ -159,25 +196,6 @@ impl DT {
     /// :return: number of (finite) triangles    
     fn number_of_triangles(&self) -> PyResult<usize> {
         Ok(self.t.number_of_triangles())
-    }
-
-    /// Return a list of all vertices in the DT (including the infinite one, vertex "0").
-    ///
-    /// :return: a list of points    
-    ///
-    /// :Example:
-    ///
-    /// >>> vertices = dt.all_vertices()
-    /// >>> for v in vertices:
-    /// >>>     print(v[0], v[1], v[2])
-    fn all_vertices(&self) -> PyResult<Vec<Vec<f64>>> {
-        Ok(self.t.all_vertices())
-    }
-
-    fn all_vertices2<'py>(&self, py: Python<'py>) -> PyResult<&'py PyArray<f64, numpy::Ix2>> {
-        let vs = self.t.all_vertices();
-        // let vs = vec![1.1, 2.1, 3.3];
-        Ok(PyArray::from_vec2(py, &vs).unwrap())
     }
 
     /// Return the point for the vertex with index *vi*.
@@ -199,48 +217,6 @@ impl DT {
                 "Invalid vertex index.",
             ));
         }
-    }
-
-    /// Return a list of (finite) triangles.
-    ///
-    /// :return: a list of triangles    
-    ///
-    /// :Example:
-    ///
-    /// >>> triangles = dt.all_triangles()
-    /// >>> for t in triangles:
-    /// >>>     print(t[0], t[1], t[2])    
-    fn all_triangles(&self) -> PyResult<Vec<Vec<usize>>> {
-        let mut trs: Vec<Vec<usize>> = Vec::with_capacity(self.t.number_of_triangles());
-        for each in self.t.all_triangles() {
-            let mut tr = Vec::with_capacity(3);
-            tr.push(each.v[0]);
-            tr.push(each.v[1]);
-            tr.push(each.v[2]);
-            trs.push(tr);
-        }
-        Ok(trs)
-    }
-
-    /// Return a list of (finite) triangles.
-    ///
-    /// :return: a list of triangles    
-    ///
-    /// :Example:
-    ///
-    /// >>> triangles = dt.all_triangles()
-    /// >>> for t in triangles:
-    /// >>>     print(t[0], t[1], t[2])    
-    fn all_triangles2<'py>(&self, py: Python<'py>) -> PyResult<&'py PyArray<usize, numpy::Ix2>> {
-        let mut trs: Vec<Vec<usize>> = Vec::with_capacity(self.t.number_of_triangles());
-        for each in self.t.all_triangles() {
-            let mut tr = Vec::with_capacity(3);
-            tr.push(each.v[0]);
-            tr.push(each.v[1]);
-            tr.push(each.v[2]);
-            trs.push(tr);
-        }
-        Ok(PyArray::from_vec2(py, &trs).unwrap())
     }
 
     /// Return the convex hull as a list of vertex indices
