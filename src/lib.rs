@@ -88,7 +88,7 @@ impl DT {
     /// Insert each point in the array of points (a 2D array) by calling insert_one_pt() for each.
     ///
     /// :param pts: a list of points (which is a list)
-    /// :return: --
+    /// :return: (nothing)
     ///      
     /// :Example:
     ///
@@ -387,7 +387,7 @@ impl DT {
     ///
     /// :param x: the x-coordinate
     /// :param y: the y-coordinate
-    /// :return: the estimated value.
+    /// :return: the estimated value
     #[pyo3(text_signature = "($self, x, y)")]
     fn interpolate_nn(&self, x: f64, y: f64) -> PyResult<f64> {
         let re = self.t.interpolate_nn(x, y);
@@ -402,7 +402,7 @@ impl DT {
     ///
     /// :param x: the x-coordinate
     /// :param y: the y-coordinate
-    /// :return: the estimated value.
+    /// :return: the estimated value
     #[pyo3(text_signature = "($self, x, y)")]
     fn interpolate_tin_linear(&self, x: f64, y: f64) -> PyResult<f64> {
         let re = self.t.interpolate_tin_linear(x, y);
@@ -419,7 +419,7 @@ impl DT {
     ///
     /// :param x: the x-coordinate
     /// :param y: the y-coordinate
-    /// :return: the estimated value.
+    /// :return: the estimated value
     #[pyo3(text_signature = "($self, x, y)")]
     fn interpolate_laplace(&mut self, x: f64, y: f64) -> PyResult<f64> {
         let re = self.t.interpolate_laplace(x, y);
@@ -434,7 +434,7 @@ impl DT {
     ///
     /// :param x: the x-coordinate
     /// :param y: the y-coordinate
-    /// :return: the estimated value.
+    /// :return: the estimated value
     #[pyo3(text_signature = "($self, x, y)")]
     fn interpolate_nni(&mut self, x: f64, y: f64) -> PyResult<f64> {
         let re = self.t.interpolate_nni(x, y);
@@ -448,7 +448,7 @@ impl DT {
     /// Throws an exception if the path is invalid.
     ///
     /// :param path: full path (a string) on disk of the file to create (will overwrite)
-    /// :return: -
+    /// :return: (nothing)
     /// :Example:
     ///
     /// >>> dt.write_obj("/home/elvis/myfile.obj")
@@ -465,7 +465,7 @@ impl DT {
     /// Throws an exception if the path is invalid.
     ///
     /// :param path: full path (a string) on disk of the file to create (will overwrite)
-    /// :return: -
+    /// :return: (nothing)
     /// :Example:
     ///
     /// >>> dt.write_obj("/home/elvis/myfile.geojson")
