@@ -28,7 +28,7 @@ Development
 Documentation
 =============
 
-Simple documentation of the API is available in the folder `/docs/`
+https://homepage.tudelft.nl/23t4p/startinpy/
 
 
 Examples
