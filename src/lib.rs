@@ -33,7 +33,9 @@ impl DT {
         DT { t: tmp }
     }
 
-    /// Get the points [x, y, z] of all vertices in the DT (including the infinite one, vertex "0").
+    /// Get the points [x, y, z] of all vertices in the DT.
+    /// This includes the infinite vertex (vertex at position 0), which is not part of the DT.
+    /// It has dummy coordinates and no triangles refer to it.
     ///
     /// :Example:
     ///
@@ -42,6 +44,9 @@ impl DT {
     /// (102, 3) #-- this is a numpy array
     /// >>> for p in pts:
     /// >>>     print(p[0], p[1], p[2])
+    /// ...
+    /// >>> dt.points[0]
+    /// [-99999.99999 -99999.99999 -99999.99999]
     #[getter]
     fn points<'py>(&self, py: Python<'py>) -> PyResult<&'py PyArray<f64, numpy::Ix2>> {
         let vs = self.t.all_vertices();
@@ -73,7 +78,7 @@ impl DT {
     }
 
     /// Insert one new point in the DT.
-    /// If there is a point at the same location (based on 2D tolerance),
+    /// If there is a point at the same location (based on :func:`startinpy.DT.snap_tolerance`),
     /// then the point is not inserted and the index of the already existing vertex is returned.
     ///
     /// :param x: x-coordinate of point to insert
@@ -126,7 +131,7 @@ impl DT {
 
     /// Insert each point in the array of points (a 2D array) by calling insert_one_pt() for each.
     ///
-    /// :param pts: a list of points (which is a list)
+    /// :param pts: an array of points (which is an array)
     /// :return: (nothing)
     ///      
     /// :Example:
@@ -193,7 +198,7 @@ impl DT {
         Ok(self.t.number_of_vertices())
     }
 
-    /// :return: number of (finite) triangles    
+    /// :return: number of triangles    
     fn number_of_triangles(&self) -> PyResult<usize> {
         Ok(self.t.number_of_triangles())
     }
@@ -202,16 +207,20 @@ impl DT {
     /// An exception is thrown if vertex index is invalid.
     ///
     /// :param vi: the index of the vertex
-    /// :return: the point, a list [x, y, z].
+    /// :return: the point
     /// :Example:
     ///
     /// >>> v = dt.get_point(4)
     /// [13.0, 2.0, 11.11]
     #[pyo3(text_signature = "($self, vi)")]
-    fn get_point(&self, vi: usize) -> PyResult<Vec<f64>> {
+    fn get_point<'py>(
+        &self,
+        py: Python<'py>,
+        vi: usize,
+    ) -> PyResult<&'py PyArray<f64, numpy::Ix1>> {
         let re = self.t.get_point(vi);
         if re.is_some() {
-            Ok(self.t.get_point(vi).unwrap())
+            return Ok(PyArray::from_vec(py, re.unwrap()));
         } else {
             return Err(PyErr::new::<exceptions::PyIndexError, _>(
                 "Invalid vertex index.",
@@ -219,14 +228,15 @@ impl DT {
         }
     }
 
-    /// Return the convex hull as a list of vertex indices
+    /// Return the convex hull as an array of vertex indices.
     ///
-    /// :return: a list of vertex indices, oriented counter-clockwise (CCW)
-    fn convex_hull(&self) -> PyResult<Vec<usize>> {
-        Ok(self.t.convex_hull())
+    /// :return: an array of vertex indices, oriented counter-clockwise (CCW)
+    #[pyo3(text_signature = "($self)")]
+    fn convex_hull<'py>(&self, py: Python<'py>) -> PyResult<&'py PyArray<usize, numpy::Ix1>> {
+        Ok(PyArray::from_vec(py, self.t.convex_hull()))
     }
 
-    /// Is the point [x, y] located inside the convex hull of the DT
+    /// Is the point [x, y] located inside the convex hull of the DT.
     ///
     /// :param x: the x-coordinate
     /// :param y: the y-coordinate
@@ -256,7 +266,7 @@ impl DT {
     ///
     /// :param x: the x-coordinate
     /// :param y: the y-coordinate
-    /// :return: the vertex index of the closest.
+    /// :return: the vertex index of the closest point
     #[pyo3(text_signature = "($self, x, y)")]
     fn closest_point(&self, x: f64, y: f64) -> PyResult<usize> {
         let re = self.t.closest_point(x, y);
@@ -273,7 +283,7 @@ impl DT {
     /// Exception thrown if vertex index doesn't exist in the DT.
     ///
     /// :param vi: the vertex index
-    /// :return: a list of triangles (ordered counter-clockwise)
+    /// :return: an array of triangles (ordered counter-clockwise)
     ///
     /// :Example:
     ///
@@ -287,7 +297,11 @@ impl DT {
     /// 4 [3, 2, 9]
     /// 5 [3, 9, 4]
     #[pyo3(text_signature = "($self, vi)")]
-    fn incident_triangles_to_vertex(&self, vi: usize) -> PyResult<Vec<Vec<usize>>> {
+    fn incident_triangles_to_vertex<'py>(
+        &self,
+        py: Python<'py>,
+        vi: usize,
+    ) -> PyResult<&'py PyArray<usize, numpy::Ix2>> {
         let re = self.t.incident_triangles_to_vertex(vi);
         if re.is_some() {
             let l = re.unwrap();
@@ -299,7 +313,7 @@ impl DT {
                 tr.push(each.v[2]);
                 trs.push(tr);
             }
-            Ok(trs)
+            return Ok(PyArray::from_vec2(py, &trs).unwrap());
         } else {
             return Err(PyErr::new::<exceptions::PyIndexError, _>(
                 "Invalid vertex index.",
@@ -307,17 +321,21 @@ impl DT {
         }
     }
 
-    /// Return a list of vertex indices that are adjacent to vertex *vi*,
+    /// Return an array of vertex indices that are adjacent to vertex *vi*,
     /// that is those on the edges incident to *vi*.
-    /// An exception is thrown if *vi* does not exist in teh DT.
+    /// An exception is thrown if *vi* does not exist in the DT.
     ///
     /// :param vi: the vertex index
-    /// :return: a list of vertex indices (ordered counter-clockwise)
+    /// :return: an array of vertex indices (ordered counter-clockwise)
     #[pyo3(text_signature = "($self, vi)")]
-    fn adjacent_vertices_to_vertex(&self, vi: usize) -> PyResult<Vec<usize>> {
+    fn adjacent_vertices_to_vertex<'py>(
+        &self,
+        py: Python<'py>,
+        vi: usize,
+    ) -> PyResult<&'py PyArray<usize, numpy::Ix1>> {
         let re = self.t.adjacent_vertices_to_vertex(vi);
         if re.is_some() {
-            Ok(re.unwrap())
+            return Ok(PyArray::from_vec(py, re.unwrap()));
         } else {
             return Err(PyErr::new::<exceptions::PyIndexError, _>(
                 "Invalid vertex index.",
@@ -327,8 +345,11 @@ impl DT {
 
     /// Verify if a triangle exists in the DT.
     ///
-    /// :param t: the triangle, a list of 3 vertex indices
+    /// :param t: the triangle, an array of 3 vertex indices
     /// :return: True if t exists, False otherwise.
+    /// :Example:
+    ///
+    /// >>> re = dt.is_triangle(np.array([11, 162, 666])))
     #[pyo3(text_signature = "($self, t)")]
     fn is_triangle(&self, t: Vec<usize>) -> PyResult<bool> {
         let tr = startin::Triangle {
@@ -344,7 +365,12 @@ impl DT {
     /// :param y: the y-coordinate
     /// :return: the triangle.
     #[pyo3(text_signature = "($self, x, y)")]
-    fn locate(&self, x: f64, y: f64) -> PyResult<Vec<usize>> {
+    fn locate<'py>(
+        &self,
+        py: Python<'py>,
+        x: f64,
+        y: f64,
+    ) -> PyResult<&'py PyArray<usize, numpy::Ix1>> {
         let re = self.t.locate(x, y);
         let mut tr: Vec<usize> = Vec::new();
         if re.is_some() {
@@ -352,13 +378,13 @@ impl DT {
             tr.push(t.v[0]);
             tr.push(t.v[1]);
             tr.push(t.v[2]);
-            return Ok(tr);
+            return Ok(PyArray::from_vec(py, tr));
         } else {
             return Err(PyErr::new::<exceptions::PyException, _>("Outside CH"));
         }
     }
 
-    /// Interpolation method: nearest neighbour (or closest method).
+    /// Interpolation method: nearest neighbour (or closest neighbour).
     /// An Exception is thrown if [x, y] is outside the convex hull.    
     ///
     /// :param x: the x-coordinate
@@ -388,7 +414,7 @@ impl DT {
         Ok(re.unwrap())
     }
 
-    /// Interpolation method: Laplace interpolation ([details about the method](http://dilbert.engr.ucdavis.edu/~suku/nem/index.html)).
+    /// Interpolation method: Laplace interpolation (`details about the method <http://dilbert.engr.ucdavis.edu/~suku/nem/index.html>`_).
     /// This is a variation of natural interpolation method with distances used instead of stolen areas.
     /// Thus faster in practice.
     /// An Exception is thrown if [x, y] is outside the convex hull.    
@@ -396,6 +422,14 @@ impl DT {
     /// :param x: the x-coordinate
     /// :param y: the y-coordinate
     /// :return: the estimated value
+    /// :Example:
+    ///
+    /// >>> try:
+    /// >>>     zhat = dt.interpolate_laplace(55.2, 33.1)
+    /// >>>     print("result: ", zhat)
+    /// >>> except Exception as e:
+    /// >>>     print(e)
+    /// 64.08234343
     #[pyo3(text_signature = "($self, x, y)")]
     fn interpolate_laplace(&mut self, x: f64, y: f64) -> PyResult<f64> {
         let re = self.t.interpolate_laplace(x, y);
