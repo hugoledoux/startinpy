@@ -36,59 +36,55 @@ Examples
 
 ```python
 import startinpy
+import numpy as np
 
-pts = []
-pts.append([0.0, 0.0, 11.11])
-pts.append([1.0, 0.0, 22.22])
-pts.append([1.0, 1.0, 33.33])
-pts.append([0.0, 1.0, 44])
-pts.append([0.5, 0.49, 44])
-pts.append([0.45, 0.69, 44])
-pts.append([0.65, 0.49, 44])
-pts.append([0.75, 0.29, 44])
-pts.append([1.5, 1.49, 44])
-pts.append([0.6, 0.2, 44])
-pts.append([0.45, 0.4, 44])
-pts.append([0.1, 0.8, 44])
 
-t = startinpy.DT()
-t.insert(pts)
+#-- generate 100 points randomly in the plane
+rng = np.random.default_rng()
+pts = rng.random((100, 3))
+pts = pts * 100
+
+dt = startinpy.DT()
+dt.insert(pts)
 
 #-- remove vertex #4
-t.remove(4)
+try:
+    dt.remove(4)
+except Exception as e:
+    print(e)
 
-print("# vertices:", t.number_of_vertices())
-print("# triangles:", t.number_of_triangles())
+print("# vertices:", dt.number_of_vertices())
+print("# triangles:", dt.number_of_triangles())
 
-print("CH: ", t.convex_hull())
+print("CH: ", dt.convex_hull())
 
-itrs = t.incident_triangles_to_vertex(4);
-print(itrs)
+print(dt.is_triangle([4, 12, 6]) )
+print(dt.is_triangle([5, 12, 6]) )
 
-print(t.is_triangle([4, 12, 6]) )
-print(t.is_triangle([5, 12, 6]) )
-
-print("--- /Vertices ---")
-for each in t.all_vertices():
+print("--- /Points ---")
+for each in dt.points:
     print(each)
-print("--- Vertices/ ---")
+print("--- Points/ ---")
 
-alltr = t.all_triangles()
+alltr = dt.triangle
 print(alltr[3])
+
+try:
+    zhat = dt.interpolate_tin_linear(55.2, 33.1)
+    print("result: ", zhat)
+except Exception as e:
+    print(e)
 ```
 
-It can read LAS/LAZ and output OBJ files too:
+It can read LAS/LAZ and output GeoJSON files too:
 
 ```python
 import startinpy
-
 t = startinpy.DT()
 t.read_las("/home/elvis/myfile.laz")
-
 print("# vertices:", t.number_of_vertices())
 print("# triangles:", t.number_of_triangles())
-
-t.write_obj("/home/elvis/output.obj")
+t.write_geojson("/home/elvis/output.geojson")
 ```
 
 
