@@ -3,19 +3,36 @@ API documentation
 =================
 
 startinpy does not have specific classes and/or objects for points, vertices, and triangles. 
-Lists (arrays) of floats and integers are used.
+`numpy arrays <https://numpy.org/doc/stable/reference/arrays.html>`_ of floats and integers are used.
 
-A **Point** is a list of 3 floats 
+A **Point** is an array of 3 float (x-coordinate, y-coordinate, z-coordinate).
 
-The vertices are stored in a list of points, each vertex is indexed by its position (0-based).
+.. code-block:: python
 
-The first vertex is the *infinite vertex*, and has no coordinates (it has this: [-99999.99999, -99999.99999, -99999.99999]).
+   >>> import startinpy
+   >>> dt = startinpy.DT()
+   >>> dt.insert_one_pt(11.3, 22.2, 4.7)
+   >>> dt.points[1]
+   array([11.3, 22.2, 4.7])
+
+A **Vertex** is an integer, it is the index in the array of points (:func:`startinpy.DT.points`, which is 0-based).
+
+A **Triangle** is an array of 3 integer, the values of the indices of the 3 vertices (ordered counter-clockwise) in the array of points (:func:`startinpy.DT.points`, which is 0-based).
+
+.. code-block:: python
+
+   >>> dt.triangles[2]
+   array([1, 3, 2], dtype=uint64)
+   >>> #-- z-coordinate of 3rd vertex of the same triangle 
+   >>> dt.points[dt.triangles[2][2]][2]
+   3.3
 
 
-A triangle is simply a triplet of vertex indices, eg [4, 2, 11], these are always ordered counter-clockwise (CCW).
-
+.. IMPORTANT::
+   The first vertex in the list of points is the **infinite vertex**, and has no coordinates (it has this: [-99999.99999, -99999.99999, -99999.99999]). It is used internally to ensure that the whole DT is consitant. No Triangle refers to the vertex.
 
 
 
 .. autoclass:: startinpy.DT
    :members:
+
