@@ -29,7 +29,7 @@ A **Triangle** is an array of 3 integer, the values of the indices of the 3 vert
 
 
 .. IMPORTANT::
-   The first vertex in the list of points is the **infinite vertex**, and has no coordinates (it has this: [-99999.99999, -99999.99999, -99999.99999]). It is used internally to ensure that the whole DT is consitant. No Triangle refers to the vertex.
+   The first vertex in the list of points is the **infinite vertex**, and has no coordinates (it has this: [-99999.99999, -99999.99999, -99999.99999]). It is used internally to ensure that the whole DT is consistent. No Triangle refers to the vertex.
 
 
 
