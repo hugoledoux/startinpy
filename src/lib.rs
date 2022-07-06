@@ -236,6 +236,14 @@ impl DT {
         Ok(PyArray::from_vec(py, self.t.convex_hull()))
     }
 
+    /// Return the bbox of the dataset
+    ///
+    /// :return: an array of 4 coordinates: [minx, miny, maxx, maxy]
+    #[pyo3(text_signature = "($self)")]
+    fn get_bbox<'py>(&self, py: Python<'py>) -> PyResult<&'py PyArray<f64, numpy::Ix1>> {
+        Ok(PyArray::from_vec(py, self.t.get_bbox()))
+    }
+
     /// Is the point [x, y] located inside the convex hull of the DT.
     ///
     /// :param x: the x-coordinate
