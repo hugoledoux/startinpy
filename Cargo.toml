@@ -19,7 +19,7 @@ gdal = "0.12.0"
 
 
 [dependencies.pyo3]
-version = ">=0.13"
+version = ">=0.15"
 features = ["extension-module"]
 
 
