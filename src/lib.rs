@@ -1,6 +1,8 @@
 use numpy::PyArray;
 use pyo3::exceptions;
 use pyo3::prelude::*;
+use pyo3::types::PyDict;
+use pyo3::types::PyTuple;
 
 extern crate gdal;
 extern crate las;
@@ -133,21 +135,36 @@ impl DT {
     }
 
     /// Insert each point in the array of points (a 2D array) by calling insert_one_pt() for each.
+    /// Use the bbox to sped up the construction (works especially good for rasters).
     ///
     /// :param pts: an array of points (which is an array)
+    /// :param bbox: an array of 4 values for bbox [minx, miny, maxx, maxy]
     /// :return: (nothing)
     ///      
     /// :Example:
     ///
     /// >>> pts = []
-    /// >>> pts.append([0.0, 0.0, 11.11])
-    /// >>> pts.append([1.0, 0.3, 22.22])
+    /// >>> pts.append([1.0, 1.0, 11.11])
+    /// >>> pts.append([1.0, 2.3, 22.22])
     /// >>> pts.append([12.3, 21.0, 4.52])
+    /// >>> ...
     /// >>> dt = startinpy.DT()
-    /// >>> dt.insert(pts)
-    #[pyo3(text_signature = "($self, pts)")]
-    fn insert(&mut self, pts: Vec<Vec<f64>>) {
+    /// >>> dt.insert(pts, [0.0, 0.0, 22.2, 22.4])
+    #[pyo3(text_signature = "($self, pts, bbox)")]
+    #[args(pts, bbox = "*")]
+    fn insert2(&mut self, pts: Vec<Vec<f64>>, bbox: &PyTuple) -> PyResult<()> {
+        if bbox.is_empty() == false {
+            let tmp = &bbox[0];
+            let b: Vec<f64> = tmp.extract()?;
+            if b.len() != 4 {
+                return Err(PyErr::new::<exceptions::PyIOError, _>(
+                    "bbox should be array of 4 values: [minx, miny, maxx, maxy]",
+                ));
+            }
+            self.t.insert(&pts, Some(b));
+        }
         self.t.insert(&pts, None);
+        Ok(())
     }
 
     /// Read the LAS/LAZ file and insert all the points in the DT.
