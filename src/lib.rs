@@ -2,9 +2,12 @@ use numpy::PyArray;
 use pyo3::exceptions;
 use pyo3::prelude::*;
 
+extern crate gdal;
+extern crate las;
 extern crate startin;
 
-extern crate las;
+use gdal::raster::RasterBand;
+use gdal::Dataset;
 use las::Read;
 
 /// A Delaunay triangulator where the input are 2.5D points,
@@ -144,10 +147,10 @@ impl DT {
     /// >>> dt.insert(pts)
     #[pyo3(text_signature = "($self, pts)")]
     fn insert(&mut self, pts: Vec<Vec<f64>>) {
-        self.t.insert(&pts);
+        self.t.insert(&pts, None);
     }
 
-    /// Read the LAS/LAZ file (a string) and insert all the points in the DT.
+    /// Read the LAS/LAZ file and insert all the points in the DT.
     ///
     /// :param path: full path (a string) on disk of the file to read
     /// :return: throws an exception if the path is invalid
@@ -170,6 +173,56 @@ impl DT {
             let p = each.unwrap();
             let _re = self.t.insert_one_pt(p.x, p.y, p.z);
         }
+        Ok(())
+    }
+
+    /// Read the GeoTIFF file and insert all the points in the DT.
+    ///
+    /// :param path: full path (a string) on disk of the file to read
+    /// :return: throws an exception if the path is invalid
+    /// :Example:
+    ///
+    /// >>> dt = startinpy.DT()
+    /// >>> dt.read_geotiff("/home/elvis/myfile.tif")
+    /// >>> print("# triangles:", dt.number_of_triangles())
+    #[pyo3(text_signature = "($self, path)")]
+    fn read_geotiff(&mut self, path: String) -> PyResult<()> {
+        let re = Dataset::open(path);
+        // let re = las::Reader::from_path(path);
+        if re.is_err() {
+            return Err(PyErr::new::<exceptions::PyIOError, _>(
+                "Invalid path for GeoTIFF file.",
+            ));
+        }
+        let dataset = re.unwrap();
+        let crs = dataset.geo_transform().unwrap();
+        let rasterband: RasterBand = dataset.rasterband(1).unwrap();
+        let mut pts: Vec<Vec<f64>> = Vec::new();
+        let nodatavalue = rasterband.no_data_value().unwrap();
+        let xsize = rasterband.x_size();
+        let ysize = rasterband.y_size();
+        //-- for each line, starting from the top-left
+        for j in 0..ysize {
+            if let Ok(rv) =
+                rasterband.read_as::<f64>((0, j.try_into().unwrap()), (xsize, 1), (xsize, 1), None)
+            {
+                for (i, each) in rv.data.iter().enumerate() {
+                    let x = crs[0] + (i as f64 * crs[1]) + crs[1];
+                    let y = crs[3] + (j as f64 * crs[5]) + crs[5];
+                    let z = each;
+                    if *z != nodatavalue {
+                        pts.push(vec![x, y, *z]);
+                    }
+                }
+            }
+        }
+        let bbox = vec![
+            crs[0],
+            crs[3] + (ysize as f64 * crs[5]),
+            crs[0] + (xsize as f64 * crs[1]),
+            crs[3],
+        ];
+        self.t.insert(&pts, Some(bbox));
         Ok(())
     }
 
