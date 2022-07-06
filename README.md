@@ -66,7 +66,7 @@ for each in dt.points:
     print(each)
 print("--- Points/ ---")
 
-alltr = dt.triangle
+alltr = dt.triangles
 print(alltr[3])
 
 try:
