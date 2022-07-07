@@ -6,12 +6,19 @@
 startinpy 
 =========
 
-A Delaunay triangulator where the input are 2.5D points, the DT is computed in 2D but the elevation of the vertices are kept.
-This is used mostly for the modelling of terrains.
+A Delaunay triangulator where the input are 2.5D points (they have an elevation), the Delaunay triangulation (DT) is computed in 2D but the elevation of the vertices are kept.
+This is used mostly for the modelling of terrains, but other attributes could be used.
 
-Originally written in `Rust <https://www.rust-lang.org/>`_ (so it's rather fast), and `robust arithmetic <https://crates.io/crates/robust>`_ is used (so it shouldn't crash).
+Originally written in `Rust <https://www.rust-lang.org/>`_ (so it's rather fast; `see Rust code <https://github.com/hugoledoux/startin>`_), and `robust arithmetic <https://crates.io/crates/robust>`_ is used (so it shouldn't crash).
+The Python bindings just wrap the Rust code.
 
-Delaunay triangulations can be incrementally constructed, vertices can be deleted efficiently, and a few spatial interpolation methods are implemented.
+startinpy allows you to:
+
+- insert incrementally points
+- delete some (useful for simplification, interpolation, and other operations)attributes
+- a few spatial interpolation functions are implemented
+- has functions to read directly GeoTIFF and LAS/LAZ files
+- outputs GeoJSON and OBJ 
 
 .. code-block:: python
 

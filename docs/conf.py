@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.abspath('../'))
 # -- Project information -----------------------------------------------------
 
 project = 'startinpy'
-copyright = '2021, Hugo Ledoux'
+copyright = '2022, Hugo Ledoux'
 author = 'Hugo Ledoux'
 
 # The full version, including alpha/beta/rc tags
