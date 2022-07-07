@@ -1,6 +1,7 @@
 use numpy::PyArray;
 use pyo3::exceptions;
 use pyo3::prelude::*;
+use pyo3::types::PyDict;
 
 use pyo3::types::PyTuple;
 
@@ -10,6 +11,7 @@ extern crate startin;
 
 use gdal::raster::RasterBand;
 use gdal::Dataset;
+use las::point::Classification;
 use las::Read;
 
 /// A Delaunay triangulator where the input are 2.5D points,
@@ -174,25 +176,55 @@ impl DT {
     /// Read the LAS/LAZ file and insert all the points in the DT.
     ///
     /// :param path: full path (a string) on disk of the file to read
+    /// :param classification: (optional) a list of classes to keep. If not used then all points are used.
     /// :return: throws an exception if the path is invalid
     /// :Example:
     ///
     /// >>> dt = startinpy.DT()
     /// >>> dt.read_las("/home/elvis/myfile.laz")
-    /// >>> print("# vertices:", dt.number_of_vertices())
-    #[pyo3(text_signature = "($self, path)")]
-    fn read_las(&mut self, path: String) -> PyResult<()> {
+    /// >>> OR
+    /// >>> dt.read_las("/home/elvis/myfile.laz", classification=[2,6])
+    #[pyo3(text_signature = "($self, path, [classification])")]
+    #[args(path, py_kwargs = "**")]
+    fn read_las(&mut self, path: String, py_kwargs: Option<&PyDict>) -> PyResult<()> {
+        let mut c: Vec<u8> = Vec::new();
+        if py_kwargs.is_some() {
+            let tmp = py_kwargs.unwrap();
+            let a = tmp.keys();
+            for each in a {
+                let b: String = each.extract()?;
+                if b != "classification" {
+                    let s = format!("'{}' is an invalid keyword argument for read_las()", b);
+                    return Err(PyErr::new::<exceptions::PyTypeError, _>(s));
+                }
+            }
+            c = tmp.get_item("classification").unwrap().extract()?;
+        }
         let re = las::Reader::from_path(path);
         if re.is_err() {
             return Err(PyErr::new::<exceptions::PyIOError, _>(
                 "Invalid path for LAS/LAZ file.",
             ));
         }
+        //-- make a list of classifications
+        let mut classes: Vec<las::point::Classification> = Vec::new();
+        for each in &c {
+            let nc = Classification::new(*each);
+            if nc.is_ok() {
+                classes.push(nc.unwrap());
+            }
+        }
         let mut reader = re.unwrap();
         let _count = reader.header().number_of_points();
         for each in reader.points() {
             let p = each.unwrap();
-            let _re = self.t.insert_one_pt(p.x, p.y, p.z);
+            if classes.is_empty() == false {
+                if classes.contains(&p.classification) {
+                    let _re = self.t.insert_one_pt(p.x, p.y, p.z);
+                }
+            } else {
+                let _re = self.t.insert_one_pt(p.x, p.y, p.z);
+            }
         }
         Ok(())
     }
