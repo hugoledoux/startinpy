@@ -50,6 +50,8 @@ impl DT {
     /// >>> for p in pts:
     /// >>>     print(p[0], p[1], p[2])
     /// ...
+    /// >>> dt.points[27]
+    /// [101.122 72.293 11.223]
     /// >>> dt.points[0]
     /// [-99999.99999 -99999.99999 -99999.99999]
     #[getter]
@@ -138,7 +140,7 @@ impl DT {
     /// Use the bbox to sped up the construction (works especially good for rasters).
     ///
     /// :param pts: an array of points (which is an array)
-    /// :param bbox: an array of 4 values for bbox [minx, miny, maxx, maxy]
+    /// :param bbox: (optional) an array of 4 values for bbox [minx, miny, maxx, maxy]
     /// :return: (nothing)
     ///      
     /// :Example:
@@ -149,10 +151,12 @@ impl DT {
     /// >>> pts.append([12.3, 21.0, 4.52])
     /// >>> ...
     /// >>> dt = startinpy.DT()
+    /// >>> dt.insert(pts)
+    /// OR
     /// >>> dt.insert(pts, [0.0, 0.0, 22.2, 22.4])
     #[pyo3(text_signature = "($self, pts, bbox)")]
     #[args(pts, bbox = "*")]
-    fn insert2(&mut self, pts: Vec<Vec<f64>>, bbox: &PyTuple) -> PyResult<()> {
+    fn insert(&mut self, pts: Vec<Vec<f64>>, bbox: &PyTuple) -> PyResult<()> {
         if bbox.is_empty() == false {
             let tmp = &bbox[0];
             let b: Vec<f64> = tmp.extract()?;
@@ -268,7 +272,7 @@ impl DT {
         Ok(self.t.number_of_vertices())
     }
 
-    /// :return: number of triangles    
+    /// :return: number of (finite) triangles    
     fn number_of_triangles(&self) -> PyResult<usize> {
         Ok(self.t.number_of_triangles())
     }
@@ -309,6 +313,11 @@ impl DT {
     /// Return the bbox of the dataset
     ///
     /// :return: an array of 4 coordinates: [minx, miny, maxx, maxy]
+    ///
+    /// :Example:
+    ///
+    /// >>> bbox = dt.get_bbox()
+    /// [ 505043.690 5258283.953  523361.172 5275100.003 ]
     #[pyo3(text_signature = "($self)")]
     fn get_bbox<'py>(&self, py: Python<'py>) -> PyResult<&'py PyArray<f64, numpy::Ix1>> {
         Ok(PyArray::from_vec(py, self.t.get_bbox()))
