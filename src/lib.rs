@@ -155,21 +155,26 @@ impl DT {
     /// >>> dt = startinpy.DT()
     /// >>> dt.insert(pts)
     /// OR
-    /// >>> dt.insert(pts, [0.0, 0.0, 22.2, 22.4])
-    #[pyo3(text_signature = "($self, pts, bbox)")]
-    #[args(pts, bbox = "*")]
-    fn insert(&mut self, pts: Vec<Vec<f64>>, bbox: &PyTuple) -> PyResult<()> {
-        if bbox.is_empty() == false {
-            let tmp = &bbox[0];
-            let b: Vec<f64> = tmp.extract()?;
-            if b.len() != 4 {
-                return Err(PyErr::new::<exceptions::PyIOError, _>(
-                    "bbox should be array of 4 values: [minx, miny, maxx, maxy]",
-                ));
+    /// >>> dt.insert(pts, bbox=[0.0, 0.0, 22.2, 22.4])
+    #[pyo3(text_signature = "($self, pts[, bbox])")]
+    #[args(path, py_kwargs = "**")]
+    fn insert(&mut self, pts: Vec<Vec<f64>>, py_kwargs: Option<&PyDict>) -> PyResult<()> {
+        let bbox: Vec<f64>;
+        if py_kwargs.is_some() {
+            let tmp = py_kwargs.unwrap();
+            let a = tmp.keys();
+            for each in a {
+                let b: String = each.extract()?;
+                if b != "bbox" {
+                    let s = format!("'{}' is an invalid keyword argument for insert()", b);
+                    return Err(PyErr::new::<exceptions::PyTypeError, _>(s));
+                }
             }
-            self.t.insert(&pts, Some(b));
+            bbox = tmp.get_item("bbox").unwrap().extract()?;
+            self.t.insert(&pts, Some(bbox));
+        } else {
+            self.t.insert(&pts, None);
         }
-        self.t.insert(&pts, None);
         Ok(())
     }
 
@@ -230,6 +235,7 @@ impl DT {
     }
 
     /// Read the GeoTIFF file and insert all the points in the DT.
+    /// (no_data are skipped)
     ///
     /// :param path: full path (a string) on disk of the file to read
     /// :return: throws an exception if the path is invalid
