@@ -3,8 +3,6 @@ use pyo3::exceptions;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
 
-use pyo3::types::PyTuple;
-
 extern crate gdal;
 extern crate las;
 extern crate startin;
@@ -139,10 +137,12 @@ impl DT {
     }
 
     /// Insert each point in the array of points (a 2D array) by calling insert_one_pt() for each.
-    /// Use the bbox to sped up the construction (works especially good for rasters).
+    /// Different insertion strategies can be used: "AsIs" (inserts points in the order given) or
+    /// "BBox" (inserts first the BBox of the points, which speeds up the construction,
+    /// works especially good for rasters).
     ///
     /// :param pts: an array of points (which is an array)
-    /// :param bbox: (optional) an array of 4 values for bbox [minx, miny, maxx, maxy]
+    /// :param insertionstrategy: (optional) "AsIs" or "BBox"
     /// :return: (nothing)
     ///      
     /// :Example:
@@ -155,25 +155,20 @@ impl DT {
     /// >>> dt = startinpy.DT()
     /// >>> dt.insert(pts)
     /// OR
-    /// >>> dt.insert(pts, bbox=[0.0, 0.0, 22.2, 22.4])
-    #[pyo3(text_signature = "($self, pts[, bbox])")]
-    #[args(path, py_kwargs = "**")]
-    fn insert(&mut self, pts: Vec<Vec<f64>>, py_kwargs: Option<&PyDict>) -> PyResult<()> {
-        let bbox: Vec<f64>;
-        if py_kwargs.is_some() {
-            let tmp = py_kwargs.unwrap();
-            let a = tmp.keys();
-            for each in a {
-                let b: String = each.extract()?;
-                if b != "bbox" {
-                    let s = format!("'{}' is an invalid keyword argument for insert()", b);
-                    return Err(PyErr::new::<exceptions::PyTypeError, _>(s));
-                }
+    /// >>> dt.insert(pts, insertionstrategy="BBox")
+    #[pyo3(text_signature = "($self, pts[, insertionstrategy])")]
+    #[args(path, insertionstrategy = "\"AsIs\"")]
+    fn insert(&mut self, pts: Vec<[f64; 3]>, insertionstrategy: &str) -> PyResult<()> {
+        match insertionstrategy {
+            "AsIs" => self.t.insert(&pts, startin::InsertionStrategy::AsIs),
+            "BBox" => self.t.insert(&pts, startin::InsertionStrategy::BBox),
+            _ => {
+                let s = format!(
+                    "'{}' is an unknown insertion strategy for insert()",
+                    insertionstrategy
+                );
+                return Err(PyErr::new::<exceptions::PyTypeError, _>(s));
             }
-            bbox = tmp.get_item("bbox").unwrap().extract()?;
-            self.t.insert(&pts, Some(bbox));
-        } else {
-            self.t.insert(&pts, None);
         }
         Ok(())
     }
@@ -181,7 +176,7 @@ impl DT {
     /// Read the LAS/LAZ file and insert all the points in the DT.
     ///
     /// :param path: full path (a string) on disk of the file to read
-    /// :param classification: (optional) a list of classes to keep. If not used then all points are used.
+    /// :param classification: (optional) a list of class(es) to keep. If not used then all points are inserted.
     /// :return: throws an exception if the path is invalid
     /// :Example:
     ///
@@ -189,7 +184,7 @@ impl DT {
     /// >>> dt.read_las("/home/elvis/myfile.laz")
     /// >>> OR
     /// >>> dt.read_las("/home/elvis/myfile.laz", classification=[2,6])
-    #[pyo3(text_signature = "($self, path, [classification])")]
+    #[pyo3(text_signature = "($self, path[, classification])")]
     #[args(path, py_kwargs = "**")]
     fn read_las(&mut self, path: String, py_kwargs: Option<&PyDict>) -> PyResult<()> {
         let mut c: Vec<u8> = Vec::new();
@@ -247,7 +242,6 @@ impl DT {
     #[pyo3(text_signature = "($self, path)")]
     fn read_geotiff(&mut self, path: String) -> PyResult<()> {
         let re = Dataset::open(path);
-        // let re = las::Reader::from_path(path);
         if re.is_err() {
             return Err(PyErr::new::<exceptions::PyIOError, _>(
                 "Invalid path for GeoTIFF file.",
@@ -256,7 +250,7 @@ impl DT {
         let dataset = re.unwrap();
         let crs = dataset.geo_transform().unwrap();
         let rasterband: RasterBand = dataset.rasterband(1).unwrap();
-        let mut pts: Vec<Vec<f64>> = Vec::new();
+        let mut pts: Vec<[f64; 3]> = Vec::new();
         let nodatavalue = rasterband.no_data_value().unwrap();
         let xsize = rasterband.x_size();
         let ysize = rasterband.y_size();
@@ -270,18 +264,12 @@ impl DT {
                     let y = crs[3] + (j as f64 * crs[5]) + crs[5];
                     let z = each;
                     if *z != nodatavalue {
-                        pts.push(vec![x, y, *z]);
+                        pts.push([x, y, *z]);
                     }
                 }
             }
         }
-        let bbox = vec![
-            crs[0],
-            crs[3] + (ysize as f64 * crs[5]),
-            crs[0] + (xsize as f64 * crs[1]),
-            crs[3],
-        ];
-        self.t.insert(&pts, Some(bbox));
+        self.t.insert(&pts, startin::InsertionStrategy::BBox);
         Ok(())
     }
 
