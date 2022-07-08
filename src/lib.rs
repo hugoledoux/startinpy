@@ -591,10 +591,10 @@ impl DT {
     /// :return: (nothing)
     /// :Example:
     ///
-    /// >>> dt.write_obj("/home/elvis/myfile.ply")
+    /// >>> dt.write_ply("/home/elvis/myfile.ply")
     #[pyo3(text_signature = "($self, path)")]
     fn write_ply(&self, path: String) -> PyResult<()> {
-        let re = self.t.write_ply(path.to_string(), false);
+        let re = self.t.write_ply(path.to_string());
         if re.is_err() {
             return Err(PyErr::new::<exceptions::PyIOError, _>("Invalid path"));
         }
