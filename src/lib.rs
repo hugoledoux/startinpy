@@ -577,7 +577,24 @@ impl DT {
     /// >>> dt.write_obj("/home/elvis/myfile.obj")
     #[pyo3(text_signature = "($self, path)")]
     fn write_obj(&self, path: String) -> PyResult<()> {
-        let re = self.t.write_obj(path.to_string(), false);
+        let re = self.t.write_obj(path.to_string());
+        if re.is_err() {
+            return Err(PyErr::new::<exceptions::PyIOError, _>("Invalid path"));
+        }
+        Ok(())
+    }
+
+    /// Write an PLY of the DT to the path (a string).
+    /// Throws an exception if the path is invalid.
+    ///
+    /// :param path: full path (a string) on disk of the file to create (will overwrite)
+    /// :return: (nothing)
+    /// :Example:
+    ///
+    /// >>> dt.write_obj("/home/elvis/myfile.ply")
+    #[pyo3(text_signature = "($self, path)")]
+    fn write_ply(&self, path: String) -> PyResult<()> {
+        let re = self.t.write_ply(path.to_string(), false);
         if re.is_err() {
             return Err(PyErr::new::<exceptions::PyIOError, _>("Invalid path"));
         }

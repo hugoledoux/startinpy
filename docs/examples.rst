@@ -3,7 +3,7 @@ Examples
 ============
 
 
-Loading a LAZ file
+Reading a LAZ file
 ------------------
 
 .. code-block:: python
@@ -15,9 +15,8 @@ Loading a LAZ file
    print("# vertices:", dt.number_of_vertices())
    
 
-
-Exporting the DT to QGIS (GeoJSON)
-----------------------------------
+Exporting the DT to GeoJSON
+---------------------------
 
 .. code-block:: python
 
@@ -30,6 +29,18 @@ Exporting the DT to QGIS (GeoJSON)
    dt = startinpy.DT()
    dt.insert(pts, insertionstrategy="AsIs")
    dt.write_geojson("/home/elvis/myfile.geojson")
+
+
+Exporting the DT to QGIS (MDAL Mesh)
+------------------------------------
+
+.. code-block:: python
+
+   import startinpy
+      
+   dt = startinpy.DT()
+   dt.read_geotiff("/home/elvis/mydem.tif")
+   dt.write_ply("/home/elvis/mydem.ply")
 
 
 Plotting the DT with matplotlib
