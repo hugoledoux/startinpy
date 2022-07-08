@@ -1,5 +1,5 @@
 
-[![GitHub license](https://img.shields.io/github/license/hugoledoux/startin_python)](https://github.com/hugoledoux/startin_python/blob/master/LICENSE) [![PyPI version](https://badge.fury.io/py/startinpy.svg)](https://badge.fury.io/py/startinpy)
+[![GitHub license](https://img.shields.io/github/license/hugoledoux/startin_python)](https://github.com/hugoledoux/startin_python/blob/master/LICENSE) [![PyPI version](https://badge.fury.io/py/startinpy.svg)](https://badge.fury.io/py/startinpy) [![docs](https://img.shields.io/badge/docs-startinpy.rtfd.io-brightgreen)](https://startinpy.rtfd.io/)
 
 startinpy
 =========
@@ -16,6 +16,15 @@ pip
 To install the latest release: `pip install startinpy`
 
 
+If you want to compile it yourself
+----------------------------------
+
+1. install latest [Rust](https://www.rust-lang.org/)
+2. install [maturin](https://github.com/PyO3/maturin)
+3. `maturin build --release`
+4. `cd ./target/wheels/`
+5. `pip install [name-wheel].whl` will install it to your local Python
+
 Development
 -----------
 
@@ -28,7 +37,7 @@ Development
 Documentation
 =============
 
-https://homepage.tudelft.nl/23t4p/startinpy/
+https://startinpy.rtfo.io
 
 
 Examples
