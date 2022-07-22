@@ -12,14 +12,15 @@ edition = "2021"
 
 [dependencies]
 # startin = ">=0.5.0"
-startin = { path = "../startin" }
-las = { version = ">=0.7.4", features = ["laz"] }
-numpy = "0.15"
-gdal = "0.12.0"
+# startin = { path = "../startin" }
+startin = { git = "https://github.com/hugoledoux/startin", branch = "develop" }
+las = { version = "~0.7", features = ["laz"] }
+numpy = "~0.16"
+gdal = { version = "~0.12", features = ["bindgen"] }
 
 
 [dependencies.pyo3]
-version = ">=0.15"
+version = "~0.16.0"
 features = ["extension-module"]
 
 
