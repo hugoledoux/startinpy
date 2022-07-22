@@ -12,7 +12,7 @@ build:
     rust: "1.61"
 
 python:
-  - requirements: docs/requirements.txt
   install:
+    - requirements: docs/requirements.txt
     - method: pip
       path: .
