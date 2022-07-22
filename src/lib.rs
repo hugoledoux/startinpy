@@ -617,4 +617,18 @@ impl DT {
         }
         Ok(())
     }
+
+    /// Vertically exaggerate the elevation values of the vertices.
+    /// Used mostly for visualisation.
+    ///
+    /// :param factor: a positive value (can be <1.0 to remove exaggeration)
+    /// :return: (nothing)
+    /// :Example:
+    ///
+    /// >>> dt.vertical_exaggeration(2.0)
+    /// >>> dt.vertical_exaggeration(0.5)
+    #[pyo3(text_signature = "($self, factor)")]
+    fn vertical_exaggeration(&mut self, factor: f64) {
+        self.t.vertical_exaggeration(factor);
+    }
 }
