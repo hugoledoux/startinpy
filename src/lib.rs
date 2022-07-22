@@ -18,7 +18,8 @@ use las::Read;
 /// This is the Python bindings of Rust's startin:
 /// (https://github.com/hugoledoux/startin)
 #[pymodule]
-fn startinpy(_py: Python, m: &PyModule) -> PyResult<()> {
+#[pyo3(name = "startinpy")]
+fn startinpy(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
     m.add_class::<DT>()?;
     Ok(())
 }
