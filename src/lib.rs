@@ -123,17 +123,18 @@ impl DT {
         let re = self.t.remove(vi);
         match re {
             Ok(_x) => return Ok(()),
-            Err(_x) => {
-                if _x == "Cannot remove the infinite vertex" {
+            Err(why) => match why {
+                startin::StartinError::VertexInfinite => {
                     return Err(PyErr::new::<exceptions::PyIndexError, _>(
                         "Invalid index, cannot remove infinite vertex.",
                     ));
-                } else {
+                }
+                _ => {
                     return Err(PyErr::new::<exceptions::PyIndexError, _>(
                         "Invalid index, vertex doesn't exist.",
                     ));
                 }
-            }
+            },
         };
     }
 
@@ -320,7 +321,7 @@ impl DT {
         vi: usize,
     ) -> PyResult<&'py PyArray<f64, numpy::Ix1>> {
         let re = self.t.get_point(vi);
-        if re.is_some() {
+        if re.is_ok() {
             return Ok(PyArray::from_vec(py, re.unwrap()));
         } else {
             return Err(PyErr::new::<exceptions::PyIndexError, _>(
@@ -358,7 +359,7 @@ impl DT {
     #[pyo3(text_signature = "($self, x, y)")]
     fn is_inside_convex_hull(&self, x: f64, y: f64) -> PyResult<bool> {
         let re = self.t.locate(x, y);
-        if re.is_none() == true {
+        if re.is_ok() == true {
             return Ok(false);
         } else {
             Ok(true)
@@ -384,7 +385,7 @@ impl DT {
     #[pyo3(text_signature = "($self, x, y)")]
     fn closest_point(&self, x: f64, y: f64) -> PyResult<usize> {
         let re = self.t.closest_point(x, y);
-        if re.is_none() == true {
+        if re.is_ok() == true {
             return Err(PyErr::new::<exceptions::PyException, _>(
                 "(x, y) is outside the convex hull.",
             ));
@@ -417,7 +418,7 @@ impl DT {
         vi: usize,
     ) -> PyResult<&'py PyArray<usize, numpy::Ix2>> {
         let re = self.t.incident_triangles_to_vertex(vi);
-        if re.is_some() {
+        if re.is_ok() {
             let l = re.unwrap();
             let mut trs: Vec<Vec<usize>> = Vec::with_capacity(l.len());
             for each in l {
@@ -448,7 +449,7 @@ impl DT {
         vi: usize,
     ) -> PyResult<&'py PyArray<usize, numpy::Ix1>> {
         let re = self.t.adjacent_vertices_to_vertex(vi);
-        if re.is_some() {
+        if re.is_ok() {
             return Ok(PyArray::from_vec(py, re.unwrap()));
         } else {
             return Err(PyErr::new::<exceptions::PyIndexError, _>(
@@ -487,7 +488,7 @@ impl DT {
     ) -> PyResult<&'py PyArray<usize, numpy::Ix1>> {
         let re = self.t.locate(x, y);
         let mut tr: Vec<usize> = Vec::new();
-        if re.is_some() {
+        if re.is_ok() {
             let t = re.unwrap();
             tr.push(t.v[0]);
             tr.push(t.v[1]);
@@ -507,7 +508,7 @@ impl DT {
     #[pyo3(text_signature = "($self, x, y)")]
     fn interpolate_nn(&self, x: f64, y: f64) -> PyResult<f64> {
         let re = self.t.interpolate_nn(x, y);
-        if re.is_none() {
+        if re.is_ok() {
             return Err(PyErr::new::<exceptions::PyException, _>("Outside CH"));
         }
         Ok(re.unwrap())
@@ -522,7 +523,7 @@ impl DT {
     #[pyo3(text_signature = "($self, x, y)")]
     fn interpolate_tin_linear(&self, x: f64, y: f64) -> PyResult<f64> {
         let re = self.t.interpolate_tin_linear(x, y);
-        if re.is_none() {
+        if re.is_ok() {
             return Err(PyErr::new::<exceptions::PyException, _>("Outside CH"));
         }
         Ok(re.unwrap())
@@ -547,7 +548,7 @@ impl DT {
     #[pyo3(text_signature = "($self, x, y)")]
     fn interpolate_laplace(&mut self, x: f64, y: f64) -> PyResult<f64> {
         let re = self.t.interpolate_laplace(x, y);
-        if re.is_none() {
+        if re.is_ok() {
             return Err(PyErr::new::<exceptions::PyException, _>("Outside CH"));
         }
         Ok(re.unwrap())
@@ -562,7 +563,7 @@ impl DT {
     #[pyo3(text_signature = "($self, x, y)")]
     fn interpolate_nni(&mut self, x: f64, y: f64) -> PyResult<f64> {
         let re = self.t.interpolate_nni(x, y);
-        if re.is_none() {
+        if re.is_ok() {
             return Err(PyErr::new::<exceptions::PyException, _>("Outside CH"));
         }
         Ok(re.unwrap())
