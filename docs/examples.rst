@@ -11,7 +11,7 @@ Reading a LAZ file
    import startinpy
 
    dt = startinpy.DT()
-   dt.read_las("/home/elvis/myfile.laz")
+   dt.read_las("/home/elvis/myfile.laz", classification=[2,6])
    print("# vertices:", dt.number_of_vertices())
    
 
@@ -40,6 +40,8 @@ Exporting the DT to QGIS (MDAL Mesh)
       
    dt = startinpy.DT()
    dt.read_geotiff("/home/elvis/mydem.tif")
+   #-- exaggerate the elevation by a factor 2.0
+   dt.vertical_exaggeration(2.0)
    dt.write_ply("/home/elvis/mydem.ply")
 
 
