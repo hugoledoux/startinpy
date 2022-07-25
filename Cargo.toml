@@ -16,8 +16,8 @@ edition = "2021"
 startin = { git = "https://github.com/hugoledoux/startin", branch = "develop" }
 las = { version = "~0.7", features = ["laz"] }
 numpy = "~0.16"
-gdal = "~0.12"
-# gdal = { version = "~0.12", features = ["bindgen"] }
+# gdal = "~0.12"
+gdal = { version = "~0.12", features = ["bindgen"] }
 
 
 [dependencies.pyo3]
