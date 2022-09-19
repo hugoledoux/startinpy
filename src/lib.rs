@@ -508,7 +508,7 @@ impl DT {
     #[pyo3(text_signature = "($self, x, y)")]
     fn interpolate_nn(&self, x: f64, y: f64) -> PyResult<f64> {
         let re = self.t.interpolate_nn(x, y);
-        if re.is_ok() {
+        if re.is_err() {
             return Err(PyErr::new::<exceptions::PyException, _>("Outside CH"));
         }
         Ok(re.unwrap())
@@ -523,7 +523,7 @@ impl DT {
     #[pyo3(text_signature = "($self, x, y)")]
     fn interpolate_tin_linear(&self, x: f64, y: f64) -> PyResult<f64> {
         let re = self.t.interpolate_tin_linear(x, y);
-        if re.is_ok() {
+        if re.is_err() {
             return Err(PyErr::new::<exceptions::PyException, _>("Outside CH"));
         }
         Ok(re.unwrap())
@@ -548,7 +548,7 @@ impl DT {
     #[pyo3(text_signature = "($self, x, y)")]
     fn interpolate_laplace(&mut self, x: f64, y: f64) -> PyResult<f64> {
         let re = self.t.interpolate_laplace(x, y);
-        if re.is_ok() {
+        if re.is_err() {
             return Err(PyErr::new::<exceptions::PyException, _>("Outside CH"));
         }
         Ok(re.unwrap())
@@ -563,7 +563,7 @@ impl DT {
     #[pyo3(text_signature = "($self, x, y)")]
     fn interpolate_nni(&mut self, x: f64, y: f64) -> PyResult<f64> {
         let re = self.t.interpolate_nni(x, y);
-        if re.is_ok() {
+        if re.is_err() {
             return Err(PyErr::new::<exceptions::PyException, _>("Outside CH"));
         }
         Ok(re.unwrap())
