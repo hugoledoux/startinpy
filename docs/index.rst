@@ -15,10 +15,10 @@ The Python bindings just wrap the Rust code.
 startinpy allows you to:
 
 - insert incrementally points
-- delete some (useful for simplification, interpolation, and other operations)attributes
+- delete vertices (useful for simplification, interpolation, and other operations)
 - a few spatial interpolation functions are implemented
 - has functions to read directly GeoTIFF and LAS/LAZ files
-- outputs GeoJSON and OBJ 
+- outputs GeoJSON, OBJ, and PLY
 
 .. code-block:: python
 
