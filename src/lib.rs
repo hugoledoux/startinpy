@@ -43,8 +43,6 @@ impl DT {
     /// This includes the infinite vertex (vertex at position 0), which is not part of the DT.
     /// It has dummy coordinates and no triangles refer to it.
     ///
-    /// :Example:
-    ///
     /// >>> pts = dt.points
     /// >>> print(pts.shape)
     /// (102, 3) #-- this is a numpy array
@@ -62,8 +60,6 @@ impl DT {
     }
 
     /// Get the triangles in the DT.
-    ///
-    /// :Example:
     ///
     /// >>> trs = dt.triangles
     /// >>> print(trs.shape)
@@ -93,7 +89,6 @@ impl DT {
     /// :param y: y-coordinate of point to insert
     /// :param z: z-coordinate of point to insert
     /// :return: index of the vertex in the DT   
-    /// :Example:
     ///
     /// >>> dt.insert_one_pt(3.2, 1.1, 17.0)
     /// 5
@@ -111,8 +106,6 @@ impl DT {
     ///
     /// :param vi: index of vertex to delete
     /// :return: (Exception is thrown if *vi* is invalid)
-    ///
-    /// :Example:
     ///
     /// >>> try:
     /// >>>     t.remove(45)
@@ -146,8 +139,6 @@ impl DT {
     /// :param pts: an array of points (which is an array)
     /// :param insertionstrategy: (optional) "AsIs" or "BBox"
     /// :return: (nothing)
-    ///      
-    /// :Example:
     ///
     /// >>> pts = []
     /// >>> pts.append([1.0, 1.0, 11.11])
@@ -180,7 +171,6 @@ impl DT {
     /// :param path: full path (a string) on disk of the file to read
     /// :param classification: (optional) a list of class(es) to keep. If not used then all points are inserted.
     /// :return: throws an exception if the path is invalid
-    /// :Example:
     ///
     /// >>> dt = startinpy.DT()
     /// >>> dt.read_las("/home/elvis/myfile.laz")
@@ -236,7 +226,6 @@ impl DT {
     ///
     /// :param path: full path (a string) on disk of the file to read
     /// :return: throws an exception if the path is invalid
-    /// :Example:
     ///
     /// >>> dt = startinpy.DT()
     /// >>> dt.read_geotiff("/home/elvis/myfile.tif")
@@ -279,8 +268,6 @@ impl DT {
     /// Two vertices closer than this will be the merged during insertion.
     /// (default=0.001)
     ///
-    /// :Example:
-    ///
     /// >>> dt = startinpy.DT()
     /// >>> dt.snap_tolerance = 0.05 #-- modify to 0.05unit
     /// >>> print("The snap tolerance is:", dt.snap_tolerance)
@@ -310,7 +297,6 @@ impl DT {
     ///
     /// :param vi: the index of the vertex
     /// :return: the point
-    /// :Example:
     ///
     /// >>> v = dt.get_point(4)
     /// [13.0, 2.0, 11.11]
@@ -341,8 +327,6 @@ impl DT {
     /// Return the bbox of the dataset
     ///
     /// :return: an array of 4 coordinates: [minx, miny, maxx, maxy]
-    ///
-    /// :Example:
     ///
     /// >>> bbox = dt.get_bbox()
     /// [ 505043.690 5258283.953  523361.172 5275100.003 ]
@@ -382,13 +366,16 @@ impl DT {
     /// :param x: the x-coordinate
     /// :param y: the y-coordinate
     /// :return: the vertex index of the closest point
+    ///
+    /// >>> try:
+    /// >>>     cp = dt.closest_point(32.1, 66.9)
+    /// >>> except Exception as e:
+    /// >>>     print(e)
     #[pyo3(text_signature = "($self, x, y)")]
     fn closest_point(&self, x: f64, y: f64) -> PyResult<usize> {
         let re = self.t.closest_point(x, y);
-        if re.is_ok() == true {
-            return Err(PyErr::new::<exceptions::PyException, _>(
-                "(x, y) is outside the convex hull.",
-            ));
+        if re.is_err() {
+            return Err(PyErr::new::<exceptions::PyException, _>("Outside CH"));
         } else {
             Ok(re.unwrap())
         }
@@ -399,8 +386,6 @@ impl DT {
     ///
     /// :param vi: the vertex index
     /// :return: an array of triangles (ordered counter-clockwise)
-    ///
-    /// :Example:
     ///
     /// >>> tri = dt.incident_triangles_to_vertex(3)
     /// >>> for i, dt in enumerate(tri):
@@ -462,7 +447,6 @@ impl DT {
     ///
     /// :param t: the triangle, an array of 3 vertex indices
     /// :return: True if t exists, False otherwise.
-    /// :Example:
     ///
     /// >>> re = dt.is_triangle(np.array([11, 162, 666])))
     #[pyo3(text_signature = "($self, t)")]
@@ -537,7 +521,6 @@ impl DT {
     /// :param x: the x-coordinate
     /// :param y: the y-coordinate
     /// :return: the estimated value
-    /// :Example:
     ///
     /// >>> try:
     /// >>>     zhat = dt.interpolate_laplace(55.2, 33.1)
@@ -560,6 +543,13 @@ impl DT {
     /// :param x: the x-coordinate
     /// :param y: the y-coordinate
     /// :return: the estimated value
+    ///
+    /// >>> try:
+    /// >>>     zhat = dt.interpolate_laplace(55.2, 33.1)
+    /// >>>     print("result: ", zhat)
+    /// >>> except Exception as e:
+    /// >>>     print(e)
+    /// 64.08234343
     #[pyo3(text_signature = "($self, x, y)")]
     fn interpolate_nni(&mut self, x: f64, y: f64) -> PyResult<f64> {
         let re = self.t.interpolate_nni(x, y);
@@ -574,7 +564,6 @@ impl DT {
     ///
     /// :param path: full path (a string) on disk of the file to create (will overwrite)
     /// :return: (nothing)
-    /// :Example:
     ///
     /// >>> dt.write_obj("/home/elvis/myfile.obj")
     #[pyo3(text_signature = "($self, path)")]
@@ -591,7 +580,6 @@ impl DT {
     ///
     /// :param path: full path (a string) on disk of the file to create (will overwrite)
     /// :return: (nothing)
-    /// :Example:
     ///
     /// >>> dt.write_ply("/home/elvis/myfile.ply")
     #[pyo3(text_signature = "($self, path)")]
@@ -608,7 +596,6 @@ impl DT {
     ///
     /// :param path: full path (a string) on disk of the file to create (will overwrite)
     /// :return: (nothing)
-    /// :Example:
     ///
     /// >>> dt.write_obj("/home/elvis/myfile.geojson")
     #[pyo3(text_signature = "($self, path)")]
@@ -625,7 +612,6 @@ impl DT {
     ///
     /// :param factor: a positive value (can be <1.0 to remove exaggeration)
     /// :return: (nothing)
-    /// :Example:
     ///
     /// >>> dt.vertical_exaggeration(2.0)
     /// >>> dt.vertical_exaggeration(0.5)
