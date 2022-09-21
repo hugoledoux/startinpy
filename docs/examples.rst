@@ -65,7 +65,8 @@ This code saves the resulting triangulation to a `PLY file <https://en.wikipedia
    dt.vertical_exaggeration(2.0)
    dt.write_ply("mydt.ply")
 
-.. image:: mdal.png
+.. image:: figs/mdal.png
+
 
 Plotting the DT with matplotlib
 -------------------------------
@@ -90,3 +91,5 @@ Plotting the DT with matplotlib
    #-- the vertex "0" shouldn't be plotted, so start at 1
    plt.plot(pts[1:,0], pts[1:,1], 'o')
    plt.show()
+
+.. image:: figs/matplotlib.png
