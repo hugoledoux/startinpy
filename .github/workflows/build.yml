@@ -9,10 +9,6 @@ on:
 jobs:
   linux:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        target: ['x86_64-unknown-linux-gnu', 'aarch64-unknown-linux-gnu']
-      fail-fast: false
     steps:
     - uses: actions/checkout@v2
     - uses: messense/maturin-action@v1
@@ -21,7 +17,7 @@ jobs:
         manylinux: auto
         target: ${{ matrix.target }}
         command: build
-        args: --release --no-sdist
+        args: --release --no-sdist -i python3.9  
 
   windows:
     runs-on: windows-latest
@@ -31,7 +27,7 @@ jobs:
       with:
         maturin-version: latest
         command: build
-        args: --release --no-sdist
+        args: --release --no-sdist -i python3.9  
 
   macos:
     runs-on: macos-latest
