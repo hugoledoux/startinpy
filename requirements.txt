@@ -1,0 +1,1 @@
+sphinx-celery==2.0.0
