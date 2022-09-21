@@ -129,12 +129,12 @@ impl DT {
     }
 
     /// Insert each point in the array of points (a 2D array) by calling insert_one_pt() for each.
-    /// Different insertion strategies can be used: "AsIs" (inserts points in the order given) or
-    /// "BBox" (inserts first the BBox of the points, which speeds up the construction,
+    /// Different insertion strategies can be used: "AsIs" (*default*: inserts points in the order
+    /// given) or "BBox" (inserts first the BBox of the points, which speeds up the construction,
     /// works especially good for rasters).
     ///
     /// :param pts: an array of points (which is an array)
-    /// :param insertionstrategy: (optional) "AsIs" or "BBox"
+    /// :param insertionstrategy: (optional) "AsIs" (*default*) or "BBox"
     /// :return: (nothing)
     ///
     /// >>> pts = []
