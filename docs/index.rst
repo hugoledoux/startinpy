@@ -17,7 +17,7 @@ startinpy allows you to:
 - insert incrementally points
 - delete vertices (useful for simplification, interpolation, and other operations)
 - a few spatial interpolation functions are implemented
-- has functions to read directly GeoTIFF and LAS/LAZ files
+- has a function to read directly LAS/LAZ files
 - outputs GeoJSON, OBJ, and PLY
 
 .. code-block:: python
