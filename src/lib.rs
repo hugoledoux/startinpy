@@ -78,6 +78,14 @@ impl DT {
         Ok(PyArray::from_vec2(py, &trs).unwrap())
     }
 
+    fn __str__(&self) -> PyResult<String> {
+        Ok(format!("{}", self.t))
+    }
+
+    fn __repr__(&self) -> PyResult<String> {
+        Ok(format!("{}", self.t))
+    }
+
     /// Insert one new point in the DT.
     /// If there is a point at the same location (based on :func:`startinpy.DT.snap_tolerance`),
     /// then the point is not inserted and the index of the already existing vertex is returned.
