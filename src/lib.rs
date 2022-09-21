@@ -3,12 +3,9 @@ use pyo3::exceptions;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
 
-extern crate gdal;
 extern crate las;
 extern crate startin;
 
-use gdal::raster::RasterBand;
-use gdal::Dataset;
 use las::point::Classification;
 use las::Read;
 
@@ -218,49 +215,6 @@ impl DT {
                 let _re = self.t.insert_one_pt(p.x, p.y, p.z);
             }
         }
-        Ok(())
-    }
-
-    /// Read the GeoTIFF file and insert all the points in the DT.
-    /// (no_data are skipped)
-    ///
-    /// :param path: full path (a string) on disk of the file to read
-    /// :return: throws an exception if the path is invalid
-    ///
-    /// >>> dt = startinpy.DT()
-    /// >>> dt.read_geotiff("/home/elvis/myfile.tif")
-    /// >>> print("# triangles:", dt.number_of_triangles())
-    #[pyo3(text_signature = "($self, path)")]
-    fn read_geotiff(&mut self, path: String) -> PyResult<()> {
-        let re = Dataset::open(path);
-        if re.is_err() {
-            return Err(PyErr::new::<exceptions::PyIOError, _>(
-                "Invalid path for GeoTIFF file.",
-            ));
-        }
-        let dataset = re.unwrap();
-        let crs = dataset.geo_transform().unwrap();
-        let rasterband: RasterBand = dataset.rasterband(1).unwrap();
-        let mut pts: Vec<[f64; 3]> = Vec::new();
-        let nodatavalue = rasterband.no_data_value().unwrap();
-        let xsize = rasterband.x_size();
-        let ysize = rasterband.y_size();
-        //-- for each line, starting from the top-left
-        for j in 0..ysize {
-            if let Ok(rv) =
-                rasterband.read_as::<f64>((0, j.try_into().unwrap()), (xsize, 1), (xsize, 1), None)
-            {
-                for (i, each) in rv.data.iter().enumerate() {
-                    let x = crs[0] + (i as f64 * crs[1]) + crs[1];
-                    let y = crs[3] + (j as f64 * crs[5]) + crs[5];
-                    let z = each;
-                    if *z != nodatavalue {
-                        pts.push([x, y, *z]);
-                    }
-                }
-            }
-        }
-        self.t.insert(&pts, startin::InsertionStrategy::BBox);
         Ok(())
     }
 
