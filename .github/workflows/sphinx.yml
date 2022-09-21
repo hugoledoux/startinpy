@@ -1,8 +1,9 @@
 name: Build sphinx docs + gh-pages
 
 on:
- release:
-  types: [published]
+  push:
+  release:
+    types: [published]
 
 jobs:
   linux:
