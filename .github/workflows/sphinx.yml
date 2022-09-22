@@ -1,7 +1,7 @@
 name: Build sphinx docs + gh-pages
 
 on:
-  # push:
+  push:
   release:
     types: [published]
 
@@ -36,11 +36,12 @@ jobs:
         maturin-version: latest
         manylinux: auto
         command: develop
+
     - name: Running the Sphinx to gh-pages Action
       uses: uibcdf/action-sphinx-docs-to-gh-pages@v1.0.0
       with:
         branch: master
         dir_docs: docs
-        sphinxapiopts: '-b html'       
+        sphinxopts: '-b html'       
 
 
