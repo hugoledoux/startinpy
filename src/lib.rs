@@ -306,9 +306,9 @@ impl DT {
     fn is_inside_convex_hull(&self, x: f64, y: f64) -> PyResult<bool> {
         let re = self.t.locate(x, y);
         if re.is_ok() == true {
-            return Ok(false);
+            return Ok(true);
         } else {
-            Ok(true)
+            Ok(false)
         }
     }
 
