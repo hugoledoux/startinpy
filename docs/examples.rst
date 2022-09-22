@@ -35,7 +35,7 @@ Reading a GeoTIFF file with rasterio
 ------------------------------------
 
 We can use `rasterio <https://rasterio.readthedocs.io>`_ to read a GeoTIFF and triangulate the centre of the pixels/cells directly.
-Notice that retrieving the (*x,y*)-coordinates of the centres with the `xy() function <https://rasterio.readthedocs.io/en/latest/api/rasterio.io.html?highlight=xy#rasterio.io.DatasetReader.xy>`_ is **super slow** and it's better to just use the code below.
+Notice that retrieving the (*x,y*)-coordinates of the centres with the `xy() function of rasterio <https://rasterio.readthedocs.io/en/latest/api/rasterio.io.html?highlight=xy#rasterio.io.DatasetReader.xy>`_ is **super slow** and it's better to use the code below.
 
 Notice that we use the insertion strategy "BBox" because it is several orders of magnitude faster for gridded datasets.
 
