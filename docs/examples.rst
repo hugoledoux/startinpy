@@ -6,12 +6,15 @@ Examples
 Reading a LAZ file
 ------------------
 
+This will both read only the point classified at "2" or "6", and thin randomly the file by a factor 10.
+
+ 
 .. code-block:: python
 
    import startinpy
 
    dt = startinpy.DT()
-   dt.read_las("/home/elvis/myfile.laz", classification=[2,6])
+   dt.read_las("/home/elvis/myfile.laz", classification=[2,6], thinning=10)
    print("# vertices:", dt.number_of_vertices())
    
 
@@ -47,6 +50,7 @@ This code saves the resulting triangulation to a `PLY file <https://en.wikipedia
 
    import startinpy
    import rasterio
+   import random
 
    d = rasterio.open('mydem.tif')
    band1 = d.read(1)
@@ -57,7 +61,7 @@ This code saves the resulting triangulation to a `PLY file <https://en.wikipedia
             x = t[2] + (j * t[0]) + (t[0] / 2)
             y = t[5] + (i * t[4]) + (t[4] / 2)
             z = band1[i][j]
-            if z != d.nodatavals:
+            if (z != d.nodatavals) and (random.randint(0, 100) == 5):
                 pts.append([x, y, z])
    dt = startinpy.DT()
    dt.insert(pts, insertionstrategy="BBox")
@@ -65,7 +69,39 @@ This code saves the resulting triangulation to a `PLY file <https://en.wikipedia
    dt.vertical_exaggeration(2.0)
    dt.write_ply("mydt.ply")
 
-.. image:: figs/mdal.png
+.. image:: figs/mdal.jpg
+
+
+3D visualisation with Polyscope
+-------------------------------
+
+You need to install `Polyscope <https://polyscope.run/py/>`_ (basically `pip install polyscope`).
+
+.. code-block:: python
+
+   import startinpy
+   import numpy as np
+   import polyscope as ps
+
+   dt = startinpy.DT()
+   dt.read_las("/home/elvis/myfile.laz", classification=[2,6])
+
+   pts = dt.points
+   pts[0] = pts[1] #-- first vertex has -99999 and messes up the viz
+   trs = dt.triangles
+
+   ps.init()
+   ps.set_program_name("mydt")
+   ps.set_up_dir("z_up")
+   ps.set_ground_plane_mode("shadow_only")
+   ps.set_ground_plane_height_factor(0.01, is_relative=True)
+   ps.set_autocenter_structures(True)
+   ps.set_autoscale_structures(True)
+   ps.register_point_cloud("mypoints", pts[1:], radius=0.0015, point_render_mode='sphere')
+   ps_mesh = ps.register_surface_mesh("mysurface", pts, trs)
+   ps.show()
+   
+.. image:: figs/polyscope.jpg
 
 
 Plotting the DT with matplotlib
