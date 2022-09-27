@@ -2,6 +2,7 @@ use numpy::PyArray;
 use pyo3::exceptions;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
+use rand::{thread_rng, Rng};
 
 extern crate las;
 extern crate startin;
@@ -222,14 +223,17 @@ impl DT {
         }
         let mut reader = re.unwrap();
         let _count = reader.header().number_of_points();
+        let mut rng = thread_rng();
         for each in reader.points() {
-            let p = each.unwrap();
-            if classes.is_empty() == false {
-                if classes.contains(&p.classification) {
+            if rng.gen_ratio(1, t) == true {
+                let p = each.unwrap();
+                if classes.is_empty() == false {
+                    if classes.contains(&p.classification) {
+                        let _re = self.t.insert_one_pt(p.x, p.y, p.z);
+                    }
+                } else {
                     let _re = self.t.insert_one_pt(p.x, p.y, p.z);
                 }
-            } else {
-                let _re = self.t.insert_one_pt(p.x, p.y, p.z);
             }
         }
         Ok(())
