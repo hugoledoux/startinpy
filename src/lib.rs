@@ -142,7 +142,7 @@ impl DT {
     /// works especially good for rasters).
     ///
     /// :param pts: an array of points (which is an array)
-    /// :param insertionstrategy: (optional) "AsIs" (*default*) or "BBox"
+    /// :param optional insertionstrategy:  "AsIs" (*default*) or "BBox"
     /// :return: (nothing)
     ///
     /// >>> pts = []
@@ -154,7 +154,7 @@ impl DT {
     /// >>> dt.insert(pts)
     /// OR
     /// >>> dt.insert(pts, insertionstrategy="BBox")
-    #[pyo3(text_signature = "($self, pts[, insertionstrategy])")]
+    #[pyo3(text_signature = "($self, pts, insertionstrategy)")]
     #[args(path, insertionstrategy = "\"AsIs\"")]
     fn insert(&mut self, pts: Vec<[f64; 3]>, insertionstrategy: &str) -> PyResult<()> {
         match insertionstrategy {
@@ -174,28 +174,37 @@ impl DT {
     /// Read the LAS/LAZ file and insert all the points in the DT.
     ///
     /// :param path: full path (a string) on disk of the file to read
-    /// :param classification: (optional) a list of class(es) to keep. If not used then all points are inserted.
+    /// :param optional classification: a list of class(es) to keep. If not used then all points are inserted.
+    /// :param optional thinning:  the thinning factor, eg 10 will randomly pick 1/10 points from the file.
     /// :return: throws an exception if the path is invalid
     ///
     /// >>> dt = startinpy.DT()
     /// >>> dt.read_las("/home/elvis/myfile.laz")
     /// >>> OR
     /// >>> dt.read_las("/home/elvis/myfile.laz", classification=[2,6])
-    #[pyo3(text_signature = "($self, path[, classification])")]
+    /// >>> OR
+    /// >>> dt.read_las("/home/elvis/myfile.laz", thinning=10, classification=[2,6])
+    #[pyo3(text_signature = "($self, path, classification, thinning)")]
     #[args(path, py_kwargs = "**")]
     fn read_las(&mut self, path: String, py_kwargs: Option<&PyDict>) -> PyResult<()> {
         let mut c: Vec<u8> = Vec::new();
+        let mut t: u32 = 1;
         if py_kwargs.is_some() {
             let tmp = py_kwargs.unwrap();
             let a = tmp.keys();
             for each in a {
                 let b: String = each.extract()?;
-                if b != "classification" {
+                if (b != "classification") && (b != "thinning") {
                     let s = format!("'{}' is an invalid keyword argument for read_las()", b);
                     return Err(PyErr::new::<exceptions::PyTypeError, _>(s));
                 }
             }
-            c = tmp.get_item("classification").unwrap().extract()?;
+            if tmp.get_item("classification").is_some() {
+                c = tmp.get_item("classification").unwrap().extract()?;
+            }
+            if tmp.get_item("thinning").is_some() {
+                t = tmp.get_item("thinning").unwrap().extract()?;
+            }
         }
         let re = las::Reader::from_path(path);
         if re.is_err() {
