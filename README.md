@@ -1,5 +1,5 @@
 
-[![PyPI](https://img.shields.io/pypi/v/startinpy?style=for-the-badge)](https://pypi.org/project/startinpy/) [![docs](https://img.shields.io/badge/docs-github.io-brightgreen?style=for-the-badge)](https://hugoledoux.github.io/startinpy/) [![GitHub license](https://img.shields.io/github/license/hugoledoux/startinpy?style=for-the-badge)](https://github.com/hugoledoux/startinpy/blob/master/LICENSE) 
+[![PyPI](https://img.shields.io/pypi/v/startinpy?style=for-the-badge)](https://pypi.org/project/startinpy/) [![docs](https://img.shields.io/badge/docs-startinpy.rtfd.io-brightgreen?style=for-the-badge)](https://startinpy.rtfd.io/) [![GitHub license](https://img.shields.io/github/license/hugoledoux/startinpy?style=for-the-badge)](https://github.com/hugoledoux/startinpy/blob/master/LICENSE) 
 
 startinpy
 =========
@@ -37,7 +37,7 @@ Development
 Documentation
 =============
 
-https://hugoledoux.github.io/startinpy/
+https://startinpy.rtfd.io
 
 
 Examples
