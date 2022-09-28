@@ -154,7 +154,7 @@ impl DT {
     /// >>> dt.insert(pts)
     /// OR
     /// >>> dt.insert(pts, insertionstrategy="BBox")
-    #[pyo3(text_signature = "($self, pts, insertionstrategy)")]
+    #[pyo3(text_signature = "($self, pts, *, insertionstrategy='AsIs')")]
     #[args(path, insertionstrategy = "\"AsIs\"")]
     fn insert(&mut self, pts: Vec<[f64; 3]>, insertionstrategy: &str) -> PyResult<()> {
         match insertionstrategy {
@@ -184,7 +184,7 @@ impl DT {
     /// >>> dt.read_las("/home/elvis/myfile.laz", classification=[2,6])
     /// >>> OR
     /// >>> dt.read_las("/home/elvis/myfile.laz", thinning=10, classification=[2,6])
-    #[pyo3(text_signature = "($self, path, classification, thinning)")]
+    #[pyo3(text_signature = "($self, path, *, classification=None, thinning=1)")]
     #[args(path, py_kwargs = "**")]
     fn read_las(&mut self, path: String, py_kwargs: Option<&PyDict>) -> PyResult<()> {
         let mut c: Vec<u8> = Vec::new();
