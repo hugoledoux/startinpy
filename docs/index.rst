@@ -39,13 +39,13 @@ Table of content
 ================
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 0
 
 
    installation
-   api
-   examples
    howitworks
+   examples
+   api
 
 
 Indices and tables
