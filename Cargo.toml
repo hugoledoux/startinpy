@@ -28,7 +28,3 @@ name = "startinpy"
 crate-type = ["cdylib"]
 
 
-[package.metadata.maturin]
-requires-python = ">=3.7"
-requires-dist = ["toml>=0.10.2"]
-classifier=["License :: OSI Approved :: MIT License"]
