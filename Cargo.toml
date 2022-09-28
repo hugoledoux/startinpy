@@ -15,11 +15,12 @@ startin = ">=0.6.0"
 # startin = { path = "../startin" }
 # startin = { git = "https://github.com/hugoledoux/startin", branch = "develop" }
 las = { version = "~0.7", features = ["laz"] }
-numpy = "~0.16"
+numpy = "~0.17"
+rand = "0.8.5"
 
 
 [dependencies.pyo3]
-version = "~0.16.0"
+version = "~0.17.0"
 features = ["extension-module"]
 
 
