@@ -1,6 +1,6 @@
 [package]
 name    = "startinpy"
-version = "0.9.0"
+version = "0.9.1"
 authors = ["Hugo Ledoux <h.ledoux@tudelft.nl>"]
 license = "MIT"
 homepage="https://github.com/hugoledoux/startinpy"
@@ -11,7 +11,7 @@ edition = "2021"
 
 
 [dependencies]
-startin = ">=0.6.0"
+startin = ">=0.6.1"
 # startin = { path = "../startin" }
 # startin = { git = "https://github.com/hugoledoux/startin", branch = "develop" }
 las = { version = "~0.7", features = ["laz"] }
