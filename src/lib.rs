@@ -596,4 +596,27 @@ impl DT {
     fn vertical_exaggeration(&mut self, factor: f64) {
         self.t.vertical_exaggeration(factor);
     }
+
+    /// Returns true if some vertices are marked as to be deleted (but still in memory)
+    /// , false otherwise.
+    ///
+    /// :return: true/false
+    #[pyo3(text_signature = "($self, factor)")]
+    fn has_garbage(&self) -> PyResult<bool> {
+        Ok(self.t.has_garbage())
+    }
+
+    /// Collect garbage, that is remove from memory (the Vec of stars) the vertices
+    /// marked as removed.
+    ///
+    /// Watch out: the vertices get new IDs (and thus the triangles) too. And this can
+    /// be a slow operation.
+    ///
+    /// >>> if dt.has_garbage():
+    /// >>>     dt.collect_garbage()
+    /// >>> assert dt.has_garbage() == False
+    fn collect_garbage(&mut self) -> PyResult<()> {
+        self.t.collect_garbage();
+        Ok(())
+    }
 }
