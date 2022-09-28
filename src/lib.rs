@@ -200,7 +200,10 @@ impl DT {
                 }
             }
             if tmp.get_item("classification").is_some() {
-                c = tmp.get_item("classification").unwrap().extract()?;
+                // println!("{:?}", tmp.get_item("classification").unwrap());
+                if tmp.get_item("classification").unwrap().is_none() == false {
+                    c = tmp.get_item("classification").unwrap().extract()?;
+                }
             }
             if tmp.get_item("thinning").is_some() {
                 t = tmp.get_item("thinning").unwrap().extract()?;
