@@ -6,7 +6,7 @@ Examples
 Reading a LAZ file
 ------------------
 
-This will both read only the point classified at "2" or "6", and thin randomly the file by a factor 10.
+This will read only the point classified as "2" or "6", and thin them randomly by a factor 10 (1/10 points will be picked, randomly selected).
 
  
 .. code-block:: python
