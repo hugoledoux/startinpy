@@ -1,6 +1,6 @@
 [package]
 name    = "startinpy"
-version = "0.9.1"
+version = "0.9.2"
 authors = ["Hugo Ledoux <h.ledoux@tudelft.nl>"]
 license = "MIT"
 homepage="https://github.com/hugoledoux/startinpy"
