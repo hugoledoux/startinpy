@@ -26,7 +26,7 @@ jobs:
       with:
         maturin-version: latest
         command: build
-        args: --release --sdist 
+        args: --release --sdist -i python3.11
 
   macos:
     runs-on: macos-latest
@@ -41,4 +41,4 @@ jobs:
       with:
         maturin-version: latest
         command: build
-        args: --release --sdist --universal2
+        args: --release --sdist --universal2 -i python3.11
