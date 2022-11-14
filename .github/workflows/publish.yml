@@ -51,6 +51,16 @@ jobs:
         command: publish
         args: --no-sdist -u hledoux -p ${{ secrets.PASSWORD_PYPI }} -i python3.10
 
+  win-p311:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: messense/maturin-action@v1
+      with:
+        maturin-version: latest
+        command: publish
+        args: --no-sdist -u hledoux -p ${{ secrets.PASSWORD_PYPI }} -i python3.11        
+
 
   macos-p38:
     runs-on: macos-latest
@@ -96,3 +106,18 @@ jobs:
         maturin-version: latest
         command: publish
         args: --no-sdist --universal2 -u hledoux -p ${{ secrets.PASSWORD_PYPI }} -i python3.10        
+
+  macos-p311:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install aarch64-apple-darwin toolchain
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        target: aarch64-apple-darwin
+    - uses: messense/maturin-action@v1
+      with:
+        maturin-version: latest
+        command: publish
+        args: --no-sdist --universal2 -u hledoux -p ${{ secrets.PASSWORD_PYPI }} -i python3.11         
