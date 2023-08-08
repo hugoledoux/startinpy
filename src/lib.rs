@@ -337,6 +337,23 @@ impl DT {
         Ok(self.t.is_vertex_convex_hull(vi))
     }
 
+    /// Return True if vertex *vi* is labelled as removed, False otherwise.
+    ///
+    /// :param vi: the vertex index
+    /// :return: True if *vi* is labelled as removed, False otherwise.
+    ///          An exception is raised if *vi* doesn't exist.  
+    #[pyo3(text_signature = "($self, vi)")]
+    fn is_vertex_removed(&self, vi: usize) -> PyResult<bool> {
+        let re = self.t.is_vertex_removed(vi);
+        if re.is_err() {
+            return Err(PyErr::new::<exceptions::PyException, _>(
+                "Invalid vertex index.",
+            ));
+        } else {
+            Ok(re.unwrap())
+        }
+    }
+
     /// Return the closest vertex index to [x, y] (distance in 2D).
     /// An Exception is thrown if [x, y] is outside the convex hull.
     ///
@@ -359,13 +376,14 @@ impl DT {
     }
 
     /// Return the triangles incident to vertex *vi*.
-    /// Exception thrown if vertex index doesn't exist in the DT.
+    /// Exception thrown if vertex index doesn't exist in the DT or
+    /// if it has been removed.
     ///
     /// :param vi: the vertex index
     /// :return: an array of triangles (ordered counter-clockwise)
     ///
-    /// >>> tri = dt.incident_triangles_to_vertex(3)
-    /// >>> for i, dt in enumerate(tri):
+    /// >>> trs = dt.incident_triangles_to_vertex(3)
+    /// >>> for i, t in enumerate(trs):
     /// >>>     print(i, t)    
     /// 0 [3, 4, 6]
     /// 1 [3, 6, 7]
@@ -398,6 +416,46 @@ impl DT {
         }
     }
 
+    /// Return the triangles adjacent to Triangle *t*.
+    /// Exception thrown if vertex index doesn't exist in the DT.
+    ///
+    /// :param vi: the vertex index
+    /// :return: an array of 3 triangles (finite and infinite)
+    ///
+    /// >>> tris = dt.adjacent_triangles_to_triangle([1, 44, 23])
+    /// >>> for i, t in enumerate(tris):
+    /// >>>     print(i, t)    
+    /// 0 [3, 4, 6]
+    /// 1 [3, 6, 7]
+    /// 2 [3, 7, 8]
+    #[pyo3(text_signature = "($self, t)")]
+    fn adjacent_triangles_to_triangle<'py>(
+        &self,
+        py: Python<'py>,
+        t: Vec<usize>,
+    ) -> PyResult<&'py PyArray<usize, numpy::Ix2>> {
+        let tr = startin::Triangle {
+            v: [t[0], t[1], t[2]],
+        };
+        let re = self.t.adjacent_triangles_to_triangle(&tr);
+        if re.is_ok() {
+            let l = re.unwrap();
+            let mut trs: Vec<Vec<usize>> = Vec::with_capacity(l.len());
+            for each in l {
+                let mut tr = Vec::with_capacity(3);
+                tr.push(each.v[0]);
+                tr.push(each.v[1]);
+                tr.push(each.v[2]);
+                trs.push(tr);
+            }
+            return Ok(PyArray::from_vec2(py, &trs).unwrap());
+        } else {
+            return Err(PyErr::new::<exceptions::PyIndexError, _>(
+                "Triangle Not Present.",
+            ));
+        }
+    }
+
     /// Return an array of vertex indices that are adjacent to vertex *vi*,
     /// that is those on the edges incident to *vi*.
     /// An exception is thrown if *vi* does not exist in the DT.
@@ -418,6 +476,23 @@ impl DT {
                 "Invalid vertex index.",
             ));
         }
+    }
+
+    /// Verify whether a Triangle is finite, or not.
+    /// An infinite triangle has the first 0-vertex as one
+    /// of its vertices.
+    /// This doesn't verify wether the the triangle exists.
+    ///
+    /// :param t: the triangle, an array of 3 vertex indices
+    /// :return: True if t is finite, False is infinite
+    ///
+    /// >>> re = dt.is_finite(np.array([11, 162, 666])))
+    #[pyo3(text_signature = "($self, t)")]
+    fn is_finite(&self, t: Vec<usize>) -> PyResult<bool> {
+        let tr = startin::Triangle {
+            v: [t[0], t[1], t[2]],
+        };
+        Ok(self.t.is_finite(&tr))
     }
 
     /// Verify if a triangle exists in the DT.
