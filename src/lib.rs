@@ -467,12 +467,14 @@ impl DT {
     /// :param y: the y-coordinate
     /// :return: the estimated value
     #[pyo3(text_signature = "($self, x, y)")]
-    fn interpolate_nn(&self, x: f64, y: f64) -> PyResult<f64> {
-        let re = self.t.interpolate_nn(x, y);
-        if re.is_err() {
+    fn interpolate_nn(&mut self, x: f64, y: f64) -> PyResult<f64> {
+        let i_nn = startin::interpolation::NN {};
+        let mut re = startin::interpolation::interpolate(&i_nn, &mut self.t, &vec![[x, y]]);
+        let re1 = re.pop().expect("no results");
+        if re1.is_err() {
             return Err(PyErr::new::<exceptions::PyException, _>("Outside CH"));
         }
-        Ok(re.unwrap())
+        Ok(re1.unwrap())
     }
 
     /// Interpolation method: linear interpolation in TIN.
@@ -482,12 +484,14 @@ impl DT {
     /// :param y: the y-coordinate
     /// :return: the estimated value
     #[pyo3(text_signature = "($self, x, y)")]
-    fn interpolate_tin_linear(&self, x: f64, y: f64) -> PyResult<f64> {
-        let re = self.t.interpolate_tin_linear(x, y);
-        if re.is_err() {
+    fn interpolate_tin_linear(&mut self, x: f64, y: f64) -> PyResult<f64> {
+        let i_tin = startin::interpolation::TIN {};
+        let mut re = startin::interpolation::interpolate(&i_tin, &mut self.t, &vec![[x, y]]);
+        let re1 = re.pop().expect("no results");
+        if re1.is_err() {
             return Err(PyErr::new::<exceptions::PyException, _>("Outside CH"));
         }
-        Ok(re.unwrap())
+        Ok(re1.unwrap())
     }
 
     /// Interpolation method: Laplace interpolation (`details about the method <http://dilbert.engr.ucdavis.edu/~suku/nem/index.html>`_).
@@ -507,11 +511,13 @@ impl DT {
     /// 64.08234343
     #[pyo3(text_signature = "($self, x, y)")]
     fn interpolate_laplace(&mut self, x: f64, y: f64) -> PyResult<f64> {
-        let re = self.t.interpolate_laplace(x, y);
-        if re.is_err() {
+        let i_lp = startin::interpolation::Laplace {};
+        let mut re = startin::interpolation::interpolate(&i_lp, &mut self.t, &vec![[x, y]]);
+        let re1 = re.pop().expect("no results");
+        if re1.is_err() {
             return Err(PyErr::new::<exceptions::PyException, _>("Outside CH"));
         }
-        Ok(re.unwrap())
+        Ok(re1.unwrap())
     }
 
     /// Interpolation method: natural neighbour method (also called Sibson's method).
@@ -529,11 +535,13 @@ impl DT {
     /// 64.08234343
     #[pyo3(text_signature = "($self, x, y)")]
     fn interpolate_nni(&mut self, x: f64, y: f64) -> PyResult<f64> {
-        let re = self.t.interpolate_nni(x, y);
-        if re.is_err() {
+        let i_nni = startin::interpolation::NNI { precompute: false };
+        let mut re = startin::interpolation::interpolate(&i_nni, &mut self.t, &vec![[x, y]]);
+        let re1 = re.pop().expect("no results");
+        if re1.is_err() {
             return Err(PyErr::new::<exceptions::PyException, _>("Outside CH"));
         }
-        Ok(re.unwrap())
+        Ok(re1.unwrap())
     }
 
     /// Write an OBJ of the DT to the path (a string).
