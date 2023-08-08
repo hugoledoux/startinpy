@@ -259,12 +259,12 @@ impl DT {
         self.t.set_snap_tolerance(snaptol);
     }
 
-    /// :return: number of (finite) vertices    
+    /// :return: number of finite vertices    
     fn number_of_vertices(&self) -> PyResult<usize> {
         Ok(self.t.number_of_vertices())
     }
 
-    /// :return: number of (finite) triangles    
+    /// :return: number of finite triangles    
     fn number_of_triangles(&self) -> PyResult<usize> {
         Ok(self.t.number_of_triangles())
     }
