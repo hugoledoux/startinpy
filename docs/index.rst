@@ -55,11 +55,8 @@ startinpy allows you to:
    alltr = dt.triangles
    print(alltr[3])
 
-   try:
-       zhat = dt.interpolate_tin_linear(55.2, 33.1)
-       print("result: ", zhat)
-   except Exception as e:
-       print(e)
+   zhat = dt.interpolate({"method": "TIN"}, [[55.2, 33.1]])
+   print("result: ", zhat[0])
 
 
 Table of content

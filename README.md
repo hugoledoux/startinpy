@@ -47,7 +47,6 @@ Examples
 import startinpy
 import numpy as np
 
-
 #-- generate 100 points randomly in the plane
 rng = np.random.default_rng()
 pts = rng.random((100, 3))
@@ -78,11 +77,8 @@ print("--- Points/ ---")
 alltr = dt.triangles
 print(alltr[3])
 
-try:
-    zhat = dt.interpolate_tin_linear(55.2, 33.1)
-    print("result: ", zhat)
-except Exception as e:
-    print(e)
+zhat = dt.interpolate({"method": "TIN"}, [[55.2, 33.1]])
+print("result: ", zhat[0])
 ```
 
 It can read LAS/LAZ and output GeoJSON files too:

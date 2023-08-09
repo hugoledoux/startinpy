@@ -538,17 +538,20 @@ impl DT {
 
     /// Interpolate with 5 different methods:
     ///
-    /// 1. "IDW": inverse distance weighing
-    /// 2. "Laplace": a faster NNI with almost the same results
-    /// 3. "NN": nearest neighbour
-    /// 4. "NNI": natural neighbour interpolation
-    /// 5. "TIN": linear interpolation in TIN
+    /// 1. IDW: inverse distance weighing
+    /// 2. Laplace: a faster NNI with almost the same results
+    /// 3. NN: nearest neighbour
+    /// 4. NNI: natural neighbour interpolation
+    /// 5. TIN: linear interpolation in TIN
     ///
-    /// :param interpolant: a JSON/dict Python object with a "method": "IDW" (or others). IDW has 2 more params: "power" and "radius"
+    /// :param interpolant: a JSON/dict Python object with a `"method": "IDW"` (or others). IDW has 2 more params: "power" and "radius"
     /// :param locations: an array of [x, y] locations where to interpolate
     /// :param strict: if the interpolation cannot find a value (because outside convex hull or search radius too small) then strict==True will stop at the first error and return that error. If strict==False then NaN is returned.
-    ///
     /// :return: an array containing all the interpolation values (same order as input array)
+    ///
+    /// >>> locs = [ [50.0, 41.1], [101.1, 33.2], [80.0, 66.0] ]
+    /// >>> re = dt.interpolate({"method": "NNI"}, locs)
+    /// >>> re = dt.interpolate({"method": "IDW", "radius": 20, "power": 2.0}, locs, strict=True)
     #[args(interpolant, locations, strict = false)]
     fn interpolate<'py>(
         &mut self,
@@ -557,7 +560,6 @@ impl DT {
         locations: Vec<[f64; 2]>,
         strict: bool,
     ) -> PyResult<&'py PyArray<f64, numpy::Ix1>> {
-        println!("{:?}", strict);
         match interpolant.get_item("method") {
             None => {
                 return Err(PyErr::new::<exceptions::PyException, _>(
@@ -568,29 +570,45 @@ impl DT {
                 let m: String = m.extract()?;
                 let mut re: Vec<f64> = Vec::with_capacity(locations.len());
                 match m.as_str() {
-                    // "IDW" => {
-                    //     let radius = interpolant.get_item("radius");
-                    //     let power = interpolant.get_item("power");
-                    //     if radius.is_none() || power.is_none() {
-                    //         return Err(PyErr::new::<exceptions::PyException, _>(
-                    //             "Wrong parameters.",
-                    //         ));
-                    //     } else {
-                    //         let r1: f64 = radius.unwrap().extract()?;
-                    //         if r1 <= 0.0 {
-                    //             return Err(PyErr::new::<exceptions::PyException, _>(
-                    //                 "Wrong parameters.",
-                    //             ));
-                    //         }
-                    //         let p1: f64 = power.unwrap().extract()?;
-                    //         if p1 <= 0.0 {
-                    //             return Err(PyErr::new::<exceptions::PyException, _>(
-                    //                 "Wrong parameters.",
-                    //             ));
-                    //         }
-                    //         return self.interpolate_idw(x, y, r1, p1);
-                    //     }
-                    // }
+                    "IDW" => {
+                        let radius = interpolant.get_item("radius");
+                        let power = interpolant.get_item("power");
+                        if radius.is_none() || power.is_none() {
+                            return Err(PyErr::new::<exceptions::PyException, _>(
+                                "Wrong parameters.",
+                            ));
+                        } else {
+                            let r1: f64 = radius.unwrap().extract()?;
+                            if r1 <= 0.0 {
+                                return Err(PyErr::new::<exceptions::PyException, _>(
+                                    "Wrong parameters.",
+                                ));
+                            }
+                            let p1: f64 = power.unwrap().extract()?;
+                            if p1 <= 0.0 {
+                                return Err(PyErr::new::<exceptions::PyException, _>(
+                                    "Wrong parameters.",
+                                ));
+                            }
+                            for loc in locations {
+                                let a = self.interpolate_idw(loc[0], loc[1], r1, p1);
+                                if a.is_ok() {
+                                    re.push(a.unwrap());
+                                } else {
+                                    if strict == true {
+                                        let s = format!(
+                                            "({}, {}) no points in search radius.",
+                                            loc[0], loc[1]
+                                        );
+                                        return Err(PyErr::new::<exceptions::PyTypeError, _>(s));
+                                    } else {
+                                        re.push(f64::NAN);
+                                    }
+                                }
+                            }
+                            Ok(PyArray::from_vec(py, re))
+                        }
+                    }
                     "Laplace" => {
                         for loc in locations {
                             let a = self.interpolate_laplace(loc[0], loc[1]);
@@ -610,9 +628,63 @@ impl DT {
                         }
                         Ok(PyArray::from_vec(py, re))
                     }
-                    // "NN" => return self.interpolate_nn(x, y),
-                    // "NNI" => return self.interpolate_nni(x, y),
-                    // "TIN" => return self.interpolate_tin_linear(x, y),
+                    "NN" => {
+                        for loc in locations {
+                            let a = self.interpolate_nn(loc[0], loc[1]);
+                            if a.is_ok() {
+                                re.push(a.unwrap());
+                            } else {
+                                if strict == true {
+                                    let s = format!(
+                                        "({}, {}) is outside the convex hull.",
+                                        loc[0], loc[1]
+                                    );
+                                    return Err(PyErr::new::<exceptions::PyTypeError, _>(s));
+                                } else {
+                                    re.push(f64::NAN);
+                                }
+                            }
+                        }
+                        Ok(PyArray::from_vec(py, re))
+                    }
+                    "NNI" => {
+                        for loc in locations {
+                            let a = self.interpolate_nni(loc[0], loc[1]);
+                            if a.is_ok() {
+                                re.push(a.unwrap());
+                            } else {
+                                if strict == true {
+                                    let s = format!(
+                                        "({}, {}) is outside the convex hull.",
+                                        loc[0], loc[1]
+                                    );
+                                    return Err(PyErr::new::<exceptions::PyTypeError, _>(s));
+                                } else {
+                                    re.push(f64::NAN);
+                                }
+                            }
+                        }
+                        Ok(PyArray::from_vec(py, re))
+                    }
+                    "TIN" => {
+                        for loc in locations {
+                            let a = self.interpolate_tin_linear(loc[0], loc[1]);
+                            if a.is_ok() {
+                                re.push(a.unwrap());
+                            } else {
+                                if strict == true {
+                                    let s = format!(
+                                        "({}, {}) is outside the convex hull.",
+                                        loc[0], loc[1]
+                                    );
+                                    return Err(PyErr::new::<exceptions::PyTypeError, _>(s));
+                                } else {
+                                    re.push(f64::NAN);
+                                }
+                            }
+                        }
+                        Ok(PyArray::from_vec(py, re))
+                    }
                     _ => {
                         return Err(PyErr::new::<exceptions::PyException, _>(
                             "Unknown interpolation method.",
