@@ -30,6 +30,7 @@ pub struct DT {
 #[pymethods]
 impl DT {
     /// Constructor for a DT (returns an empty DT)
+    ///
     #[new]
     fn new() -> Self {
         let tmp = startin::Triangulation::new();
@@ -98,7 +99,7 @@ impl DT {
     /// >>> dt.insert_one_pt(3.2, 1.1, 17.0)
     /// 5
     /// (the vertex index in the DT is 5)
-    #[pyo3(text_signature = "($self, x, y, z)")]
+    #[args(x, y, z)]
     fn insert_one_pt(&mut self, x: f64, y: f64, z: f64) -> PyResult<usize> {
         let re = self.t.insert_one_pt(x, y, z);
         match re {
@@ -116,7 +117,7 @@ impl DT {
     /// >>>     t.remove(45)
     /// >>> except Exception as e:
     /// >>>     print(e)
-    #[pyo3(text_signature = "($self, vi)")]
+    #[args(vi)]
     fn remove(&mut self, vi: usize) -> PyResult<()> {
         let re = self.t.remove(vi);
         match re {
@@ -155,7 +156,7 @@ impl DT {
     /// OR
     /// >>> dt.insert(pts, insertionstrategy="BBox")
     #[pyo3(text_signature = "($self, pts, *, insertionstrategy='AsIs')")]
-    #[args(path, insertionstrategy = "\"AsIs\"")]
+    #[args(pts, insertionstrategy = "\"AsIs\"")]
     fn insert(&mut self, pts: Vec<[f64; 3]>, insertionstrategy: &str) -> PyResult<()> {
         match insertionstrategy {
             "AsIs" => self.t.insert(&pts, startin::InsertionStrategy::AsIs),
@@ -277,7 +278,7 @@ impl DT {
     ///
     /// >>> v = dt.get_point(4)
     /// [13.0, 2.0, 11.11]
-    #[pyo3(text_signature = "($self, vi)")]
+    #[args(vi)]
     fn get_point<'py>(
         &self,
         py: Python<'py>,
@@ -296,7 +297,7 @@ impl DT {
     /// Return the convex hull as an array of vertex indices.
     ///
     /// :return: an array of vertex indices, oriented counter-clockwise (CCW)
-    #[pyo3(text_signature = "($self)")]
+    #[args()]
     fn convex_hull<'py>(&self, py: Python<'py>) -> PyResult<&'py PyArray<usize, numpy::Ix1>> {
         Ok(PyArray::from_vec(py, self.t.convex_hull()))
     }
@@ -307,7 +308,7 @@ impl DT {
     ///
     /// >>> bbox = dt.get_bbox()
     /// [ 505043.690 5258283.953  523361.172 5275100.003 ]
-    #[pyo3(text_signature = "($self)")]
+    #[args()]
     fn get_bbox<'py>(&self, py: Python<'py>) -> PyResult<&'py PyArray<f64, numpy::Ix1>> {
         Ok(PyArray::from_vec(py, self.t.get_bbox()))
     }
@@ -317,7 +318,7 @@ impl DT {
     /// :param x: the x-coordinate
     /// :param y: the y-coordinate
     /// :return: True if [x,y] is inside the convex hull or on its boundary, False otherwise.
-    #[pyo3(text_signature = "($self, x, y)")]
+    #[args(x, y)]
     fn is_inside_convex_hull(&self, x: f64, y: f64) -> PyResult<bool> {
         let re = self.t.locate(x, y);
         if re.is_ok() == true {
@@ -332,7 +333,7 @@ impl DT {
     /// :param vi: the vertex index
     /// :return: True if *vi* is on the boundary of the convex hull, False otherwise.
     ///          Also False is returned if the vertex doesn't exist in the DT.
-    #[pyo3(text_signature = "($self, vi)")]
+    #[args(vi)]
     fn is_vertex_convex_hull(&self, vi: usize) -> PyResult<bool> {
         Ok(self.t.is_vertex_convex_hull(vi))
     }
@@ -342,7 +343,7 @@ impl DT {
     /// :param vi: the vertex index
     /// :return: True if *vi* is labelled as removed, False otherwise.
     ///          An exception is raised if *vi* doesn't exist.  
-    #[pyo3(text_signature = "($self, vi)")]
+    #[args(vi)]
     fn is_vertex_removed(&self, vi: usize) -> PyResult<bool> {
         let re = self.t.is_vertex_removed(vi);
         if re.is_err() {
@@ -365,7 +366,7 @@ impl DT {
     /// >>>     cp = dt.closest_point(32.1, 66.9)
     /// >>> except Exception as e:
     /// >>>     print(e)
-    #[pyo3(text_signature = "($self, x, y)")]
+    #[args(x, y)]
     fn closest_point(&self, x: f64, y: f64) -> PyResult<usize> {
         let re = self.t.closest_point(x, y);
         if re.is_err() {
@@ -391,7 +392,7 @@ impl DT {
     /// 3 [3, 8, 2]
     /// 4 [3, 2, 9]
     /// 5 [3, 9, 4]
-    #[pyo3(text_signature = "($self, vi)")]
+    #[args(vi)]
     fn incident_triangles_to_vertex<'py>(
         &self,
         py: Python<'py>,
@@ -428,7 +429,7 @@ impl DT {
     /// 0 [3, 4, 6]
     /// 1 [3, 6, 7]
     /// 2 [3, 7, 8]
-    #[pyo3(text_signature = "($self, t)")]
+    #[args(t)]
     fn adjacent_triangles_to_triangle<'py>(
         &self,
         py: Python<'py>,
@@ -462,7 +463,7 @@ impl DT {
     ///
     /// :param vi: the vertex index
     /// :return: an array of vertex indices (ordered counter-clockwise)
-    #[pyo3(text_signature = "($self, vi)")]
+    #[args(vi)]
     fn adjacent_vertices_to_vertex<'py>(
         &self,
         py: Python<'py>,
@@ -487,7 +488,7 @@ impl DT {
     /// :return: True if t is finite, False is infinite
     ///
     /// >>> re = dt.is_finite(np.array([11, 162, 666])))
-    #[pyo3(text_signature = "($self, t)")]
+    #[args(t)]
     fn is_finite(&self, t: Vec<usize>) -> PyResult<bool> {
         let tr = startin::Triangle {
             v: [t[0], t[1], t[2]],
@@ -498,10 +499,10 @@ impl DT {
     /// Verify if a triangle exists in the DT.
     ///
     /// :param t: the triangle, an array of 3 vertex indices
-    /// :return: True if t exists, False otherwise.
+    /// :return: True if t exists, False otherwise
     ///
     /// >>> re = dt.is_triangle(np.array([11, 162, 666])))
-    #[pyo3(text_signature = "($self, t)")]
+    #[args(t)]
     fn is_triangle(&self, t: Vec<usize>) -> PyResult<bool> {
         let tr = startin::Triangle {
             v: [t[0], t[1], t[2]],
@@ -514,8 +515,8 @@ impl DT {
     ///
     /// :param x: the x-coordinate
     /// :param y: the y-coordinate
-    /// :return: the triangle.
-    #[pyo3(text_signature = "($self, x, y)")]
+    /// :return: the triangle
+    #[args(x, y)]
     fn locate<'py>(
         &self,
         py: Python<'py>,
@@ -535,88 +536,91 @@ impl DT {
         }
     }
 
-    /// Interpolation method: nearest neighbour (or closest neighbour).
-    /// An Exception is thrown if [x, y] is outside the convex hull.    
+    /// Interpolate with 5 different methods:
     ///
-    /// :param x: the x-coordinate
-    /// :param y: the y-coordinate
-    /// :return: the estimated value
-    #[pyo3(text_signature = "($self, x, y)")]
-    fn interpolate_nn(&mut self, x: f64, y: f64) -> PyResult<f64> {
-        let i_nn = startin::interpolation::NN {};
-        let mut re = startin::interpolation::interpolate(&i_nn, &mut self.t, &vec![[x, y]]);
-        let re1 = re.pop().expect("no results");
-        if re1.is_err() {
-            return Err(PyErr::new::<exceptions::PyException, _>("Outside CH"));
+    /// 1. "IDW": inverse distance weighing
+    /// 2. "Laplace": a faster NNI with almost the same results
+    /// 3. "NN": nearest neighbour
+    /// 4. "NNI": natural neighbour interpolation
+    /// 5. "TIN": linear interpolation in TIN
+    ///
+    /// :param interpolant: a JSON/dict Python object with a "method": "IDW" (or others). IDW has 2 more params: "power" and "radius"
+    /// :param locations: an array of [x, y] locations where to interpolate
+    /// :param strict: if the interpolation cannot find a value (because outside convex hull or search radius too small) then strict==True will stop at the first error and return that error. If strict==False then NaN is returned.
+    ///
+    /// :return: an array containing all the interpolation values (same order as input array)
+    #[args(interpolant, locations, strict = false)]
+    fn interpolate<'py>(
+        &mut self,
+        py: Python<'py>,
+        interpolant: &PyDict,
+        locations: Vec<[f64; 2]>,
+        strict: bool,
+    ) -> PyResult<&'py PyArray<f64, numpy::Ix1>> {
+        println!("{:?}", strict);
+        match interpolant.get_item("method") {
+            None => {
+                return Err(PyErr::new::<exceptions::PyException, _>(
+                    "Wrong parameters.",
+                ))
+            }
+            Some(m) => {
+                let m: String = m.extract()?;
+                let mut re: Vec<f64> = Vec::with_capacity(locations.len());
+                match m.as_str() {
+                    // "IDW" => {
+                    //     let radius = interpolant.get_item("radius");
+                    //     let power = interpolant.get_item("power");
+                    //     if radius.is_none() || power.is_none() {
+                    //         return Err(PyErr::new::<exceptions::PyException, _>(
+                    //             "Wrong parameters.",
+                    //         ));
+                    //     } else {
+                    //         let r1: f64 = radius.unwrap().extract()?;
+                    //         if r1 <= 0.0 {
+                    //             return Err(PyErr::new::<exceptions::PyException, _>(
+                    //                 "Wrong parameters.",
+                    //             ));
+                    //         }
+                    //         let p1: f64 = power.unwrap().extract()?;
+                    //         if p1 <= 0.0 {
+                    //             return Err(PyErr::new::<exceptions::PyException, _>(
+                    //                 "Wrong parameters.",
+                    //             ));
+                    //         }
+                    //         return self.interpolate_idw(x, y, r1, p1);
+                    //     }
+                    // }
+                    "Laplace" => {
+                        for loc in locations {
+                            let a = self.interpolate_laplace(loc[0], loc[1]);
+                            if a.is_ok() {
+                                re.push(a.unwrap());
+                            } else {
+                                if strict == true {
+                                    let s = format!(
+                                        "({}, {}) is outside the convex hull.",
+                                        loc[0], loc[1]
+                                    );
+                                    return Err(PyErr::new::<exceptions::PyTypeError, _>(s));
+                                } else {
+                                    re.push(f64::NAN);
+                                }
+                            }
+                        }
+                        Ok(PyArray::from_vec(py, re))
+                    }
+                    // "NN" => return self.interpolate_nn(x, y),
+                    // "NNI" => return self.interpolate_nni(x, y),
+                    // "TIN" => return self.interpolate_tin_linear(x, y),
+                    _ => {
+                        return Err(PyErr::new::<exceptions::PyException, _>(
+                            "Unknown interpolation method.",
+                        ))
+                    }
+                }
+            }
         }
-        Ok(re1.unwrap())
-    }
-
-    /// Interpolation method: linear interpolation in TIN.
-    /// An Exception is thrown if [x, y] is outside the convex hull.    
-    ///
-    /// :param x: the x-coordinate
-    /// :param y: the y-coordinate
-    /// :return: the estimated value
-    #[pyo3(text_signature = "($self, x, y)")]
-    fn interpolate_tin_linear(&mut self, x: f64, y: f64) -> PyResult<f64> {
-        let i_tin = startin::interpolation::TIN {};
-        let mut re = startin::interpolation::interpolate(&i_tin, &mut self.t, &vec![[x, y]]);
-        let re1 = re.pop().expect("no results");
-        if re1.is_err() {
-            return Err(PyErr::new::<exceptions::PyException, _>("Outside CH"));
-        }
-        Ok(re1.unwrap())
-    }
-
-    /// Interpolation method: Laplace interpolation (`details about the method <http://dilbert.engr.ucdavis.edu/~suku/nem/index.html>`_).
-    /// This is a variation of natural interpolation method with distances used instead of stolen areas.
-    /// Thus faster in practice.
-    /// An Exception is thrown if [x, y] is outside the convex hull.    
-    ///
-    /// :param x: the x-coordinate
-    /// :param y: the y-coordinate
-    /// :return: the estimated value
-    ///
-    /// >>> try:
-    /// >>>     zhat = dt.interpolate_laplace(55.2, 33.1)
-    /// >>>     print("result: ", zhat)
-    /// >>> except Exception as e:
-    /// >>>     print(e)
-    /// 64.08234343
-    #[pyo3(text_signature = "($self, x, y)")]
-    fn interpolate_laplace(&mut self, x: f64, y: f64) -> PyResult<f64> {
-        let i_lp = startin::interpolation::Laplace {};
-        let mut re = startin::interpolation::interpolate(&i_lp, &mut self.t, &vec![[x, y]]);
-        let re1 = re.pop().expect("no results");
-        if re1.is_err() {
-            return Err(PyErr::new::<exceptions::PyException, _>("Outside CH"));
-        }
-        Ok(re1.unwrap())
-    }
-
-    /// Interpolation method: natural neighbour method (also called Sibson's method).
-    /// An Exception is thrown if [x, y] is outside the convex hull.    
-    ///
-    /// :param x: the x-coordinate
-    /// :param y: the y-coordinate
-    /// :return: the estimated value
-    ///
-    /// >>> try:
-    /// >>>     zhat = dt.interpolate_laplace(55.2, 33.1)
-    /// >>>     print("result: ", zhat)
-    /// >>> except Exception as e:
-    /// >>>     print(e)
-    /// 64.08234343
-    #[pyo3(text_signature = "($self, x, y)")]
-    fn interpolate_nni(&mut self, x: f64, y: f64) -> PyResult<f64> {
-        let i_nni = startin::interpolation::NNI { precompute: false };
-        let mut re = startin::interpolation::interpolate(&i_nni, &mut self.t, &vec![[x, y]]);
-        let re1 = re.pop().expect("no results");
-        if re1.is_err() {
-            return Err(PyErr::new::<exceptions::PyException, _>("Outside CH"));
-        }
-        Ok(re1.unwrap())
     }
 
     /// Write an OBJ of the DT to the path (a string).
@@ -626,7 +630,7 @@ impl DT {
     /// :return: (nothing)
     ///
     /// >>> dt.write_obj("/home/elvis/myfile.obj")
-    #[pyo3(text_signature = "($self, path)")]
+    #[args(path)]
     fn write_obj(&self, path: String) -> PyResult<()> {
         let re = self.t.write_obj(path.to_string());
         if re.is_err() {
@@ -642,7 +646,7 @@ impl DT {
     /// :return: (nothing)
     ///
     /// >>> dt.write_ply("/home/elvis/myfile.ply")
-    #[pyo3(text_signature = "($self, path)")]
+    #[args(path)]
     fn write_ply(&self, path: String) -> PyResult<()> {
         let re = self.t.write_ply(path.to_string());
         if re.is_err() {
@@ -658,7 +662,7 @@ impl DT {
     /// :return: (nothing)
     ///
     /// >>> dt.write_obj("/home/elvis/myfile.geojson")
-    #[pyo3(text_signature = "($self, path)")]
+    #[args(path)]
     fn write_geojson(&self, path: String) -> PyResult<()> {
         let re = self.t.write_geojson(path.to_string());
         if re.is_err() {
@@ -675,7 +679,7 @@ impl DT {
     ///
     /// >>> dt.vertical_exaggeration(2.0)
     /// >>> dt.vertical_exaggeration(0.5)
-    #[pyo3(text_signature = "($self, factor)")]
+    #[args(factor)]
     fn vertical_exaggeration(&mut self, factor: f64) {
         self.t.vertical_exaggeration(factor);
     }
@@ -684,7 +688,6 @@ impl DT {
     /// , false otherwise.
     ///
     /// :return: true/false
-    #[pyo3(text_signature = "($self, factor)")]
     fn has_garbage(&self) -> PyResult<bool> {
         Ok(self.t.has_garbage())
     }
@@ -701,5 +704,62 @@ impl DT {
     fn collect_garbage(&mut self) -> PyResult<()> {
         self.t.collect_garbage();
         Ok(())
+    }
+}
+
+impl DT {
+    fn interpolate_nn(&mut self, x: f64, y: f64) -> PyResult<f64> {
+        let i_nn = startin::interpolation::NN {};
+        let mut re = startin::interpolation::interpolate(&i_nn, &mut self.t, &vec![[x, y]]);
+        let re1 = re.pop().expect("no results");
+        if re1.is_err() {
+            return Err(PyErr::new::<exceptions::PyException, _>("Outside CH"));
+        }
+        Ok(re1.unwrap())
+    }
+
+    fn interpolate_tin_linear(&mut self, x: f64, y: f64) -> PyResult<f64> {
+        let i_tin = startin::interpolation::TIN {};
+        let mut re = startin::interpolation::interpolate(&i_tin, &mut self.t, &vec![[x, y]]);
+        let re1 = re.pop().expect("no results");
+        if re1.is_err() {
+            return Err(PyErr::new::<exceptions::PyException, _>("Outside CH"));
+        }
+        Ok(re1.unwrap())
+    }
+
+    fn interpolate_laplace(&mut self, x: f64, y: f64) -> PyResult<f64> {
+        let i_lp = startin::interpolation::Laplace {};
+        let mut re = startin::interpolation::interpolate(&i_lp, &mut self.t, &vec![[x, y]]);
+        let re1 = re.pop().expect("no results");
+        if re1.is_err() {
+            return Err(PyErr::new::<exceptions::PyException, _>("Outside CH"));
+        }
+        Ok(re1.unwrap())
+    }
+
+    fn interpolate_nni(&mut self, x: f64, y: f64) -> PyResult<f64> {
+        let i_nni = startin::interpolation::NNI { precompute: false };
+        let mut re = startin::interpolation::interpolate(&i_nni, &mut self.t, &vec![[x, y]]);
+        let re1 = re.pop().expect("no results");
+        if re1.is_err() {
+            return Err(PyErr::new::<exceptions::PyException, _>("Outside CH"));
+        }
+        Ok(re1.unwrap())
+    }
+
+    fn interpolate_idw(&mut self, x: f64, y: f64, radius: f64, pow: f64) -> PyResult<f64> {
+        let i_idw = startin::interpolation::IDW {
+            radius: radius,
+            power: pow,
+        };
+        let mut re = startin::interpolation::interpolate(&i_idw, &mut self.t, &vec![[x, y]]);
+        let re1 = re.pop().expect("no results");
+        if re1.is_err() {
+            return Err(PyErr::new::<exceptions::PyException, _>(
+                "Search Circle Empty",
+            ));
+        }
+        Ok(re1.unwrap())
     }
 }
