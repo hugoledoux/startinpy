@@ -17,7 +17,7 @@ import sys
 # -- Project information -----------------------------------------------------
 
 project = 'startinpy'
-copyright = '2022, Hugo Ledoux'
+copyright = '2023, Hugo Ledoux'
 author = 'Hugo Ledoux'
 
 # The full version, including alpha/beta/rc tags
