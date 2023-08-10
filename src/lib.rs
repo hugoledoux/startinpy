@@ -48,9 +48,9 @@ impl DT {
     /// >>>     print(p[0], p[1], p[2])
     /// ...
     /// >>> dt.points[27]
-    /// [101.122 72.293 11.223]
+    /// array([101.122, 72.293, 11.223])
     /// >>> dt.points[0]
-    /// [-99999.99999 -99999.99999 -99999.99999]
+    /// array([-99999.99999, -99999.99999, -99999.99999])
     #[getter]
     fn points<'py>(&self, py: Python<'py>) -> PyResult<&'py PyArray<f64, numpy::Ix2>> {
         let vs = self.t.all_vertices();
@@ -277,7 +277,7 @@ impl DT {
     /// :return: the point
     ///
     /// >>> v = dt.get_point(4)
-    /// [13.0, 2.0, 11.11]
+    /// array([13., 2.0, 11.])
     #[args(vi)]
     fn get_point<'py>(
         &self,
@@ -297,6 +297,9 @@ impl DT {
     /// Return the convex hull as an array of vertex indices.
     ///
     /// :return: an array of vertex indices, oriented counter-clockwise (CCW)
+    ///
+    /// >>> dt.convex_hull()
+    /// array([2, 13, 4, 51, 27], dtype=uint64)
     #[args()]
     fn convex_hull<'py>(&self, py: Python<'py>) -> PyResult<&'py PyArray<usize, numpy::Ix1>> {
         Ok(PyArray::from_vec(py, self.t.convex_hull()))
@@ -307,7 +310,7 @@ impl DT {
     /// :return: an array of 4 coordinates: [minx, miny, maxx, maxy]
     ///
     /// >>> bbox = dt.get_bbox()
-    /// [ 505043.690 5258283.953  523361.172 5275100.003 ]
+    /// array([ 0., 0., 10., 12. ])
     #[args()]
     fn get_bbox<'py>(&self, py: Python<'py>) -> PyResult<&'py PyArray<f64, numpy::Ix1>> {
         Ok(PyArray::from_vec(py, self.t.get_bbox()))
@@ -377,6 +380,7 @@ impl DT {
     }
 
     /// Return the triangles incident to vertex *vi*.
+    /// Infinite triangles are also returned.
     /// Exception thrown if vertex index doesn't exist in the DT or
     /// if it has been removed.
     ///
@@ -386,12 +390,12 @@ impl DT {
     /// >>> trs = dt.incident_triangles_to_vertex(3)
     /// >>> for i, t in enumerate(trs):
     /// >>>     print(i, t)    
-    /// 0 [3, 4, 6]
-    /// 1 [3, 6, 7]
-    /// 2 [3, 7, 8]
-    /// 3 [3, 8, 2]
-    /// 4 [3, 2, 9]
-    /// 5 [3, 9, 4]
+    /// 0 [3 4 6]
+    /// 1 [3 6 7]
+    /// 2 [3 7 8]
+    /// 3 [3 8 2]
+    /// 4 [3 2 9]
+    /// 5 [3 9 4]
     #[args(vi)]
     fn incident_triangles_to_vertex<'py>(
         &self,
@@ -426,9 +430,9 @@ impl DT {
     /// >>> tris = dt.adjacent_triangles_to_triangle([1, 44, 23])
     /// >>> for i, t in enumerate(tris):
     /// >>>     print(i, t)    
-    /// 0 [3, 4, 6]
-    /// 1 [3, 6, 7]
-    /// 2 [3, 7, 8]
+    /// 0 [3 4 6]
+    /// 1 [3 6 7]
+    /// 2 [3 7 8]
     #[args(t)]
     fn adjacent_triangles_to_triangle<'py>(
         &self,
@@ -501,7 +505,8 @@ impl DT {
     /// :param t: the triangle, an array of 3 vertex indices
     /// :return: True if t exists, False otherwise
     ///
-    /// >>> re = dt.is_triangle(np.array([11, 162, 666])))
+    /// >>> dt.is_triangle(np.array([11, 162, 66]))
+    /// False
     #[args(t)]
     fn is_triangle(&self, t: Vec<usize>) -> PyResult<bool> {
         let tr = startin::Triangle {
@@ -546,8 +551,8 @@ impl DT {
     ///
     /// :param interpolant: a JSON/dict Python object with a `"method": "IDW"` (or others). IDW has 2 more params: "power" and "radius"
     /// :param locations: an array of [x, y] locations where to interpolate
-    /// :param strict: if the interpolation cannot find a value (because outside convex hull or search radius too small) then strict==True will stop at the first error and return that error. If strict==False then NaN is returned.
-    /// :return: an array containing all the interpolation values (same order as input array)
+    /// :param strict: if the interpolation cannot find a value (because outside convex hull or search radius too small) then strict==True will stop at the first error and return that error. If strict==False then numpy.nan is returned.
+    /// :return: a numpy array containing all the interpolation values (same order as input array)
     ///
     /// >>> locs = [ [50.0, 41.1], [101.1, 33.2], [80.0, 66.0] ]
     /// >>> re = dt.interpolate({"method": "NNI"}, locs)
@@ -764,15 +769,15 @@ impl DT {
         Ok(self.t.has_garbage())
     }
 
-    /// Collect garbage, that is remove from memory (the array of ) the vertices
+    /// Collect garbage, that is remove from memory (the array dt.points) the vertices
     /// marked as removed.
     ///
-    /// Watch out: the vertices get new IDs (and thus the triangles) too. And this can
+    /// Watch out: the vertices get new IDs, and thus the triangles get updated too. And this can
     /// be a slow operation.
     ///
     /// >>> if dt.has_garbage():
     /// >>>     dt.collect_garbage()
-    /// >>> assert dt.has_garbage() == False
+    /// >>> assert (dt.has_garbage() == False)
     fn collect_garbage(&mut self) -> PyResult<()> {
         self.t.collect_garbage();
         Ok(())
