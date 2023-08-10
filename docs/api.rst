@@ -17,7 +17,7 @@ A **Point** is an array of 3 floats (x-coordinate, y-coordinate, z-coordinate):
 
 A **Vertex** is an integer, it is the index in the array of points (:func:`startinpy.DT.points`, which is 0-based).
 
-A **Triangle** is an array of 3 integer, the values of the indices of the 3 vertices (ordered counter-clockwise) in the array of points (:func:`startinpy.DT.points`, which is 0-based).
+A **Triangle** is an array of 3 integers, the values of the indices of the 3 vertices (ordered counter-clockwise) in the array of points (:func:`startinpy.DT.points`, which is 0-based).
 
 .. code-block:: python
 

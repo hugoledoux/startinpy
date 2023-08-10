@@ -1,10 +1,11 @@
-.. startinpy documentation master file, created by
-   sphinx-quickstart on Thu Dec 16 17:10:24 2021.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
 
 startinpy 
 =========
+
+.. image:: figs/polyscope.jpg
+   :width: 40%
+   :align: right
+
 
 A Delaunay triangulator where the input are 2.5D points (they have an elevation), the Delaunay triangulation (DT) is computed in 2D but the elevation of the vertices are kept.
 This is used mostly for the modelling of terrains, but other attributes could be used.
@@ -14,11 +15,11 @@ The Python bindings just wrap the Rust code.
 
 startinpy allows you to:
 
-- insert incrementally points
-- delete vertices (useful for simplification, interpolation, and other operations)
-- interpolate with a few methods: TIN, natural neighbours, Laplace, etc.
-- read directly LAS/LAZ files
-- outputs the TIN in several formats: GeoJSON, OBJ, and PLY
+   1. insert incrementally points
+   2. delete vertices (useful for simplification, interpolation, and other operations)
+   3. interpolate with a few methods: TIN, natural neighbours, Laplace, IDW, etc.
+   4. read directly LAS/LAZ files
+   5. outputs the TIN in several formats: GeoJSON, OBJ, and PLY
 
 .. code-block:: python
 
@@ -64,7 +65,6 @@ Table of content
 
 .. toctree::
    :maxdepth: 0
-
 
    installation
    howitworks

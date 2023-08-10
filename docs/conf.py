@@ -51,7 +51,12 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'sphinx_celery'
+html_theme = 'piccolo_theme'
+html_theme_options = {
+    "source_url": 'https://github.com/hugoledoux/startinpy/'
+}
+# html_theme = 'furo'
+# html_theme = 'sphinx_celery'
 
 
 # Add any paths that contain custom static files (such as style sheets) here,

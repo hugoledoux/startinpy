@@ -38,12 +38,12 @@ impl DT {
     }
 
     /// Get the points [x, y, z] of all vertices in the DT.
-    /// This includes the infinite vertex (vertex at position 0), which is not part of the DT.
-    /// It has dummy coordinates and no triangles refer to it.
+    /// This includes the infinite vertex (vertex at position 0), which is not part of the DT
+    /// (no finite Triangle reference it, but infinite Triangles can)
     ///
     /// >>> pts = dt.points
-    /// >>> print(pts.shape)
-    /// (102, 3) #-- this is a numpy array
+    /// >>> print(pts.shape) #-- this is a numpy array
+    /// (102, 3)
     /// >>> for p in pts:
     /// >>>     print(p[0], p[1], p[2])
     /// ...
@@ -482,7 +482,7 @@ impl DT {
     /// Verify whether a Triangle is finite, or not.
     /// An infinite triangle has the first 0-vertex as one
     /// of its vertices.
-    /// This doesn't verify wether the the triangle exists.
+    /// This doesn't verify wether the triangle exists (use is_valid()).
     ///
     /// :param t: the triangle, an array of 3 vertex indices
     /// :return: True if t is finite, False is infinite
@@ -538,11 +538,11 @@ impl DT {
 
     /// Interpolate with 5 different methods:
     ///
-    /// 1. IDW: inverse distance weighing
-    /// 2. Laplace: a faster NNI with almost the same results
-    /// 3. NN: nearest neighbour
-    /// 4. NNI: natural neighbour interpolation
-    /// 5. TIN: linear interpolation in TIN
+    /// 1. **IDW**: inverse distance weighing
+    /// 2. **Laplace**: a faster NNI with almost the same results
+    /// 3. **NN**: nearest neighbour
+    /// 4. **NNI**: natural neighbour interpolation
+    /// 5. **TIN**: linear interpolation in TIN
     ///
     /// :param interpolant: a JSON/dict Python object with a `"method": "IDW"` (or others). IDW has 2 more params: "power" and "radius"
     /// :param locations: an array of [x, y] locations where to interpolate
@@ -764,7 +764,7 @@ impl DT {
         Ok(self.t.has_garbage())
     }
 
-    /// Collect garbage, that is remove from memory (the Vec of stars) the vertices
+    /// Collect garbage, that is remove from memory (the array of ) the vertices
     /// marked as removed.
     ///
     /// Watch out: the vertices get new IDs (and thus the triangles) too. And this can

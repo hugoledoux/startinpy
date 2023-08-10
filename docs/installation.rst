@@ -10,6 +10,10 @@ pip
 
    $ pip install startinpy
 
+.. WARNING::
+   The building of Linux wheels is not really working at the moment, so you'll have to compile the code yourself, see below.
+   For macOS and Windows, pip will work fine.
+
 
 If you want to compile it yourself
 ----------------------------------
