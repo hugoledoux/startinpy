@@ -52,6 +52,11 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # a list of builtin themes.
 #
 html_theme = 'furo'
+html_theme_options = {
+    "source_repository": "https://github.com/hugoledoux/startinpy/",
+    "source_branch": "master",
+    "source_directory": "docs/",
+}
 # html_theme = 'piccolo_theme'
 # html_theme_options = {
 #     "source_url": 'https://github.com/hugoledoux/startinpy/'
