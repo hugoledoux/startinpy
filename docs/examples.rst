@@ -75,7 +75,7 @@ This code saves the resulting triangulation to a `PLY file <https://en.wikipedia
 3D visualisation with Polyscope
 -------------------------------
 
-You need to install `Polyscope <https://polyscope.run/py/>`_ (basically `pip install polyscope`).
+You need to install `Polyscope <https://polyscope.run/py/>`_ (basically ``pip install polyscope``).
 
 .. code-block:: python
 
@@ -84,10 +84,10 @@ You need to install `Polyscope <https://polyscope.run/py/>`_ (basically `pip ins
    import polyscope as ps
 
    dt = startinpy.DT()
-   dt.read_las("/home/elvis/myfile.laz", classification=[2,6])
+   dt.read_las("/home/elvis/myfile.laz", thinning=10, classification=[2,6])
 
    pts = dt.points
-   pts[0] = pts[1] #-- first vertex has -99999 and messes up the viz
+   pts[0] = pts[1] #-- first vertex has inf and could mess things
    trs = dt.triangles
 
    ps.init()
@@ -97,10 +97,13 @@ You need to install `Polyscope <https://polyscope.run/py/>`_ (basically `pip ins
    ps.set_ground_plane_height_factor(0.01, is_relative=True)
    ps.set_autocenter_structures(True)
    ps.set_autoscale_structures(True)
-   ps.register_point_cloud("mypoints", pts[1:], radius=0.0015, point_render_mode='sphere')
+   pc = ps.register_point_cloud("mypoints", pts[1:], radius=0.0015, point_render_mode='sphere')
    ps_mesh = ps.register_surface_mesh("mysurface", pts, trs)
+   ps_mesh.reset_transform()
+   pc.reset_transform()
    ps.show()
-   
+
+
 .. image:: figs/polyscope.jpg
 
 
