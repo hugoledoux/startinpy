@@ -70,6 +70,7 @@ Table of content
    howitworks
    examples
    api
+   issues
 
 
 Indices and tables
