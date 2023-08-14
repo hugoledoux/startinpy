@@ -27,8 +27,16 @@ It results in a pretty fast library (comparison will come at some point), but it
 
 However, the stars are *not* exposed in startinpy to keep it a simple and higher-level library.
 
-.. _infinite:
+The data structure of startinpy has 2 arrays:
 
+1. an array of **Points**, where each entry is an array of 3 floats (x-coordinate, y-coordinate, z-coordinate)
+2. an array of **Triangles**, where each **Triangle** is an array of 3 integers, the values of the indices of the 3 vertices (ordered counter-clockwise) in the array of **Points** (:func:`startinpy.DT.points`, which is 0-based, 0 being the infinite vertex).
+
+A **Vertex** is an integer, it is the index in the array of points (:func:`startinpy.DT.points`, which is 0-based).
+
+If you delete a vertex (with :func:`startinpy.DT.remove`) then the entry in the array of **Points** is not deleted (this would be slow because arrays are contiguous and a lot of copying would be necessary), instead the vertex/point is flagged as being removed and none of the **Triangles** will refer to it.
+
+.. _infinite:
 
 Infinite vertex and triangles
 -----------------------------
@@ -40,16 +48,13 @@ Infinite vertex and triangles
 The implementation of startinpy has *infinite triangles* and *infinite vertex*, this simplifies a lot the algorithm and ensures that one can insert new points outside the convex hull of a dataset (or even delete some vertices on the boundary of the convex hull).
 The CGAL library also does this, and `it is well explained here <https://doc.cgal.org/latest/Triangulation_2/classCGAL_1_1Triangulation__2.html>`_.
 
-This is why the set of points (:func:`startinpy.DT.points`) has its first vertex as the *infinity vertex*, and it has dummy coordinates ``[-99999.99999 -99999.99999 -99999.99999]``
+The *infinite vertex* is the first vertex in the array of points (:func:`startinpy.DT.points`) and thus it has the index of 0 (zero).
+It has infinite coordinates (``[inf inf inf]``), they are of type `numpy infinity <https://numpy.org/devdocs/reference/constants.html#numpy.inf>`_).
 
-The data structure of startinpy has 2 arrays:
+An *infinite triangle* is a triangle having the infinite vertex as one of its vertices.
 
-1. an array of **Points**, where each entry is an array of 3 floats (x-coordinate, y-coordinate, z-coordinate)
-2. an array of **Triangles**, where each **Triangle** is an array of 3 integers, the values of the indices of the 3 vertices (ordered counter-clockwise) in the array of **Points** (:func:`startinpy.DT.points`, which is 0-based, 0 being the infinite vertex).
-
-A **Vertex** is an integer, it is the index in the array of points (:func:`startinpy.DT.points`, which is 0-based).
-
-If you delete a vertex (with :func:`startinpy.DT.remove`) then the entry in the array of **Points** is not deleted (this would be slow because arrays are contiguous and a lot of copying would be necessary), instead the vertex/point is flagged as being removed and none of the **Triangles** will refer to it.
+In the figure, notice that there are 5 finite triangles (126, 236, 346, 456, 516), but the data structure actually stores 5 extra infinite triangles (102, 150, 540, 304, 203).
+Those are adjacent to the 5 edges on the boundary of the convex hull of the dataset.
 
 
 Some examples of the data structure and infinity
@@ -64,6 +69,7 @@ For instance, consider this 5-vertex Delaunay triangulation:
 .. code-block:: python
 
     import startinpy
+    import numpy as np
 
     np.set_printoptions(precision=10)
 
@@ -83,12 +89,12 @@ Notice also no finite triangles refers to the vertex 0.
 
 .. code-block:: 
 
-    [[-9.999999999e+04 -9.999999999e+04 -9.999999999e+04]
-     [ 5.000000000e-01  5.000000000e-01  1.000000000e+00]
-     [ 0.000000000e+00  0.000000000e+00  2.000000000e+00]
-     [ 1.000000000e+00  0.000000000e+00  3.000000000e+00]
-     [ 1.000000000e+00  1.000000000e+00  4.000000000e+00]
-     [ 0.000000000e+00  1.000000000e+00  5.000000000e+00]]
+    [[inf inf inf]
+     [0.5 0.5 1. ]
+     [0.  0.  2. ]
+     [1.  0.  3. ]
+     [1.  1.  4. ]
+     [0.  1.  5. ]]
     [[1 2 3]
      [1 3 4]
      [1 4 5]
@@ -110,7 +116,7 @@ For instance, if you retrieve the triangles incident to a given vertex on the co
     [2 1 5]
     [2 5 0]
 
-Also, if you remove one vertex (the one in the middle of the square, vertex 1), observe that now its coordinates are also having dummy coordinates, and that no triangle in the DT refers to it anymore:
+Also, if you remove one vertex (eg the one in the middle of the square, vertex 1), observe that now its coordinates are `"Not a Number (nan)" <https://numpy.org/devdocs/reference/constants.html#numpy.nan>`_, and that no triangle in the DT refers to it anymore:
 
 .. code-block:: python
 
@@ -121,12 +127,12 @@ Also, if you remove one vertex (the one in the middle of the square, vertex 1), 
 
 .. code-block:: 
 
-    [[-9.999999999e+04 -9.999999999e+04 -9.999999999e+04]
-     [-9.999000000e+02 -9.999000000e+02 -9.999000000e+02]
-     [ 0.000000000e+00  0.000000000e+00  2.000000000e+00]
-     [ 1.000000000e+00  0.000000000e+00  3.000000000e+00]
-     [ 1.000000000e+00  1.000000000e+00  4.000000000e+00]
-     [ 0.000000000e+00  1.000000000e+00  5.000000000e+00]]
+    [[inf inf inf]
+     [nan nan nan]
+     [ 0.  0.  2.]
+     [ 1.  0.  3.]
+     [ 1.  1.  4.]
+     [ 0.  1.  5.]]
     [[2 3 4]
      [2 4 5]]
     True
@@ -142,10 +148,10 @@ Notice that now 5 vertices are in the array, and only 2 finite triangles are in 
 
 .. code-block:: 
 
-    [[-9.999999999e+04 -9.999999999e+04 -9.999999999e+04]
-     [ 0.000000000e+00  0.000000000e+00  2.000000000e+00]
-     [ 1.000000000e+00  0.000000000e+00  3.000000000e+00]
-     [ 1.000000000e+00  1.000000000e+00  4.000000000e+00]
-     [ 0.000000000e+00  1.000000000e+00  5.000000000e+00]]
+    [[inf inf inf]
+     [ 0.  0.  2.]
+     [ 1.  0.  3.]
+     [ 1.  1.  4.]
+     [ 0.  1.  5.]]
     [[1 2 3]
      [1 3 4]]
