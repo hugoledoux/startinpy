@@ -16,7 +16,7 @@ The Python bindings just wrap the Rust code.
 2. delete vertices (useful for simplification, interpolation, and other operations)
 3. interpolate with a few methods: TIN, natural neighbours, Laplace, IDW, etc.
 4. read directly LAS/LAZ files
-5. outputs the TIN to several formats: GeoJSON, OBJ, and PLY
+5. outputs the TIN to several formats: OBJ, PLY, GeoJSON, and CityJSON
 :::
 
 ```python
