@@ -13,13 +13,13 @@ This is used mostly for the modelling of terrains, but other attributes could be
 Originally written in `Rust <https://www.rust-lang.org/>`_ (so it's rather fast; `see Rust code <https://github.com/hugoledoux/startin>`_), and `robust arithmetic <https://crates.io/crates/robust>`_ is used (so it shouldn't crash).
 The Python bindings just wrap the Rust code.
 
-startinpy allows you to:
+.. admonition:: startinpy allows you to:
 
    1. insert incrementally points
    2. delete vertices (useful for simplification, interpolation, and other operations)
    3. interpolate with a few methods: TIN, natural neighbours, Laplace, IDW, etc.
    4. read directly LAS/LAZ files
-   5. outputs the TIN in several formats: GeoJSON, OBJ, and PLY
+   5. outputs the TIN to several formats: GeoJSON, OBJ, and PLY
 
 .. code-block:: python
 
