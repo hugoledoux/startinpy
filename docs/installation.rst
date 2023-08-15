@@ -7,6 +7,7 @@ pip
 ---
 
 .. code-block:: console
+
     $ pip install startinpy
 
 .. attention::
