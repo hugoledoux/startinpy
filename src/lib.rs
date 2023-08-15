@@ -88,6 +88,7 @@ impl DT {
     }
 
     /// Insert one new point in the DT.
+    ///
     /// If there is a point at the same location (based on :func:`startinpy.DT.snap_tolerance`),
     /// then the point is not inserted and the index of the already existing vertex is returned.
     ///
