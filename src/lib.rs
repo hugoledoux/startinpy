@@ -3,12 +3,30 @@ use pyo3::exceptions;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
 use rand::{thread_rng, Rng};
+use std::fs::File;
+use std::io::Write;
+
+use geojson::{Feature, FeatureCollection, Geometry, Value as GeoValue};
+use serde::{Deserialize, Serialize};
+use serde_json::json;
+use serde_json::Value;
+use serde_json::{to_value, Map};
 
 extern crate las;
 extern crate startin;
 
 use las::point::Classification;
 use las::Read;
+
+#[derive(Debug, Serialize, Deserialize)]
+struct Cityjson {
+    r#type: String,
+    version: String,
+    transform: Value,
+    #[serde(rename = "CityObjects")]
+    city_objects: Value,
+    vertices: Vec<Vec<i64>>,
+}
 
 /// A Delaunay triangulator where the input are 2.5D points,
 /// the DT is computed in 2D but the elevation of the vertices are kept.
@@ -69,7 +87,7 @@ impl DT {
     #[getter]
     fn triangles<'py>(&self, py: Python<'py>) -> PyResult<&'py PyArray<usize, numpy::Ix2>> {
         let mut trs: Vec<Vec<usize>> = Vec::with_capacity(self.t.number_of_triangles());
-        for each in self.t.all_triangles() {
+        for each in self.t.all_finite_triangles() {
             let mut tr = Vec::with_capacity(3);
             tr.push(each.v[0]);
             tr.push(each.v[1]);
@@ -746,6 +764,141 @@ impl DT {
         if re.is_err() {
             return Err(PyErr::new::<exceptions::PyIOError, _>("Invalid path"));
         }
+        Ok(())
+    }
+
+    /// Write a GeoJSON file of the triangles/vertices to disk.
+    #[args(path)]
+    pub fn write_geojson_2(&self, path: String) -> PyResult<()> {
+        let mut fc = FeatureCollection {
+            bbox: None,
+            features: vec![],
+            foreign_members: None,
+        };
+        //-- vertices
+        let allv_f = self.t.all_vertices();
+        for i in 1..allv_f.len() {
+            // println!("i: {:?}", i);
+            if self.t.is_vertex_removed(i).unwrap() == true {
+                continue;
+            }
+            let pt = Geometry::new(GeoValue::Point(vec![allv_f[i][0], allv_f[i][1]]));
+            let mut attributes = Map::new();
+            attributes.insert(String::from("id"), to_value(i.to_string()).unwrap());
+            attributes.insert(
+                String::from("z"),
+                to_value(allv_f[i][2].to_string()).unwrap(),
+            );
+            let f = Feature {
+                bbox: None,
+                geometry: Some(pt),
+                id: None,
+                properties: Some(attributes),
+                foreign_members: None,
+            };
+            fc.features.push(f);
+        }
+        //-- triangles
+        let trs = self.t.all_finite_triangles();
+        for tr in trs.iter() {
+            // s.push_str(&format!("f {} {} {}\n", tr.v[0], tr.v[1], tr.v[2]));
+            let mut l: Vec<Vec<Vec<f64>>> = vec![vec![Vec::with_capacity(1); 4]];
+            l[0][0].push(allv_f[tr.v[0]][0]);
+            l[0][0].push(allv_f[tr.v[0]][1]);
+            l[0][1].push(allv_f[tr.v[1]][0]);
+            l[0][1].push(allv_f[tr.v[1]][1]);
+            l[0][2].push(allv_f[tr.v[2]][0]);
+            l[0][2].push(allv_f[tr.v[2]][1]);
+            l[0][3].push(allv_f[tr.v[0]][0]);
+            l[0][3].push(allv_f[tr.v[0]][1]);
+            let gtr = Geometry::new(GeoValue::Polygon(l));
+            // let mut attributes = Map::new();
+            // if self.stars[]
+            // attributes.insert(String::from("active"), to_value();
+            let f = Feature {
+                bbox: None,
+                geometry: Some(gtr),
+                id: None,
+                properties: None, //Some(attributes),
+                foreign_members: None,
+            };
+            fc.features.push(f);
+        }
+        //-- write the file to disk
+        let mut fo = File::create(path)?;
+        let _ = write!(fo, "{}", fc.to_string());
+        Ok(())
+    }
+
+    /// Write a CityJSON TINRelief file to disk.
+    #[args(path, digits = 3)]
+    fn write_cityjson(&self, path: String, digits: usize) -> PyResult<()> {
+        let bbox = self.t.get_bbox();
+        let d: f64 = 1.0 / (f64::powf(10., digits as f64));
+        let trans = json!({
+            "scale": vec![d, d, d],
+            "translate": vec![bbox[0], bbox[1], 0.0],
+        });
+        //-- vertices
+        let allv_f = self.t.all_vertices();
+        let mut onevertex: Vec<f64> = Vec::new();
+        for (i, _each) in allv_f.iter().enumerate() {
+            if i != 0 && (self.t.is_vertex_removed(i).unwrap() == false) {
+                onevertex = vec![allv_f[i][0], allv_f[i][1], allv_f[i][2]];
+                break;
+            }
+        }
+        let mut allv_i: Vec<Vec<i64>> = Vec::new();
+        for i in 0..allv_f.len() {
+            let mut x = allv_f[i][0];
+            let mut y = allv_f[i][1];
+            let mut z = allv_f[i][2];
+            if i == 0 || (self.t.is_vertex_removed(i).unwrap() == true) {
+                x = onevertex[0];
+                y = onevertex[1];
+                z = onevertex[2];
+            }
+            x -= bbox[0];
+            y -= bbox[1];
+            let s0 = format!("{:.*}", digits, x).replace(".", "");
+            let s1 = format!("{:.*}", digits, y).replace(".", "");
+            let s2 = format!("{:.*}", digits, z).replace(".", "");
+            allv_i.push(vec![
+                s0.parse::<i64>().unwrap(),
+                s1.parse::<i64>().unwrap(),
+                s2.parse::<i64>().unwrap(),
+            ]);
+        }
+        let mut alltrs: Vec<Vec<Vec<usize>>> = Vec::new();
+        let trs = self.t.all_finite_triangles();
+        for tr in &trs {
+            let mut t: Vec<Vec<usize>> = Vec::new();
+            t.push(vec![tr.v[0], tr.v[1], tr.v[2]]);
+            alltrs.push(t);
+        }
+        //-- CityObjects
+        let cos = json!({
+            "type": "TINRelief".to_owned(),
+            "geometry": [ {
+                "type": "CompositeSurface",
+                "lod": "1",
+                "boundaries": alltrs
+            }
+            ]
+        });
+        let cj = Cityjson {
+            r#type: "CityJSON".to_owned(),
+            version: "1.1".to_owned(),
+            transform: trans,
+            city_objects: json!({"myterrain": cos}),
+            vertices: allv_i,
+        };
+        // Serialize it to a JSON string.
+        // let j = serde_json::to_string(&cj)?;
+        // println!("{}", j);
+        let mut fo = File::create(path)?;
+        let j = serde_json::to_string(&cj);
+        let _ = write!(fo, "{}", j.unwrap());
         Ok(())
     }
 
