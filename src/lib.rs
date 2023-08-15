@@ -757,19 +757,9 @@ impl DT {
     /// :param path: full path (a string) on disk of the file to create (will overwrite)
     /// :return: (nothing)
     ///
-    /// >>> dt.write_obj("/home/elvis/myfile.geojson")
+    /// >>> dt.write_geojson("/home/elvis/myfile.geojson")
     #[args(path)]
-    fn write_geojson(&self, path: String) -> PyResult<()> {
-        let re = self.t.write_geojson(path.to_string());
-        if re.is_err() {
-            return Err(PyErr::new::<exceptions::PyIOError, _>("Invalid path"));
-        }
-        Ok(())
-    }
-
-    /// Write a GeoJSON file of the triangles/vertices to disk.
-    #[args(path)]
-    pub fn write_geojson_2(&self, path: String) -> PyResult<()> {
+    pub fn write_geojson(&self, path: String) -> PyResult<()> {
         let mut fc = FeatureCollection {
             bbox: None,
             features: vec![],
@@ -830,7 +820,15 @@ impl DT {
         Ok(())
     }
 
-    /// Write a CityJSON TINRelief file to disk.
+    /// Write a CityJSON file of the DT (vertices+triangles) to the path (a string).
+    /// One TINRelief object is created.
+    /// Throws an exception if the path is invalid.
+    ///
+    /// :param path: full path (a string) on disk of the file to create (will overwrite)
+    /// :param digits: (default=3) number of digits to keep (for saving efficiently the coordinates)
+    /// :return: (nothing)
+    ///
+    /// >>> dt.write_cityjson("/home/elvis/myfile.city.json")
     #[args(path, digits = 3)]
     fn write_cityjson(&self, path: String, digits: usize) -> PyResult<()> {
         let bbox = self.t.get_bbox();
