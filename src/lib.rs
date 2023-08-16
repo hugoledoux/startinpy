@@ -57,7 +57,7 @@ impl DT {
 
     /// Get the points [x, y, z] of all vertices in the DT.
     /// This includes the infinite vertex (vertex at position 0), which is not part of the DT
-    /// (no finite Triangle reference it, but infinite Triangles can)
+    /// (no finite Triangle reference it, but infinite Triangles do)
     ///
     /// >>> pts = dt.points
     /// >>> print(pts.shape) #-- this is a numpy array

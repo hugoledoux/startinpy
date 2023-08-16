@@ -26,6 +26,20 @@ dt.insert(pts, insertionstrategy="AsIs")
 dt.write_geojson("/home/elvis/myfile.geojson")
 ```
 
+## Exporting the DT to several mesh formats with [meshio](https://github.com/nschloe/meshio)
+
+```python
+import startinpy
+import meshio
+
+dt = startinpy.DT()
+dt.read_las("/home/elvis/myfile.laz", classification=[2,6], thinning=10)
+pts = dt.points
+pts[0] = pts[1] #-- to ensure that infinite vertex is not blocking the viz
+cells = [("triangle", dt.triangles)]
+meshio.write_points_cells("mydt.vtu", pts, cells)
+```
+
 ## Reading a GeoTIFF file with rasterio
 
 We can use [rasterio](https://rasterio.readthedocs.io) to read a GeoTIFF and triangulate the centre of the pixels/cells directly.
