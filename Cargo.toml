@@ -11,10 +11,10 @@ edition = "2021"
 
 
 [dependencies]
-startin = ">=0.6.1"
+startin = "0.7"
 # startin = { path = "../startin" }
 # startin = { git = "https://github.com/hugoledoux/startin", branch = "develop" }
-las = { version = "~0.7", features = ["laz"] }
+las = { version = "0.7", features = ["laz"] }
 numpy = "~0.17"
 rand = "0.8.5"
 geojson = "0.24"

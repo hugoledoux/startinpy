@@ -7,10 +7,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [0.10.0] - 2023-08-16
+### Changed
+- uses the new uses startin v0.7:
+  - new interpolation mechanism
+  - fix bugs
+- outputs to GeoJSON and CityJSON was added
+- has a new doc, better info and admittedly looks nicer
+
+
 ## [0.9.2] - 2022-11-14
 ### Changed
 - bindings are built for the new python 3.11 as well now, from 3.7+
-
 
 ## [0.9.1] - 2022-09-28
 ### Changed
@@ -45,3 +54,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - new name "startinpy" to avoid clashes with the rust lib "startin" on which this project is based on. Since I use a Rust builder (maturin), there were clashes and probably a better idea to call it "startinpy" anyway.
 
+
+[0.10.0]: https://github.com/hugoledoux/startin/compare/0.9.2...0.10.0
+[0.9.2]: https://github.com/hugoledoux/startin/compare/0.9.1...0.9.2
+[0.9.1]: https://github.com/hugoledoux/startin/compare/0.9.0...0.9.1
+[0.9.0]: https://github.com/hugoledoux/startin/compare/0.8.0...0.9.0
