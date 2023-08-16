@@ -68,7 +68,7 @@ impl DT {
     /// >>> dt.points[27]
     /// array([101.122, 72.293, 11.223])
     /// >>> dt.points[0]
-    /// array([-99999.99999, -99999.99999, -99999.99999])
+    /// array([inf, inf, inf])
     #[getter]
     fn points<'py>(&self, py: Python<'py>) -> PyResult<&'py PyArray<f64, numpy::Ix2>> {
         let vs = self.t.all_vertices();
