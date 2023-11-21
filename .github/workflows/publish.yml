@@ -19,7 +19,7 @@ jobs:
   #       manylinux: auto
   #       target: ${{ matrix.target }}
   #       command: publish
-  #       args: --no-sdist -u hledoux -p ${{ secrets.PASSWORD_PYPI }}
+  #       args: --no-sdist -u __token__ -p ${{ secrets.PASSWORD_PYPI }}
 
   win-p38:
     runs-on: windows-latest
@@ -29,7 +29,7 @@ jobs:
       with:
         maturin-version: 0.13.1
         command: publish
-        args: --no-sdist -u hledoux -p ${{ secrets.PASSWORD_PYPI }} -i python3.8
+        args: --no-sdist -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.8
 
   win-p39:
     runs-on: windows-latest
@@ -39,7 +39,7 @@ jobs:
       with:
         maturin-version: 0.13.1
         command: publish
-        args: --no-sdist -u hledoux -p ${{ secrets.PASSWORD_PYPI }} -i python3.9
+        args: --no-sdist -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.9
 
   win-p310:
     runs-on: windows-latest
@@ -49,7 +49,7 @@ jobs:
       with:
         maturin-version: 0.13.1
         command: publish
-        args: --no-sdist -u hledoux -p ${{ secrets.PASSWORD_PYPI }} -i python3.10
+        args: --no-sdist -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.10
 
   win-p311:
     runs-on: windows-latest
@@ -59,7 +59,7 @@ jobs:
       with:
         maturin-version: 0.13.1
         command: publish
-        args: --no-sdist -u hledoux -p ${{ secrets.PASSWORD_PYPI }} -i python3.11        
+        args: --no-sdist -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.11        
 
   win-p312:
     runs-on: windows-latest
@@ -69,7 +69,7 @@ jobs:
       with:
         maturin-version: 0.13.1
         command: publish
-        args: --no-sdist -u hledoux -p ${{ secrets.PASSWORD_PYPI }} -i python3.12    
+        args: --no-sdist -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.12    
 
   macos-p38:
     runs-on: macos-latest
@@ -84,7 +84,7 @@ jobs:
       with:
         maturin-version: 0.13.1
         command: publish
-        args: --no-sdist --universal2 -u hledoux -p ${{ secrets.PASSWORD_PYPI }} -i python3.8
+        args: --no-sdist --universal2 -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.8
 
   macos-p39:
     runs-on: macos-latest
@@ -99,7 +99,7 @@ jobs:
       with:
         maturin-version: 0.13.1
         command: publish
-        args: --no-sdist --universal2 -u hledoux -p ${{ secrets.PASSWORD_PYPI }} -i python3.9
+        args: --no-sdist --universal2 -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.9
 
   macos-p310:
     runs-on: macos-latest
@@ -114,7 +114,7 @@ jobs:
       with:
         maturin-version: 0.13.1
         command: publish
-        args: --no-sdist --universal2 -u hledoux -p ${{ secrets.PASSWORD_PYPI }} -i python3.10        
+        args: --no-sdist --universal2 -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.10        
 
   macos-p311:
     runs-on: macos-latest
@@ -129,7 +129,7 @@ jobs:
       with:
         maturin-version: 0.13.1
         command: publish
-        args: --no-sdist --universal2 -u hledoux -p ${{ secrets.PASSWORD_PYPI }} -i python3.11         
+        args: --no-sdist --universal2 -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.11         
 
   macos-p312:
     runs-on: macos-latest
@@ -144,4 +144,4 @@ jobs:
       with:
         maturin-version: 0.13.1
         command: publish
-        args: --no-sdist --universal2 -u hledoux -p ${{ secrets.PASSWORD_PYPI }} -i python3.12        
+        args: --no-sdist --universal2 -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.12        
