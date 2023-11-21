@@ -42,7 +42,7 @@ If you delete a vertex (with {func}`startinpy.DT.remove`) then the entry in the 
 :width: 40%
 ```
 
-The implementation of startinpy has *infinite triangles* and *infinite vertex*, this simplifies a lot the algorithm and ensures that one can insert new points outside the convex hull of a dataset (or even delete some vertices on the boundary of the convex hull).
+The implementation of startinpy has *infinite triangles* and one *infinite vertex*, this simplifies a lot the algorithms and ensures that one can insert new points outside the convex hull of a dataset (or even delete some vertices on the boundary of the convex hull).
 The CGAL library also does this, and [it is well explained here](https://doc.cgal.org/latest/Triangulation_2/classCGAL_1_1Triangulation__2.html).
 
 The *infinite vertex* is the first vertex in the array of points ({func}`startinpy.DT.points`) and thus it has the index of 0 (zero).
@@ -52,6 +52,7 @@ An *infinite triangle* is a triangle having the infinite vertex as one of its ve
 
 In the figure, notice that there are 5 finite triangles (126, 236, 346, 456, 516), but the data structure actually stores 5 extra infinite triangles (102, 150, 540, 304, 203).
 Those are adjacent to the 5 edges on the boundary of the convex hull of the dataset.
+You can conceptualise the triangulation has being embedded on a sphere, and the infinite vertex is on the other side.
 
 ## Some examples of the data structure and infinity
 
@@ -80,7 +81,7 @@ print(t.triangles)
 ```
 
 Which outputs this below.
-Notice first that there are 6 vertices: the 5 we inserted plus the infinite vertex (with dummy coordinates -99999.99999...).
+Notice first that there are a total of 6 vertices: the 5 we inserted plus the infinite vertex (at index-0 with infinity coordinates `[inf inf inf]`).
 Notice also no finite triangles refers to the vertex 0.
 
 ```
@@ -112,6 +113,8 @@ for each in re:
 [2 5 0]
 ```
 
+you will notice that 2 triangles are infinite: `[2 0 3]` and `[2 5 0]`.
+
 Also, if you remove one vertex (eg the one in the middle of the square, vertex 1), observe that now its coordinates are ["Not a Number (nan)"](https://numpy.org/devdocs/reference/constants.html#numpy.nan), and that no triangle in the DT refers to it anymore:
 
 ```python
@@ -133,7 +136,7 @@ print(t.is_vertex_removed(1))
 True
 ```
 
-Finally, you can remove the unused/deleted vertices from the {func}`startinpy.DT.points` array by using {func}`startinpy.DT.collect_garbage`, which will assign a new ID to most vertices and triangles will be updated too.
+Finally, you can remove the unused/deleted vertices from the {func}`startinpy.DT.points` array by using {func}`startinpy.DT.collect_garbage`, which will assign a new ID to most vertices, and triangles will be updated too.
 Notice that now 5 vertices are in the array, and only 2 finite triangles are in the DT.
 
 ```python
