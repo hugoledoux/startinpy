@@ -7,6 +7,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.2] - 2023-12-14
+### Changed
+- fix a bug where function `adjacent_triangles_to_triangle()` returned only the finite triangles, while all (incl. infinite) should be returned
+
 ## [0.10.1] - 2023-11-21
 ### Changed
 - improve the docs to explain how startinpy works
@@ -59,6 +63,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - new name "startinpy" to avoid clashes with the rust lib "startin" on which this project is based on. Since I use a Rust builder (maturin), there were clashes and probably a better idea to call it "startinpy" anyway.
 
 
+[0.10.2]: https://github.com/hugoledoux/startin/compare/0.10.1...0.10.2
+[0.10.1]: https://github.com/hugoledoux/startin/compare/0.10.0...0.10.1
 [0.10.0]: https://github.com/hugoledoux/startin/compare/0.9.2...0.10.0
 [0.9.2]: https://github.com/hugoledoux/startin/compare/0.9.1...0.9.2
 [0.9.1]: https://github.com/hugoledoux/startin/compare/0.9.0...0.9.1
