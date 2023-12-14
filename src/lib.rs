@@ -886,7 +886,7 @@ impl DT {
         });
         let cj = Cityjson {
             r#type: "CityJSON".to_owned(),
-            version: "1.1".to_owned(),
+            version: "2.0".to_owned(),
             transform: trans,
             city_objects: json!({"myterrain": cos}),
             vertices: allv_i,
