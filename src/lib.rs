@@ -297,6 +297,51 @@ impl DT {
         self.t.set_jump_and_walk(b);
     }
 
+    /// Specify the method to handle xy-duplicates.
+    /// That is, if the insertion of a new point in the DT is impossible
+    /// because a vertex already exists (based on :func:`startinpy.DT.snap_tolerance`),
+    /// then we can decide which z-value we want to keep in the DT.
+    /// There are 4 options:
+    ///
+    /// 1. "First" (default): the z-value of the first point inserted at that xy-location is kept
+    /// 2. "Last": the z-value of the last point inserted at that xy-location is kept
+    /// 3. "Lowest": the lowest z-value is kept
+    /// 4. "Highest": the highest z-value is kept
+    ///
+    /// >>> dt = startinpy.DT()
+    /// >>> dt.duplicates_handling = "Highest"
+    #[getter(duplicates_handling)]
+    fn get_duplicates_handling(&self) -> PyResult<String> {
+        Ok(self.t.get_duplicates_handling())
+    }
+
+    #[setter(duplicates_handling)]
+    fn set_duplicates_handling(&mut self, m: &str) -> PyResult<()> {
+        match m {
+            "First" => self
+                .t
+                .set_duplicates_handling(startin::DuplicateHandling::First),
+            "Last" => self
+                .t
+                .set_duplicates_handling(startin::DuplicateHandling::Last),
+            "Highest" => self
+                .t
+                .set_duplicates_handling(startin::DuplicateHandling::Highest),
+            "Lowest" => self
+                .t
+                .set_duplicates_handling(startin::DuplicateHandling::Lowest),
+
+            _ => {
+                let s = format!(
+                    "'{}' is an unknown method to handle duplicates (First/Last/Lowest/Highest).",
+                    m
+                );
+                return Err(PyErr::new::<exceptions::PyTypeError, _>(s));
+            }
+        }
+        Ok(())
+    }
+
     /// :return: number of finite vertices    
     fn number_of_vertices(&self) -> PyResult<usize> {
         Ok(self.t.number_of_vertices())
