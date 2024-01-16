@@ -281,14 +281,12 @@ impl DT {
 
     /// Activate/deactivate the jump-and-walk for the point location.
     /// If deactivated the walk starts from the last inserted triangle.
-    /// This should be activate when the spatial coherence is the dataset
-    /// is very low (ie if it randomly shuffled)
+    /// This should be activate when the spatial coherence in the dataset
+    /// is very low (ie if the points are randomly shuffled)
     /// (default=False)
     ///
     /// >>> dt = startinpy.DT()
-    /// >>> dt.jump_and_walk = False
-    /// >>> print("Point location uses jump-and-walk:", dt.jump_and_walk)
-    /// The snap tolerance is: False
+    /// >>> dt.jump_and_walk = True
     #[getter(jump_and_walk)]
     fn get_jump_and_walk(&self) -> PyResult<bool> {
         Ok(self.t.get_jump_and_walk())
