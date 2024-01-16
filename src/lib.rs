@@ -279,6 +279,26 @@ impl DT {
         self.t.set_snap_tolerance(snaptol);
     }
 
+    /// Activate/deactivate the jump-and-walk for the point location.
+    /// If deactivated the walk starts from the last inserted triangle.
+    /// This should be activate when the spatial coherence is the dataset
+    /// is very low (ie if it randomly shuffled)
+    /// (default=False)
+    ///
+    /// >>> dt = startinpy.DT()
+    /// >>> dt.jump_and_walk = False
+    /// >>> print("Point location uses jump-and-walk:", dt.jump_and_walk)
+    /// The snap tolerance is: False
+    #[getter(jump_and_walk)]
+    fn get_jump_and_walk(&self) -> PyResult<bool> {
+        Ok(self.t.get_jump_and_walk())
+    }
+
+    #[setter(jump_and_walk)]
+    fn set_jump_and_walk(&mut self, b: bool) {
+        self.t.set_jump_and_walk(b);
+    }
+
     /// :return: number of finite vertices    
     fn number_of_vertices(&self) -> PyResult<usize> {
         Ok(self.t.number_of_vertices())
