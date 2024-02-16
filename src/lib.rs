@@ -3,6 +3,7 @@ use pyo3::exceptions;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
 use rand::{thread_rng, Rng};
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::Write;
 
@@ -49,9 +50,13 @@ pub struct DT {
 impl DT {
     /// Constructor for a DT (returns an empty DT)
     ///
+    #[args(extra_attributes = false)]
     #[new]
-    fn new() -> Self {
-        let tmp = startin::Triangulation::new();
+    fn new(extra_attributes: bool) -> Self {
+        let mut tmp = startin::Triangulation::new();
+        if extra_attributes {
+            tmp.use_extra_attributes();
+        }
         DT { t: tmp }
     }
 
@@ -118,13 +123,56 @@ impl DT {
     /// >>> dt.insert_one_pt(3.2, 1.1, 17.0)
     /// 5
     /// (the vertex index in the DT is 5)
-    #[args(x, y, z)]
-    fn insert_one_pt(&mut self, x: f64, y: f64, z: f64) -> PyResult<usize> {
-        let re = self.t.insert_one_pt(x, y, z);
-        match re {
-            Ok(x) => return Ok(x),
-            Err(x) => return Ok(x),
-        };
+    #[pyo3(text_signature = "($self, x, y, z, *, classification=1, intensity=78.0)")]
+    #[args(x, y, z, py_kwargs = "**")]
+    fn insert_one_pt(
+        &mut self,
+        x: f64,
+        y: f64,
+        z: f64,
+        py_kwargs: Option<&PyDict>,
+    ) -> PyResult<usize> {
+        // let re = self.t.insert_one_pt(x, y, z);
+        // match re {
+        //     Ok(x) => return Ok(x),
+        //     Err(x) => return Ok(x),
+        // };
+        if py_kwargs.is_some() {
+            let tmp = py_kwargs.unwrap();
+            // println!("{:?}", tmp);
+            let keys = tmp.keys();
+            let mut m = Map::new();
+            for k in keys {
+                let b: &String = &k.extract()?;
+                // println!("{:?}", tmp.get_item(b).unwrap().get_type());
+                if tmp
+                    .get_item(b)
+                    .unwrap()
+                    .is_instance_of::<pyo3::types::PyInt>()?
+                {
+                    let t1: i32 = tmp.get_item(b).unwrap().extract()?;
+                    m.insert(b.to_string(), t1.into());
+                }
+                if tmp
+                    .get_item(b)
+                    .unwrap()
+                    .is_instance_of::<pyo3::types::PyBool>()?
+                {
+                    let t1: bool = tmp.get_item(b).unwrap().extract()?;
+                    m.insert(b.to_string(), t1.into());
+                }
+                if tmp
+                    .get_item(b)
+                    .unwrap()
+                    .is_instance_of::<pyo3::types::PyFloat>()?
+                {
+                    let t1: f64 = tmp.get_item(b).unwrap().extract()?;
+                    m.insert(b.to_string(), t1.into());
+                }
+            }
+            println!("map={:?}", m);
+        }
+        Ok(11)
     }
 
     /// Remove/delete the vertex vi (an index) from the DT, and update the DT for the Delaunay criterion.
