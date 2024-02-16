@@ -132,19 +132,18 @@ impl DT {
         z: f64,
         py_kwargs: Option<&PyDict>,
     ) -> PyResult<usize> {
-        // let re = self.t.insert_one_pt(x, y, z);
-        // match re {
-        //     Ok(x) => return Ok(x),
-        //     Err(x) => return Ok(x),
-        // };
+        let mut m = Map::new();
         if py_kwargs.is_some() {
             let tmp = py_kwargs.unwrap();
-            // println!("{:?}", tmp);
             let keys = tmp.keys();
-            let mut m = Map::new();
             for k in keys {
                 let b: &String = &k.extract()?;
-                // println!("{:?}", tmp.get_item(b).unwrap().get_type());
+                if b == "extra_attribute" {
+                    let s: String = tmp.get_item(b).unwrap().to_string();
+                    let v: Value = serde_json::from_str(&s).unwrap();
+                    m = serde_json::from_value(v).unwrap();
+                    continue;
+                }
                 if tmp
                     .get_item(b)
                     .unwrap()
@@ -170,9 +169,23 @@ impl DT {
                     m.insert(b.to_string(), t1.into());
                 }
             }
-            println!("map={:?}", m);
         }
-        Ok(11)
+        // println!("map={:?}", m);
+        if m.is_empty() {
+            let re = self.t.insert_one_pt(x, y, z);
+            match re {
+                Ok(x) => return Ok(x),
+                Err(x) => return Ok(x),
+            };
+        } else {
+            let re = self
+                .t
+                .insert_one_pt_with_attribute(x, y, z, serde_json::to_value(m).unwrap());
+            match re {
+                Ok(x) => return Ok(x),
+                Err(x) => return Ok(x),
+            };
+        }
     }
 
     /// Remove/delete the vertex vi (an index) from the DT, and update the DT for the Delaunay criterion.
