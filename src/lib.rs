@@ -403,6 +403,11 @@ impl DT {
         Ok(())
     }
 
+    #[args()]
+    fn list_all_attributes(&self) -> PyResult<Vec<String>> {
+        Ok(self.t.list_all_attributes())
+    }
+
     #[pyo3(text_signature = "($self, attribute='intensity')")]
     #[args(attribute)]
     fn attributes<'py>(
