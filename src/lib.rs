@@ -3,7 +3,7 @@ use pyo3::exceptions;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
 use rand::{thread_rng, Rng};
-use std::collections::HashMap;
+
 use std::fs::File;
 use std::io::Write;
 
@@ -401,6 +401,69 @@ impl DT {
             }
         }
         Ok(())
+    }
+
+    #[pyo3(text_signature = "($self, attribute='intensity')")]
+    #[args(attribute)]
+    fn attributes<'py>(
+        &self,
+        py: Python<'py>,
+        attribute: String,
+    ) -> PyResult<&'py PyArray<f64, numpy::Ix1>> {
+        let mut attrs: Vec<f64> = Vec::new();
+        let mut b_found = false;
+        let a2 = &self.t.all_attributes();
+        match a2 {
+            Some(x) => {
+                for a in x {
+                    match a.get(&attribute) {
+                        Some(x) => {
+                            if x.is_boolean() {
+                                if x.as_bool().unwrap() == true {
+                                    attrs.push(1.0);
+                                } else {
+                                    attrs.push(0.0);
+                                }
+                            } else {
+                                attrs.push((*x).as_f64().unwrap());
+                            }
+                            b_found = true;
+                        }
+                        None => attrs.push(f64::NAN),
+                    }
+                }
+            }
+            None => (),
+        }
+        if b_found {
+            return Ok(PyArray::from_vec(py, attrs));
+        } else {
+            let empty: Vec<f64> = Vec::new();
+            Ok(PyArray::from_vec(py, empty))
+        }
+    }
+
+    #[pyo3(text_signature = "($self, vi")]
+    #[args(vi)]
+    fn get_attribute(&self, vi: usize) -> PyResult<String> {
+        match self.t.get_attribute(vi) {
+            Ok(v) => return Ok(v.to_string()),
+            Err(_) => {
+                return Err(PyErr::new::<exceptions::PyIndexError, _>(
+                    "Invalid vertex index.",
+                ));
+            }
+        }
+    }
+
+    #[pyo3(text_signature = "($self, vi, attribute")]
+    #[args(vi, attribute)]
+    fn set_attribute(&mut self, vi: usize, attribute: String) -> PyResult<bool> {
+        let v: Value = serde_json::from_str(&attribute).unwrap();
+        match self.t.set_attribute(vi, v) {
+            Ok(b) => return Ok(b),
+            Err(_) => return Ok(false),
+        }
     }
 
     /// :return: number of finite vertices    
