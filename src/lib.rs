@@ -113,16 +113,18 @@ impl DT {
     /// Insert one new point in the DT.
     ///
     /// If there is a point at the same location (based on :func:`startinpy.DT.snap_tolerance`),
-    /// then the point is not inserted and the index of the already existing vertex is returned.
+    /// then :func:`startinpy.DT.duplicates_handling decides which z-value (and extra attributes)
+    /// are kept.
     ///
     /// :param x: x-coordinate of point to insert
     /// :param y: y-coordinate of point to insert
     /// :param z: z-coordinate of point to insert
-    /// :return: index of the vertex in the DT   
+    /// :return: a tuple: 1) the index of the vertex in the DT;
+    ///          2) whether a new vertex was inserted (True if yes; False is there was already a vertex at
+    ///          that xy-location.
     ///
-    /// >>> dt.insert_one_pt(3.2, 1.1, 17.0)
-    /// 5
-    /// (the vertex index in the DT is 5)
+    /// >>> (vi, new_vertex) = dt.insert_one_pt(3.2, 1.1, 17.0)
+    /// (37, True)
     #[pyo3(text_signature = "($self, x, y, z, *, classification=1, intensity=78.0)")]
     #[args(x, y, z, py_kwargs = "**")]
     fn insert_one_pt(
@@ -131,7 +133,7 @@ impl DT {
         y: f64,
         z: f64,
         py_kwargs: Option<&PyDict>,
-    ) -> PyResult<usize> {
+    ) -> PyResult<(usize, bool)> {
         let mut m = Map::new();
         if py_kwargs.is_some() {
             let tmp = py_kwargs.unwrap();
@@ -174,16 +176,16 @@ impl DT {
         if m.is_empty() {
             let re = self.t.insert_one_pt(x, y, z);
             match re {
-                Ok(x) => return Ok(x),
-                Err(x) => return Ok(x),
+                Ok(x) => return Ok((x, true)),
+                Err(x) => return Ok((x, false)),
             };
         } else {
             let re = self
                 .t
                 .insert_one_pt_with_attribute(x, y, z, serde_json::to_value(m).unwrap());
             match re {
-                Ok(x) => return Ok(x),
-                Err(x) => return Ok(x),
+                Ok(x) => return Ok((x, true)),
+                Err(x) => return Ok((x, false)),
             };
         }
     }
