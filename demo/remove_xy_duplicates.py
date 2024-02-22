@@ -8,6 +8,7 @@ las.points = las.points[::1] #-- thinning
 d = np.vstack((las.x, las.y, las.z)).transpose()
 
 dt = startinpy.DT()
+dt.snap_tolerance = 0.02
 #-- keep the highest z-value when xy-duplicates arise
 dt.duplicates_handling = "Highest"
 
@@ -23,6 +24,11 @@ new_las = laspy.LasData(las.header)
 new_las.points = las.points[np.asarray(mask)]
 #-- save subset to a new laz file
 new_las.write("out.laz")
+
+print("*"*22)
+print("input: {:>15}".format(len(las.points)))
+print("output: {:>14}".format(len(new_las.points)))
+print("xy-duplicates: {:>7}".format(len(las.points) - len(new_las.points)))
 
 
 
