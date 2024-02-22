@@ -404,7 +404,7 @@ impl DT {
     }
 
     #[args()]
-    fn list_all_attributes(&self) -> PyResult<Vec<String>> {
+    fn list_attributes(&self) -> PyResult<Vec<String>> {
         Ok(self.t.list_all_attributes())
     }
 
