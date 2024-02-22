@@ -984,11 +984,11 @@ impl DT {
         Ok(self.t.has_garbage())
     }
 
-    /// Collect garbage, that is remove from memory (the array dt.points) the vertices
-    /// marked as removed.
+    /// Collect garbage, that is remove from memory the vertices
+    /// marked as removed (modifies the array dt.points and all indices of the triangles).
     ///
-    /// Watch out: the vertices get new IDs, and thus the triangles get updated too. And this can
-    /// be a slow operation.
+    /// Watch out: the vertices get new IDs, and thus the triangles get updated too.
+    /// And this can be a slow operation.
     ///
     /// >>> if dt.has_garbage():
     /// >>>     dt.collect_garbage()
