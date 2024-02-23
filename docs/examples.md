@@ -2,13 +2,18 @@
 
 ## Reading a LAZ file
 
-This will read only the point classified as "2" or "6", and thin them randomly by a factor 10 (1/10 points will be picked, randomly selected).
+We recommend you use [laspy](https://laspy.readthedocs.io) (`pip install 'laspy[lazrs]'` to install) to read a LAS/LAZ into a NumPy array, and then pass that array to startinpy:
 
 ```python
 import startinpy
+import numpy as np
+import laspy
 
+las = laspy.read("myfile.laz")
+pts = np.vstack((las.x, las.y, las.z)).transpose()
+pts = d[::1] #-- thinning to speed up, put ::10 to keep 1/10 of the points
 dt = startinpy.DT()
-dt.read_las("/home/elvis/myfile.laz", classification=[2,6], thinning=10)
+dt.insert(pts)
 print("# vertices:", dt.number_of_vertices())
 ```
 
@@ -32,12 +37,13 @@ dt.write_geojson("/home/elvis/myfile.geojson")
 import startinpy
 import meshio
 
-dt = startinpy.DT()
-dt.read_las("/home/elvis/myfile.laz", classification=[2,6], thinning=10)
-pts = dt.points
-pts[0] = pts[1] #-- to ensure that infinite vertex is not blocking the viz
+las = laspy.read("myfile.laz")
+pts = np.vstack((las.x, las.y, las.z)).transpose()
+dt = startinpy.DT(pts)
+vs = dt.points
+v[0] = v[1] #-- to ensure that infinite vertex is not blocking the viz
 cells = [("triangle", dt.triangles)]
-meshio.write_points_cells("mydt.vtu", pts, cells)
+meshio.write_points_cells("mydt.vtu", v, cells)
 ```
 
 ## Reading a GeoTIFF file with rasterio
