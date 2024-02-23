@@ -36,7 +36,7 @@ with open("../Cargo.toml") as fp:
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx_copybutton',
-     'myst_parser',
+    'myst_parser',
 ]
 
 myst_enable_extensions = [

@@ -5,7 +5,7 @@ authors = ["Hugo Ledoux <h.ledoux@tudelft.nl>"]
 license = "MIT"
 homepage="https://github.com/hugoledoux/startinpy"
 repository="https://github.com/hugoledoux/startinpy"
-description = "A Delaunay triangulator for terrains"
+description = "Modelling terrains with Delaunay triangulation"
 readme = "README.md"
 edition = "2021"
 

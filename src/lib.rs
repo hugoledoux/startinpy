@@ -45,7 +45,7 @@ pub struct DT {
 impl DT {
     /// Constructor for a DT (returns an empty DT).
     ///
-    /// :param extra_attributes: a Boolean stating whether the vertices can have extra attributes
+    /// :param optional extra_attributes: a Boolean stating whether the vertices can have extra attributes
     /// attache to them.
     #[args(extra_attributes = false)]
     #[new]
@@ -347,8 +347,9 @@ impl DT {
     }
 
     /// Get all the values for a given extra attribute stored for the vertices.
-    /// Returns the values a numpy array with dtype=``np.float64``, those need to be casted if necessary.
-    /// Watch out, if a given vertex doesn't have that attribute than ``np.nan`` is inserted
+    /// Returns the values as a numpy array with type ``np.float64``,
+    /// those need to be casted if necessary.
+    /// Watch out, if a given vertex doesn't have that attribute then ``np.nan`` is inserted
     /// in the array.
     ///
     /// :param attribute: the name (a string) of the attribute
@@ -920,7 +921,7 @@ impl DT {
         Ok(())
     }
 
-    /// Write a GeoJSON file of the DT (vertices+triangles) to the path (a string).
+    /// Write a `GeoJSON <https://geojson.org>`_ file of the DT (vertices+triangles) to the path (a string).
     /// Throws an exception if the path is invalid.
     ///
     /// :param path: full path (a string) on disk of the file to create (will overwrite)
@@ -989,8 +990,8 @@ impl DT {
         Ok(())
     }
 
-    /// Write a CityJSON file of the DT (vertices+triangles) to the path (a string).
-    /// One TINRelief object is created.
+    /// Write a `CityJSON <https://www.cityjson.org>`_ file of the DT (vertices+triangles) to the path (a string).
+    /// One `TINRelief <https://www.cityjson.org/specs/#tinrelief>`_ object is created.
     /// Throws an exception if the path is invalid.
     ///
     /// :param path: full path (a string) on disk of the file to create (will overwrite)
@@ -1093,7 +1094,7 @@ impl DT {
     /// Collect garbage, that is remove from memory the vertices
     /// marked as removed (modifies the array dt.points and all indices of the triangles).
     ///
-    /// Watch out: the vertices get new IDs, and thus the triangles get updated too.
+    /// **Watch out:** the vertices get new IDs, and thus the triangles get updated too.
     /// And this can be a slow operation.
     ///
     /// >>> if dt.has_garbage():
