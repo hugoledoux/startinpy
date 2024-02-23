@@ -3,6 +3,7 @@ use pyo3::exceptions;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
 use rand::{thread_rng, Rng};
+
 use std::fs::File;
 use std::io::Write;
 
@@ -49,9 +50,13 @@ pub struct DT {
 impl DT {
     /// Constructor for a DT (returns an empty DT)
     ///
+    #[args(extra_attributes = false)]
     #[new]
-    fn new() -> Self {
-        let tmp = startin::Triangulation::new();
+    fn new(extra_attributes: bool) -> Self {
+        let mut tmp = startin::Triangulation::new();
+        if extra_attributes {
+            tmp.use_extra_attributes();
+        }
         DT { t: tmp }
     }
 
@@ -108,23 +113,81 @@ impl DT {
     /// Insert one new point in the DT.
     ///
     /// If there is a point at the same location (based on :func:`startinpy.DT.snap_tolerance`),
-    /// then the point is not inserted and the index of the already existing vertex is returned.
+    /// then :func:`startinpy.DT.duplicates_handling decides which z-value (and extra attributes)
+    /// are kept.
     ///
     /// :param x: x-coordinate of point to insert
     /// :param y: y-coordinate of point to insert
     /// :param z: z-coordinate of point to insert
-    /// :return: index of the vertex in the DT   
+    /// :return: a tuple: 1) the index of the vertex in the DT;
+    ///          2) whether a new vertex was inserted (True if yes; False is there was already a vertex at
+    ///          that xy-location.
     ///
-    /// >>> dt.insert_one_pt(3.2, 1.1, 17.0)
-    /// 5
-    /// (the vertex index in the DT is 5)
-    #[args(x, y, z)]
-    fn insert_one_pt(&mut self, x: f64, y: f64, z: f64) -> PyResult<usize> {
-        let re = self.t.insert_one_pt(x, y, z);
-        match re {
-            Ok(x) => return Ok(x),
-            Err(x) => return Ok(x),
-        };
+    /// >>> (vi, new_vertex) = dt.insert_one_pt(3.2, 1.1, 17.0)
+    /// (37, True)
+    #[pyo3(text_signature = "($self, x, y, z, *, classification=1, intensity=78.0)")]
+    #[args(x, y, z, py_kwargs = "**")]
+    fn insert_one_pt(
+        &mut self,
+        x: f64,
+        y: f64,
+        z: f64,
+        py_kwargs: Option<&PyDict>,
+    ) -> PyResult<(usize, bool)> {
+        let mut m = Map::new();
+        if py_kwargs.is_some() {
+            let tmp = py_kwargs.unwrap();
+            let keys = tmp.keys();
+            for k in keys {
+                let b: &String = &k.extract()?;
+                if b == "extra_attribute" {
+                    let s: String = tmp.get_item(b).unwrap().to_string();
+                    let v: Value = serde_json::from_str(&s).unwrap();
+                    m = serde_json::from_value(v).unwrap();
+                    continue;
+                }
+                if tmp
+                    .get_item(b)
+                    .unwrap()
+                    .is_instance_of::<pyo3::types::PyInt>()?
+                {
+                    let t1: i32 = tmp.get_item(b).unwrap().extract()?;
+                    m.insert(b.to_string(), t1.into());
+                }
+                if tmp
+                    .get_item(b)
+                    .unwrap()
+                    .is_instance_of::<pyo3::types::PyBool>()?
+                {
+                    let t1: bool = tmp.get_item(b).unwrap().extract()?;
+                    m.insert(b.to_string(), t1.into());
+                }
+                if tmp
+                    .get_item(b)
+                    .unwrap()
+                    .is_instance_of::<pyo3::types::PyFloat>()?
+                {
+                    let t1: f64 = tmp.get_item(b).unwrap().extract()?;
+                    m.insert(b.to_string(), t1.into());
+                }
+            }
+        }
+        // println!("map={:?}", m);
+        if m.is_empty() {
+            let re = self.t.insert_one_pt(x, y, z);
+            match re {
+                Ok(x) => return Ok((x, true)),
+                Err(x) => return Ok((x, false)),
+            };
+        } else {
+            let re = self
+                .t
+                .insert_one_pt_with_attribute(x, y, z, serde_json::to_value(m).unwrap());
+            match re {
+                Ok(x) => return Ok((x, true)),
+                Err(x) => return Ok((x, false)),
+            };
+        }
     }
 
     /// Remove/delete the vertex vi (an index) from the DT, and update the DT for the Delaunay criterion.
@@ -340,6 +403,74 @@ impl DT {
             }
         }
         Ok(())
+    }
+
+    #[args()]
+    fn list_attributes(&self) -> PyResult<Vec<String>> {
+        Ok(self.t.list_all_attributes())
+    }
+
+    #[pyo3(text_signature = "($self, attribute='intensity')")]
+    #[args(attribute)]
+    fn attributes<'py>(
+        &self,
+        py: Python<'py>,
+        attribute: String,
+    ) -> PyResult<&'py PyArray<f64, numpy::Ix1>> {
+        let mut attrs: Vec<f64> = Vec::new();
+        let mut b_found = false;
+        let a2 = &self.t.all_attributes();
+        match a2 {
+            Some(x) => {
+                for a in x {
+                    match a.get(&attribute) {
+                        Some(x) => {
+                            if x.is_boolean() {
+                                if x.as_bool().unwrap() == true {
+                                    attrs.push(1.0);
+                                } else {
+                                    attrs.push(0.0);
+                                }
+                            } else {
+                                attrs.push((*x).as_f64().unwrap());
+                            }
+                            b_found = true;
+                        }
+                        None => attrs.push(f64::NAN),
+                    }
+                }
+            }
+            None => (),
+        }
+        if b_found {
+            return Ok(PyArray::from_vec(py, attrs));
+        } else {
+            let empty: Vec<f64> = Vec::new();
+            Ok(PyArray::from_vec(py, empty))
+        }
+    }
+
+    #[pyo3(text_signature = "($self, vi")]
+    #[args(vi)]
+    fn get_attribute(&self, vi: usize) -> PyResult<String> {
+        match self.t.get_attribute(vi) {
+            Ok(v) => return Ok(v.to_string()),
+            Err(_) => {
+                return Err(PyErr::new::<exceptions::PyIndexError, _>(
+                    "Invalid vertex index.",
+                ));
+            }
+        }
+    }
+
+    #[pyo3(text_signature = "($self, vi, attribute")]
+    #[args(vi, attribute)]
+    fn set_attribute(&mut self, vi: usize, attribute: String) -> PyResult<bool> {
+        let v: Value = serde_json::from_str(&attribute).unwrap();
+        match self.t.set_attribute(vi, v) {
+            Ok(b) => return Ok(b),
+            Err(_) => return Ok(false),
+        }
     }
 
     /// :return: number of finite vertices    
