@@ -7,10 +7,10 @@ las = laspy.read("../data/small.laz")
 
 #-- read intensity and store it as extra_attribute in the startinpy DT
 d = np.vstack((las.x, las.y, las.z, las.intensity)).transpose()
-d100 = d[::1] #-- thinning to speed up, put ::1 to keep all the points
+d = d[::1] #-- thinning to speed up, put ::1 to keep all the points
 
 dt = startinpy.DT(extra_attributes=True)
-for each in d100:
+for each in d:
     dt.insert_one_pt(each[0], each[1], each[2], intensity=each[3])
 
 a = {'intensity': 155.5, 'reflectance': 111, 'something': True}
