@@ -2,7 +2,6 @@ use numpy::PyArray;
 use pyo3::exceptions;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
-use rand::{thread_rng, Rng};
 
 use std::fs::File;
 use std::io::Write;
@@ -13,11 +12,7 @@ use serde_json::json;
 use serde_json::Value;
 use serde_json::{to_value, Map};
 
-extern crate las;
 extern crate startin;
-
-use las::point::Classification;
-use las::Read;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Cityjson {
