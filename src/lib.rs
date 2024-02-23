@@ -116,6 +116,7 @@ impl DT {
     /// :param x: x-coordinate of point to insert
     /// :param y: y-coordinate of point to insert
     /// :param z: z-coordinate of point to insert
+    /// :param optional extra_attributes: extra parameters with values
     /// :return: a tuple: 1) the index of the (created or kept) vertex in the triangulation;
     ///          2) whether a new vertex was inserted: True if yes; False is there was already
     ///          a vertex at that xy-location.
@@ -138,7 +139,7 @@ impl DT {
             let keys = tmp.keys();
             for k in keys {
                 let b: &String = &k.extract()?;
-                if b == "extra_attribute" {
+                if b == "extra_attributes" {
                     let s: String = tmp.get_item(b).unwrap().to_string();
                     let v: Value = serde_json::from_str(&s).unwrap();
                     m = serde_json::from_value(v).unwrap();
