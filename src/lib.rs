@@ -43,8 +43,10 @@ pub struct DT {
 
 #[pymethods]
 impl DT {
-    /// Constructor for a DT (returns an empty DT)
+    /// Constructor for a DT (returns an empty DT).
     ///
+    /// :param extra_attributes: a Boolean stating whether the vertices can have extra attributes
+    /// attache to them.
     #[args(extra_attributes = false)]
     #[new]
     fn new(extra_attributes: bool) -> Self {
@@ -108,18 +110,19 @@ impl DT {
     /// Insert one new point in the DT.
     ///
     /// If there is a point at the same location (based on :func:`startinpy.DT.snap_tolerance`),
-    /// then :func:`startinpy.DT.duplicates_handling decides which z-value (and extra attributes)
-    /// are kept.
+    /// then :func:`startinpy.DT.duplicates_handling` decides which z-value (and eventually extra
+    /// attributes) are kept.
     ///
     /// :param x: x-coordinate of point to insert
     /// :param y: y-coordinate of point to insert
     /// :param z: z-coordinate of point to insert
-    /// :return: a tuple: 1) the index of the vertex in the DT;
-    ///          2) whether a new vertex was inserted (True if yes; False is there was already a vertex at
-    ///          that xy-location.
+    /// :return: a tuple: 1) the index of the (created or kept) vertex in the triangulation;
+    ///          2) whether a new vertex was inserted: True if yes; False is there was already
+    ///          a vertex at that xy-location.
     ///
     /// >>> (vi, new_vertex) = dt.insert_one_pt(3.2, 1.1, 17.0)
     /// (37, True)
+    /// >>> dt.insert_one_pt(13.2, 44.1, 74.2, intensity=77.2)
     #[pyo3(text_signature = "($self, x, y, z, *, classification=1, intensity=78.0)")]
     #[args(x, y, z, py_kwargs = "**")]
     fn insert_one_pt(
@@ -330,12 +333,34 @@ impl DT {
         Ok(())
     }
 
+    /// List all the names of the extra attributes that the vertices have.
+    ///
+    /// :return: a Vec of the names, empty if none
+    ///
+    /// >>> dt = startinpy.DT(extra_attributes=True)
+    /// >>> dt.insert_one_pt(85000.0, 444003.2, 2.2, intensity=111.1)
+    /// >>> dt.list_attributes()
+    /// ['intensity']
     #[args()]
     fn list_attributes(&self) -> PyResult<Vec<String>> {
         Ok(self.t.list_all_attributes())
     }
 
-    #[pyo3(text_signature = "($self, attribute='intensity')")]
+    /// Get all the values for a given extra attribute stored for the vertices.
+    /// Returns the values a numpy array with dtype=``np.float64``, those need to be casted if necessary.
+    /// Watch out, if a given vertex doesn't have that attribute than ``np.nan`` is inserted
+    /// in the array.
+    ///
+    /// :param attribute: the name (a string) of the attribute
+    /// :return: an array all the values (including for the removed vertices).
+    ///          The array is empty is the extra attributes doesn't exist.
+    ///
+    /// >>> dt = startinpy.DT(extra_attributes=True)
+    /// >>> dt.insert_one_pt(85000.0, 444003.2, 2.2, intensity=111.1)
+    /// >>> ...
+    /// >>> dt.attributes('intensity')
+    /// array([  111.1, 22.2, 46.4, nan, ...,   77.8, 111.1])
+    #[pyo3(text_signature = "($self, attribute)")]
     #[args(attribute)]
     fn attributes<'py>(
         &self,
@@ -375,7 +400,18 @@ impl DT {
         }
     }
 
-    #[pyo3(text_signature = "($self, vi")]
+    /// Get all the extra attributes stored for a specific vertex.
+    /// Returns the values as a JSON dictionary in string.
+    ///
+    /// :param vi: the index of the vertex
+    /// :return: a JSON object as a string
+    ///
+    /// >>> dt = startinpy.DT(extra_attributes=True)
+    /// >>> dt.insert_one_pt(85000.0, 444003.2, 2.2, intensity=111.1, reflectance=29.9)
+    /// >>> ...
+    /// >>> json.loads(dt.get_attribute(17))
+    /// {'intensity': 111.1, 'reflectance': 99.1}
+    #[pyo3(text_signature = "($self, vi)")]
     #[args(vi)]
     fn get_attribute(&self, vi: usize) -> PyResult<String> {
         match self.t.get_attribute(vi) {
@@ -388,7 +424,21 @@ impl DT {
         }
     }
 
-    #[pyo3(text_signature = "($self, vi, attribute")]
+    /// Set/overwrite the extra attributes for a specific vertex.
+    /// Returns the values as a JSON dictionary in string.
+    ///
+    /// :param vi: the index of the vertex
+    /// :param attribute: the JSON object (as a string) of the extra attribute, which contains all values
+    /// :return: True if the attribute was assigned, False otherwise
+    ///
+    /// >>> dt = startinpy.DT(extra_attributes=True)
+    /// >>> dt.insert_one_pt(85000.0, 444003.2, 2.2, intensity=111.1, reflectance=29.9)
+    /// >>> ...
+    /// >>> new_a = {'intensity': 155.5, 'reflectance': 222.2, 'extra': 3}
+    /// >>> dt.set_attribute(17, json.dumps(new_a))
+    /// >>> dt.get_attribute(17)
+    /// '{"extra":3,"intensity":155.5,"reflectance":222.2}'    
+    #[pyo3(text_signature = "($self, vi, attribute)")]
     #[args(vi, attribute)]
     fn set_attribute(&mut self, vi: usize, attribute: String) -> PyResult<bool> {
         let v: Value = serde_json::from_str(&attribute).unwrap();
@@ -409,7 +459,7 @@ impl DT {
     }
 
     /// Return the point for the vertex with index *vi*.
-    /// An exception is thrown if vertex index is invalid.
+    /// An exception is thrown if the vertex index is invalid.
     ///
     /// :param vi: the index of the vertex
     /// :return: the point
@@ -1032,10 +1082,10 @@ impl DT {
         self.t.vertical_exaggeration(factor);
     }
 
-    /// Returns true if some vertices are marked as to be deleted (but still in memory)
-    /// , false otherwise.
+    /// Returns True if some vertices are marked as to be deleted (but still in memory)
+    /// , False otherwise.
     ///
-    /// :return: true/false
+    /// :return: True/False
     fn has_garbage(&self) -> PyResult<bool> {
         Ok(self.t.has_garbage())
     }
