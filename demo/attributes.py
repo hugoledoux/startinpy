@@ -3,11 +3,11 @@ import numpy as np
 import json
 import laspy
 
-las = laspy.read("/Users/hugo/data/ahn4/crop.laz")
+las = laspy.read("../data/small.laz")
 
 #-- read intensity and store it as extra_attribute in the startinpy DT
 d = np.vstack((las.x, las.y, las.z, las.intensity)).transpose()
-d100 = d[::1000] #-- thinning to speed up, put ::1 to keep all the points
+d100 = d[::1] #-- thinning to speed up, put ::1 to keep all the points
 
 dt = startinpy.DT(extra_attributes=True)
 for each in d100:

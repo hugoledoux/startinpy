@@ -7,11 +7,11 @@ import math
 from tqdm import tqdm
 
 def main():
-    las = laspy.read("/Users/hugo/data/ahn4/bk.laz")
+    las = laspy.read("../data/small.laz")
 
     #-- read intensity and store it as extra_attribute in the startinpy DT
     d = np.vstack((las.x, las.y, las.z)).transpose()
-    d = d[::10] #-- thinning to speed up, put ::1 to keep all the points
+    d = d[::1] #-- thinning to speed up, put ::10 to keep 1/10 of the points
 
     dt = startinpy.DT()
     dt.duplicates_handling = "Highest"
@@ -21,7 +21,7 @@ def main():
 
     #-- grid with 1m resolution the bbox
     bbox = dt.get_bbox()
-    cellsize = 1.0
+    cellsize = 0.5
     deltax = math.ceil((bbox[2] - bbox[0]) / cellsize)
     deltay = math.ceil((bbox[3] - bbox[1]) / cellsize)
     # zhat = numpy.zeros(shape=(deltay,deltax))
@@ -41,7 +41,7 @@ def main():
     zhat = dt.interpolate({"method": "TIN"}, centres)
     
     #-- save to a GeoTIFF with rasterio
-    write_rasterio('grid2.tiff', zhat.reshape((deltay, deltax)), (bbox[0], bbox[1]), cellsize)
+    write_rasterio('grid.tiff', zhat.reshape((deltay, deltax)), (bbox[0], bbox[1]), cellsize)
     #-- save to a ASC grid file (text file)
     # write_asc_file('grid.asc', zhat.reshape((deltay, deltax)), (bbox[0], bbox[1]), cellsize)
 
