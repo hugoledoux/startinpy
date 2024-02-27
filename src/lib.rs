@@ -336,7 +336,7 @@ impl DT {
 
     /// List all the names of the extra attributes that the vertices have.
     ///
-    /// :return: a Vec of the names, empty if none
+    /// :return: an array of the names, empty if none
     ///
     /// >>> dt = startinpy.DT(extra_attributes=True)
     /// >>> dt.insert_one_pt(85000.0, 444003.2, 2.2, intensity=111.1)
@@ -361,7 +361,7 @@ impl DT {
     /// >>> dt.insert_one_pt(85000.0, 444003.2, 2.2, intensity=111.1)
     /// >>> ...
     /// >>> dt.attributes('intensity')
-    /// array([  111.1, 22.2, 46.4, nan, ...,   77.8, 111.1])
+    /// array([nan, 111.1, 22.2, 46.4, nan, ...,   77.8, 111.1])
     #[pyo3(text_signature = "($self, attribute)")]
     #[args(attribute)]
     fn attributes<'py>(
