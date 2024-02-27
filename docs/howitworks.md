@@ -2,7 +2,7 @@
 
 ## Original code written in rust
 
-startinpy source code in written in [Rust](https://www.rust-lang.org/) (called just 'startin', [original source code](https://github.com/hugoledoux/startin)).
+The library for calculating the Delaunay triangulation is originally written in [Rust](https://www.rust-lang.org/), it is called just 'startin' and its [ source code is open](https://github.com/hugoledoux/startin).
 
 Robust arithmetic for the geometric predicates are used ([Shewchuk's predicates](https://www.cs.cmu.edu/~quake/robust.html), well the [Rust port of the code](https://crates.io/crates/robust)), so startin/py is robust and shouldn't crash (touch wood).
 

@@ -5,11 +5,12 @@
 :width: 40%
 ```
 
-A Delaunay triangulator where the input are 2.5D points (they have an elevation), the Delaunay triangulation (DT) is computed in 2D but the elevation of the vertices are kept.
-This is used mostly for the modelling of terrains, but other attributes could be used.
+A library to model and manipulate terrains/DTMs using a (2D) Delaunay triangulation. 
+The triangulation is computed in 2D, but the *z*-elevation of the vertices are kept.
 
-Originally written in [Rust](https://www.rust-lang.org/) (so it's rather fast; [see Rust code](https://github.com/hugoledoux/startin)), and [robust arithmetic](https://crates.io/crates/robust) is used (so it shouldn't crash).
-The Python bindings wrap the Rust code, add [NumPy](https://numpy.org/) input/output, and some functions.
+The underlying library is written in [Rust](https://www.rust-lang.org/) so it's rather fast ([see Rust code](https://github.com/hugoledoux/startin)) and [robust arithmetic](https://crates.io/crates/robust) is used (so it shouldn't crash).
+
+startinpy uses the Rust library and adds several utilities and functions, for instance [NumPy](https://numpy.org/) support for input/output, exporting to several formats, and easy-of-use.
 
 :::{admonition} startinpy allows you to:
 1. insert incrementally points
@@ -17,16 +18,16 @@ The Python bindings wrap the Rust code, add [NumPy](https://numpy.org/) input/ou
 3. interpolate with a few methods: TIN, natural neighbours, Laplace, IDW, etc.
 4. use other useful terrain Python libraries that are also NumPy-based, eg [laszy](https://laspy.readthedocs.io), [meshio](https://github.com/nschloe/meshio)
 5. outputs the TIN to several formats: OBJ, PLY, GeoJSON, and CityJSON
+6. [extra attributes](attributes) (the ones from LAS/LAZ) can be stored with the vertices
 :::
 
 ```python
 import startinpy
 import numpy as np
+import laspy
 
-#-- generate 100 points randomly in the plane
-rng = np.random.default_rng()
-pts = rng.random((100, 3))
-pts = pts * 100
+las = laspy.read("../data/small.laz")
+pts = np.vstack((las.x, las.y, las.z)).transpose()
 
 dt = startinpy.DT()
 dt.insert(pts)
@@ -42,18 +43,12 @@ print("# triangles:", dt.number_of_triangles())
 
 print("CH: ", dt.convex_hull())
 
-print(dt.is_triangle([4, 12, 6]) )
-print(dt.is_triangle([5, 12, 6]) )
+vi = 235
+one_random_pt = dt.points[vi]
+print("one random point:", one_random_pt)
+print(dt.incident_triangles_to_vertex(vi))
 
-print("--- /Points ---")
-for each in dt.points:
-    print(each)
-print("--- Points/ ---")
-
-alltr = dt.triangles
-print(alltr[3])
-
-zhat = dt.interpolate({"method": "TIN"}, [[55.2, 33.1]])
+zhat = dt.interpolate({"method": "TIN"}, [[85718.5, 447211.6]])
 print("result: ", zhat[0])
 ```
 
