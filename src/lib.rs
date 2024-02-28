@@ -247,7 +247,7 @@ impl DT {
                     "'{}' is an unknown insertion strategy for insert()",
                     insertionstrategy
                 );
-                return Err(PyErr::new::<exceptions::PyTypeError, _>(s));
+                return Err(PyErr::new::<exceptions::PyException, _>(s));
             }
         }
         Ok(())
@@ -328,7 +328,7 @@ impl DT {
                     "'{}' is an unknown method to handle duplicates (First/Last/Lowest/Highest).",
                     m
                 );
-                return Err(PyErr::new::<exceptions::PyTypeError, _>(s));
+                return Err(PyErr::new::<exceptions::PyException, _>(s));
             }
         }
         Ok(())
@@ -795,7 +795,7 @@ impl DT {
                                             "({}, {}) no points in search radius.",
                                             loc[0], loc[1]
                                         );
-                                        return Err(PyErr::new::<exceptions::PyTypeError, _>(s));
+                                        return Err(PyErr::new::<exceptions::PyException, _>(s));
                                     } else {
                                         re.push(f64::NAN);
                                     }
@@ -815,7 +815,7 @@ impl DT {
                                         "({}, {}) is outside the convex hull.",
                                         loc[0], loc[1]
                                     );
-                                    return Err(PyErr::new::<exceptions::PyTypeError, _>(s));
+                                    return Err(PyErr::new::<exceptions::PyException, _>(s));
                                 } else {
                                     re.push(f64::NAN);
                                 }
@@ -834,7 +834,7 @@ impl DT {
                                         "({}, {}) is outside the convex hull.",
                                         loc[0], loc[1]
                                     );
-                                    return Err(PyErr::new::<exceptions::PyTypeError, _>(s));
+                                    return Err(PyErr::new::<exceptions::PyException, _>(s));
                                 } else {
                                     re.push(f64::NAN);
                                 }
@@ -853,7 +853,7 @@ impl DT {
                                         "({}, {}) is outside the convex hull.",
                                         loc[0], loc[1]
                                     );
-                                    return Err(PyErr::new::<exceptions::PyTypeError, _>(s));
+                                    return Err(PyErr::new::<exceptions::PyException, _>(s));
                                 } else {
                                     re.push(f64::NAN);
                                 }
@@ -872,7 +872,7 @@ impl DT {
                                         "({}, {}) is outside the convex hull.",
                                         loc[0], loc[1]
                                     );
-                                    return Err(PyErr::new::<exceptions::PyTypeError, _>(s));
+                                    return Err(PyErr::new::<exceptions::PyException, _>(s));
                                 } else {
                                     re.push(f64::NAN);
                                 }
