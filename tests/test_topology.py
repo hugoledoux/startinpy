@@ -40,14 +40,16 @@ def test_adjacent_triangles_to_triangle():
             finite += 1
     assert finite == 2
     
+def test_adjacent_vertices_to_vertex():
+    dt = dt_5_points()
+    vs = dt.adjacent_vertices_to_vertex(5)
+    assert len(vs) == 4
+    with pytest.raises(IndexError):
+        vs = dt.adjacent_vertices_to_vertex(15)
+    vs = dt.adjacent_vertices_to_vertex(0)
+    assert len(vs) == 4
+    #-- includes the infinity vertex
+    vs = dt.adjacent_vertices_to_vertex(1) 
+    assert len(vs) == 4
+    
 
-
-    # assert len(trs) == 4
-    # for tr in trs:
-    #     assert np.isin(5, tr)
-    # with pytest.raises(IndexError):
-    #     trs = dt.incident_triangles_to_vertex(6)
-    # trs = dt.incident_triangles_to_vertex(0)
-    # assert len(trs) == 4
-    # for tr in trs:
-    #     assert np.isin(0, tr)

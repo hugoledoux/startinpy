@@ -40,3 +40,9 @@ def test_triangles():
     assert dt.triangles.shape == (0, 0)
     dt = dt_5_points()
     assert dt.triangles.shape == (4, 3)
+
+def test_vertical_exaggeration():
+    dt = dt_5_points()
+    dt.vertical_exaggeration(2.0)
+    assert dt.points[1][2] == pytest.approx(1.0)
+    assert dt.points[5][2] == pytest.approx(9.0)

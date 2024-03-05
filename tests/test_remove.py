@@ -9,6 +9,17 @@ def random(n=20):
     pts = pts * 100
     return pts
 
+def test_remove_insert():
+    pts = random(25)
+    dt = startinpy.DT()
+    dt.insert(pts)
+    dt.remove(17)
+    assert dt.is_vertex_removed(17) == True
+    assert dt.has_garbage() == True
+    dt.insert_one_pt(88., 88., 88.)
+    assert dt.is_vertex_removed(17) == False
+    assert dt.has_garbage() == False
+
 def test_remove_valid():
     total = 25
     pts = random(total)
@@ -17,8 +28,10 @@ def test_remove_valid():
     assert dt.number_of_vertices() == total
     dt.remove(17)
     assert dt.number_of_vertices() == (total - 1)
+    assert dt.is_vertex_removed(17) == True
     dt.remove(12)
     assert dt.number_of_vertices() == (total - 2)
+    assert dt.is_vertex_removed(12) == True
 
 def test_remove_invalid():
     pts = random()
@@ -68,6 +81,7 @@ def test_garbagecollection():
     dt.remove(61)
     dt.remove(91)
     assert dt.number_of_vertices() == 97
+    assert dt.has_garbage() == True
     notr = dt.number_of_triangles()
     dt.collect_garbage()
     assert dt.number_of_vertices() == 97
