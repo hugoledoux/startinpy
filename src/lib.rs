@@ -364,7 +364,7 @@ impl DT {
     /// array([nan, 111.1, 22.2, 46.4, nan, ...,   77.8, 111.1])
     #[pyo3(text_signature = "($self, attribute)")]
     #[args(attribute)]
-    fn attributes<'py>(
+    fn attribute<'py>(
         &self,
         py: Python<'py>,
         attribute: String,
@@ -404,6 +404,8 @@ impl DT {
 
     /// Get all the extra attributes stored for a specific vertex.
     /// Returns the values as a JSON dictionary in string.
+    /// An exception is thrown if the terrain has no extra attributes stored and/or if
+    /// the vertex index is invalid.
     ///
     /// :param vi: the index of the vertex
     /// :return: a JSON object as a string
@@ -415,14 +417,22 @@ impl DT {
     /// {'intensity': 111.1, 'reflectance': 99.1}
     #[pyo3(text_signature = "($self, vi)")]
     #[args(vi)]
-    fn get_attribute(&self, vi: usize) -> PyResult<String> {
-        match self.t.get_attribute(vi) {
+    fn get_vertex_attributes(&self, vi: usize) -> PyResult<String> {
+        match self.t.get_vertex_attributes(vi) {
             Ok(v) => return Ok(v.to_string()),
-            Err(_) => {
-                return Err(PyErr::new::<exceptions::PyIndexError, _>(
-                    "Invalid vertex index.",
-                ));
-            }
+            Err(e) => match e {
+                startin::StartinError::VertexRemoved => {
+                    return Err(PyErr::new::<exceptions::PyException, _>(
+                        "Invalid vertex index.",
+                    ))
+                }
+                startin::StartinError::TinHasNoAttributes => {
+                    return Err(PyErr::new::<exceptions::PyException, _>(
+                        "TIN has no extra attributes.",
+                    ))
+                }
+                _ => return Err(PyErr::new::<exceptions::PyException, _>("Error")),
+            },
         }
     }
 
@@ -442,9 +452,9 @@ impl DT {
     /// '{"extra":3,"intensity":155.5,"reflectance":222.2}'    
     #[pyo3(text_signature = "($self, vi, attribute)")]
     #[args(vi, attribute)]
-    fn set_attribute(&mut self, vi: usize, attribute: String) -> PyResult<bool> {
+    fn set_vertex_attributes(&mut self, vi: usize, attribute: String) -> PyResult<bool> {
         let v: Value = serde_json::from_str(&attribute).unwrap();
-        match self.t.set_attribute(vi, v) {
+        match self.t.set_vertex_attributes(vi, v) {
             Ok(b) => return Ok(b),
             Err(_) => return Ok(false),
         }
