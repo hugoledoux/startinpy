@@ -11,7 +11,7 @@ import laspy
 
 las = laspy.read("myfile.laz")
 pts = np.vstack((las.x, las.y, las.z)).transpose()
-pts = d[::1] #-- thinning to speed up, put ::10 to keep 1/10 of the points
+pts = pts[::1] #-- thinning to speed up, put ::10 to keep 1/10 of the points
 dt = startinpy.DT()
 dt.insert(pts)
 print("# vertices:", dt.number_of_vertices())
@@ -41,9 +41,9 @@ las = laspy.read("myfile.laz")
 pts = np.vstack((las.x, las.y, las.z)).transpose()
 dt = startinpy.DT(pts)
 vs = dt.points
-v[0] = v[1] #-- to ensure that infinite vertex is not blocking the viz
+vs[0] = vs[1] #-- to ensure that infinite vertex is not blocking the viz
 cells = [("triangle", dt.triangles)]
-meshio.write_points_cells("mydt.vtu", v, cells)
+meshio.write_points_cells("mydt.vtu", vs, cells)
 ```
 
 ## Reading a GeoTIFF file with rasterio
@@ -52,17 +52,18 @@ We can use [rasterio](https://rasterio.readthedocs.io) to read a GeoTIFF and tri
 Notice that retrieving the (*x,y*)-coordinates of the centres with the [xy() function of rasterio](https://rasterio.readthedocs.io/en/latest/api/rasterio.io.html?highlight=xy#rasterio.io.DatasetReader.xy) is **super slow** and it's better to use the code below.
 
 Notice that we use the insertion strategy "BBox" because it is several orders of magnitude faster for gridded datasets.
+The code also randomly selects 1% of the points.
 
-The no_data values are not inserted in the triangulation.
+The `no_data` values are not inserted in the triangulation.
 
-This code saves the resulting triangulation to a [PLY file](<https://en.wikipedia.org/wiki/PLY_(file_format)>) that can be opened directly in QGIS (with the newish [MDAL mesh](https://docs.qgis.org/3.22/en/docs/user_manual/working_with_mesh/mesh_properties.html)).
+This code saves the resulting triangulation to a [PLY file](<https://en.wikipedia.org/wiki/PLY_(file_format)>) that can be opened directly in QGIS (with the newish [MDAL mesh](https://docs.qgis.org/3.34/en/docs/user_manual/working_with_mesh/mesh_properties.html)).
 
 ```python
 import startinpy
 import rasterio
 import random
 
-d = rasterio.open('mydem.tif')
+d = rasterio.open('data/dem_01.tif')
 band1 = d.read(1)
 t = d.transform
 pts = []
@@ -91,9 +92,13 @@ You need to install [Polyscope](https://polyscope.run/py/) (basically `pip insta
 import startinpy
 import numpy as np
 import polyscope as ps
+import laspy
 
+las = laspy.read("data/small.laz")
+pts = np.vstack((las.x, las.y, las.z)).transpose()
+pts = pts[::10] #-- thinning to speed up, put ::10 to keep 1/10 of the points
 dt = startinpy.DT()
-dt.read_las("/home/elvis/myfile.laz", thinning=10, classification=[2,6])
+dt.insert(pts)
 
 pts = dt.points
 pts[0] = pts[1] #-- first vertex has inf and could mess things
