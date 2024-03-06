@@ -1028,11 +1028,12 @@ impl DT {
             }
         }
         let mut allv_i: Vec<Vec<i64>> = Vec::new();
-        for i in 0..allv_f.len() {
+        for i in 1..allv_f.len() {
             let mut x = allv_f[i][0];
             let mut y = allv_f[i][1];
             let mut z = allv_f[i][2];
-            if i == 0 || (self.t.is_vertex_removed(i).unwrap() == true) {
+            // if i == 0 || (self.t.is_vertex_removed(i).unwrap() == true) {
+            if self.t.is_vertex_removed(i).unwrap() == true {
                 x = onevertex[0];
                 y = onevertex[1];
                 z = onevertex[2];
@@ -1052,7 +1053,7 @@ impl DT {
         let trs = self.t.all_finite_triangles();
         for tr in &trs {
             let mut t: Vec<Vec<usize>> = Vec::new();
-            t.push(vec![tr.v[0], tr.v[1], tr.v[2]]);
+            t.push(vec![tr.v[0] - 1, tr.v[1] - 1, tr.v[2] - 1]);
             alltrs.push(t);
         }
         //-- CityObjects
