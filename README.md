@@ -1,6 +1,9 @@
 
 [![PyPI](https://img.shields.io/pypi/v/startinpy?style=for-the-badge)](https://pypi.org/project/startinpy/) [![docs](https://img.shields.io/badge/docs-startinpy.rtfd.io-brightgreen?style=for-the-badge)](https://startinpy.rtfd.io/) [![GitHub license](https://img.shields.io/github/license/hugoledoux/startinpy?style=for-the-badge)](https://github.com/hugoledoux/startinpy/blob/master/LICENSE) 
 
+
+![](docs/figs/polyscope.jpg){:width="400px"}
+
 startinpy
 =========
 
