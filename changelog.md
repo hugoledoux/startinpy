@@ -7,14 +7,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.0] - XXX
+### Added
+- xy-duplicates are now handled and the behaviour can be configured. Previous version it was first-come-first-served, but now these 4 options are possible: First/Last/Highest/Lowest (First==default). This means that if a new vertex is an xy-duplicate (based on `dt.snap_tolerance`, the z value kept is depending on the configuration.
+- vertices can now have extra attributes stored, eg to keep the LAS attributes (intensity, number_of_returns, etc.)
+- a full unit test suite (pytest) has been added, testing all functions
+- there is now a `./demo` with several examples 
+### Changed
+- improve the pydocs + added a section about the extra vertices
+- many bugs were fixed, eg PLY output is now valid, the CityJSON output now correctly omits the infinity vertex
+- the `dt.jump_and_walk` is now exposed and can be used (if your dataset has little spatial coherence it could be useful)
+- the latest version of maturin (to build the Python bindings from Rust) is now used
+### Removed
+- the function `read_las()` is removed, using "laspy" is simpler/better/flexible so this this the favoured option. Demos and examples are added.
+
+
 ## [0.10.2] - 2023-12-14
 ### Changed
 - fix a bug where function `adjacent_triangles_to_triangle()` returned only the finite triangles, while all (incl. infinite) should be returned
+
 
 ## [0.10.1] - 2023-11-21
 ### Changed
 - improve the docs to explain how startinpy works
 - added Python v3.12 support
+
 
 ## [0.10.0] - 2023-08-16
 ### Changed
@@ -29,12 +46,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - bindings are built for the new python 3.11 as well now, from 3.7+
 
+
 ## [0.9.1] - 2022-09-28
 ### Changed
 - uses startin = v0.6.1
 - the much improved docs in `docs/` is now automatically built put at https://startinpy.rtfd.io/
 ### Added
 - 2 functions related to garbage collection
+
 
 ## [0.9.0] - 2022-09-22
 ### Changed
@@ -63,6 +82,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - new name "startinpy" to avoid clashes with the rust lib "startin" on which this project is based on. Since I use a Rust builder (maturin), there were clashes and probably a better idea to call it "startinpy" anyway.
 
 
+[0.10.2]: https://github.com/hugoledoux/startin/compare/0.10.2...0.11.0
 [0.10.2]: https://github.com/hugoledoux/startin/compare/0.10.1...0.10.2
 [0.10.1]: https://github.com/hugoledoux/startin/compare/0.10.0...0.10.1
 [0.10.0]: https://github.com/hugoledoux/startin/compare/0.9.2...0.10.0
