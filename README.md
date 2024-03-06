@@ -1,9 +1,8 @@
 
+<img src="docs/figs/polyscope.jpg" width="350">
+
 [![PyPI](https://img.shields.io/pypi/v/startinpy?style=for-the-badge)](https://pypi.org/project/startinpy/) [![docs](https://img.shields.io/badge/docs-startinpy.rtfd.io-brightgreen?style=for-the-badge)](https://startinpy.rtfd.io/) [![GitHub license](https://img.shields.io/github/license/hugoledoux/startinpy?style=for-the-badge)](https://github.com/hugoledoux/startinpy/blob/master/LICENSE) 
 
-
-
-<img src="docs/figs/polyscope.jpg" width="300">
 
 startinpy
 =========
@@ -13,15 +12,16 @@ The triangulation is computed in 2D, but the *z*-elevation of the vertices are k
 
 The underlying library is written in [Rust](https://www.rust-lang.org/) so it's rather fast ([see Rust code](https://github.com/hugoledoux/startin)) and [robust arithmetic](https://crates.io/crates/robust) is used (so it shouldn't crash).
 
-startinpy uses the Rust library and adds several utilities and functions, for instance [NumPy](https://numpy.org/) support for input/output, exporting to several formats, and easy-of-use.
+startinpy uses the [startin Rust library](https://github.com/hugoledoux/startin) and adds several utilities and functions, for instance [NumPy](https://numpy.org/) support for input/output, exporting to several formats, and easy-of-use.
 
 startinpy allows you to:
-    1. insert incrementally points
-    2. delete vertices (useful for simplification, interpolation, and other operations)
-    3. interpolate and create grids with several methods: TIN, natural neighbours, IDW, Laplace, etc.
-    4. use other useful terrain Python libraries that are also NumPy-based, eg [laszy](https://laspy.readthedocs.io), [meshio](https://github.com/nschloe/meshio)
-    5. outputs the TIN to several formats: OBJ, PLY, GeoJSON, and CityJSON
-    6. [extra attributes](attributes) (the ones from LAS/LAZ) can be stored with the vertices
+
+  1. insert incrementally points
+  2. delete vertices (useful for simplification, interpolation, and other operations)
+  3. interpolate and create grids with several methods: TIN, natural neighbours, IDW, Laplace, etc.
+  4. use other useful terrain Python libraries that are also NumPy-based, eg [laszy](https://laspy.readthedocs.io), [meshio](https://github.com/nschloe/meshio)
+  5. outputs the TIN to several formats: OBJ, PLY, GeoJSON, and CityJSON
+  6. [extra attributes](attributes) (the ones from LAS/LAZ) can be stored with the vertices
 
 
 Documentation
