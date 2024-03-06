@@ -1074,8 +1074,6 @@ impl DT {
             vertices: allv_i,
         };
         // Serialize it to a JSON string.
-        // let j = serde_json::to_string(&cj)?;
-        // println!("{}", j);
         let mut fo = File::create(path)?;
         let j = serde_json::to_string(&cj);
         let _ = write!(fo, "{}", j.unwrap());
