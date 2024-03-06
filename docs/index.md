@@ -8,7 +8,7 @@
 A library for modelling and processing 2.5D terrains using a (2D) Delaunay triangulation. 
 The triangulation is computed in 2D, but the *z*-elevation of the vertices are kept.
 
-The underlying library is written in [Rust](https://www.rust-lang.org/) so it's rather fast ([see Rust code](https://github.com/hugoledoux/startin)) and [robust arithmetic](https://crates.io/crates/robust) is used (so it shouldn't crash).
+The [underlying code](https://github.com/hugoledoux/startin) is written in [Rust](https://www.rust-lang.org/) (so it's rather fast) and [robust arithmetic](https://crates.io/crates/robust) is used (so it shouldn't crash).
 
 startinpy uses the [startin Rust library](https://github.com/hugoledoux/startin) and adds several utilities and functions, for instance [NumPy](https://numpy.org/) support for input/output, exporting to several formats, and easy-of-use.
 
