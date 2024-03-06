@@ -4,7 +4,26 @@
 startinpy
 =========
 
-Python bindings for [startin](https://github.com/hugoledoux/startin), a Delaunay triangulator for the modelling of terrains.
+A library for modelling and processing 2.5D terrains using a (2D) Delaunay triangulation. 
+The triangulation is computed in 2D, but the *z*-elevation of the vertices are kept.
+
+The underlying library is written in [Rust](https://www.rust-lang.org/) so it's rather fast ([see Rust code](https://github.com/hugoledoux/startin)) and [robust arithmetic](https://crates.io/crates/robust) is used (so it shouldn't crash).
+
+startinpy uses the Rust library and adds several utilities and functions, for instance [NumPy](https://numpy.org/) support for input/output, exporting to several formats, and easy-of-use.
+
+startinpy allows you to:
+    1. insert incrementally points
+    2. delete vertices (useful for simplification, interpolation, and other operations)
+    3. interpolate and create grids with several methods: TIN, natural neighbours, IDW, Laplace, etc.
+    4. use other useful terrain Python libraries that are also NumPy-based, eg [laszy](https://laspy.readthedocs.io), [meshio](https://github.com/nschloe/meshio)
+    5. outputs the TIN to several formats: OBJ, PLY, GeoJSON, and CityJSON
+    6. [extra attributes](attributes) (the ones from LAS/LAZ) can be stored with the vertices
+
+
+Documentation
+=============
+
+https://startinpy.rtfd.io
 
 
 Installation
@@ -34,23 +53,20 @@ Development
   4. move to another folder, and `import startinpy` shouldn't return any error
 
 
-Documentation
-=============
-
-https://startinpy.rtfd.io
 
 
 Examples
 ========
 
+The folder `./demo` contains a few examples.
+
 ```python
 import startinpy
 import numpy as np
+import laspy
 
-#-- generate 100 points randomly in the plane
-rng = np.random.default_rng()
-pts = rng.random((100, 3))
-pts = pts * 100
+las = laspy.read("../data/small.laz")
+pts = np.vstack((las.x, las.y, las.z)).transpose()
 
 dt = startinpy.DT()
 dt.insert(pts)
@@ -64,34 +80,16 @@ except Exception as e:
 print("# vertices:", dt.number_of_vertices())
 print("# triangles:", dt.number_of_triangles())
 
+#-- print the vertices forming the convex hull, in CCW-order
 print("CH: ", dt.convex_hull())
 
-print(dt.is_triangle([4, 12, 6]) )
-print(dt.is_triangle([5, 12, 6]) )
+#-- fetch all the incident triangles (CCW-ordered) to the vertex #235
+vi = 235
+one_random_pt = dt.points[vi]
+print("one random point:", one_random_pt)
+print(dt.incident_triangles_to_vertex(vi))
 
-print("--- /Points ---")
-for each in dt.points:
-    print(each)
-print("--- Points/ ---")
-
-alltr = dt.triangles
-print(alltr[3])
-
-zhat = dt.interpolate({"method": "TIN"}, [[55.2, 33.1]])
+#-- interpolate at a location with the linear in TIN method
+zhat = dt.interpolate({"method": "TIN"}, [[85718.5, 447211.6]])
 print("result: ", zhat[0])
 ```
-
-It can read LAS/LAZ and output GeoJSON files too:
-
-```python
-import startinpy
-t = startinpy.DT()
-t.read_las("/home/elvis/myfile.laz")
-print("# vertices:", t.number_of_vertices())
-print("# triangles:", t.number_of_triangles())
-t.write_geojson("/home/elvis/output.geojson")
-```
-
-
-
-
