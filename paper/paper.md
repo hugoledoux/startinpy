@@ -49,35 +49,20 @@ startinpy was developed specifically for needs of 2.5D terrain modelling.
 Its core (construction of the DT, deletion, interpolation, etc) is written in Rust (and called simply `startin`, source code is available at https://github.com/hugoledoux/startin) and can be used in Rust programs. 
 A C-interface to the library is also available, this allows us to use, for instance, the library in Julia (https://github.com/evetion/startin.jl); it has been used recently to build a global coastal terrain using measurements from the space station [@Pronk24].
 Observe that the robust predicates as described in @Shewchuk96 are used (the code has been converted to pure Rust, see https://docs.rs/robust/latest/robust/, which means that startinpy should not crash because of floating-point arithmetic.
+Since the library is not written in pure Python, a GitHub Action compiles the bindings for the lastest versions of Python and for Windows/macOS/Linux.
 
-The name of the library comes from the fact that the data structure used is based on the concept of *stars* in a network [@Blandford05], which allows us to store adjacency and incidence and have a very compact data structure.
+The name of the library comes from the fact that the data structure implemented is based on the concept of *stars* in a graph [@Blandford05], which allows us to both store adjacency and incidence and have a very compact data structure.
+The construction algorithm used is an incremental insertion based on flips, and the deletion of a vertex is also possible. 
+The algorithm implemented is a modification of @Mostafavi03, I have extended it to allow the deletion of vertices on the boundary of the convex hull. 
 
-The construction algorithm used is an incremental insertion based on flips, and the data structure is a cheap implementation of the star-based structure defined in Blandford et al. (2003), cheap because the link of each vertex is stored a simple array (Vec) and not in an optimised blob like they did. It results in a pretty fast library (comparison will come at some point), but it uses more space than the optimised one.
+A few spatial interpolation methods that are based on the DT and its dual structure the Voronoi diagram have been implemented: TIN, natural neighbours, Laplace, etc.
 
-The deletion of a vertex is also possible. The algorithm implemented is a modification of the one of Mostafavi, Gold, and Dakowicz (2003). The ears are filled by flipping, so it's in theory more robust. I have also extended the algorithm to allow the deletion of vertices on the boundary of the convex hull. The algorithm is sub-optimal, but in practice the number of neighbours of a given vertex in a DT is only 6, so it doesn't really matter.
-startinpy constructs a DT incrementally by implementating the 
+It is possible to store extra attributes with each vertex, each attribute is stored as a JSON object/dictionary, a key-value pair where the key is a string and the value is one of these 3 options: (1) an integer, (2) a float, or (3) a boolean.
+This can be used to preserve the lidar properties of the input points (eg intensity, RGB, number of returns, etc.), those are not possible to attach with the Python libraries mentioned above.
 
-deletion by Gold
-incremental
-star-based data structure of XXX
-different optimisation to speed it up
+To facilitate the processing and analysis of large datasets, and to integrate with other libraries (such as laspy https://github.com/laspy/laspy), NumPy arrays are used; a few examples in the documentation are available.
 
-, and the interactive deletion of vertices is possible.
-
-1. insert incrementally points
-2. delete vertices (useful for simplification, interpolation, and other operations)
-3. interpolate and create grids with several methods: TIN, natural neighbours, IDW, Laplace, etc.
-4. use other useful terrain Python libraries that are also NumPy-based, eg [laszy](https://laspy.readthedocs.io), [meshio](https://github.com/nschloe/meshio)
-5. outputs the TIN to several formats: OBJ, PLY, GeoJSON, and CityJSON
-6. [extra attributes](attributes) (the ones from LAS/LAZ) can be stored with the vertices
-
-is incrementation insertion, deletion is possible, and is using NumPy for i/o so that it is easy to pair with laspy and others libraries.
-
-add/delete can also be used for QC
-
-Several functions that are useful
-
-github-action to compile and generate all the bindings for diff OSes.
+Finally, it is possible to output the TIN to several formats: OBJ, PLY, GeoJSON, and CityJSON (examples are also in the documentation).
 
 
 # Citations
