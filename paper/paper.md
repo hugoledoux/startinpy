@@ -18,48 +18,69 @@ bibliography: ref.bib
 
 # Summary
 
-The Python library startinpy allows us to model and process terrains with a triangulation. 
-This is used to represent the morphology of a given area (hills, valleys, but buildings and other man-structures can be included) by using elevation points and to derive and calculate properties from that triangulation.
+The Python library `startinpy` allows us to construct, modify, and manipulate triangulated terrains, commonly called TINs (triangulated irregular networks).
+Given a dataset formed of elevation samples (eg collected with lidar or photogrammetry), it is possible to construct a TIN, identify outliers, convert to a gridded terrain (with spatial interpolation), etc.
+Observe that while it is built primarily for points having a *z*-elevation, a Delaunay triangulation (DT) in 2D is computed (a TIN is a so-called 2.5D object). 
+This means that startinpy can also be used for applications where a standard 2D DT is necessary.
+Also, unlike several triangulation libraries, `startinpy` exposes its topological data structure and this allows users to obtain incident and adjacent triangles to vertices/triangles. This can be useful for quality control, to derive properties like slope, to convert to different formats, etc. 
+The underlying code of `startinpy` is written in the language Rust (so it's rather fast), robust arithmetic is used (so it shouldn't crash), and it use NumPy for input/output of data, which allows it to integrate with other Python libraries.
 
-A terrain library
 
-(which are 2.5D objects) using a two-dimensional Delaunay triangulation.
-This means that while a triangulation is computed in 2D, the *z*-elevation of the vertices are kept.
-
-Such a library is necessary to represent the morphology of an area, when one wants to avoid using grids and prefers a leaner representation with points and triangles.
-
-The underlying code of startinpy is written in the language Rust (so it's rather fast) and robust arithmetic is used (so it shouldn't crash).
-
-startinpy uses the [startin Rust library](https://github.com/hugoledoux/startin) and adds several utilities and functions, for instance [NumPy](https://numpy.org/) support for input/output, exporting to several formats, and easy-of-use.
+<!-- Such a library is necessary to represent the morphology of an area, when one wants to avoid using grids and prefers a leaner representation with points and triangles. -->
 
 
 # Statement of need
 
-- 2D DT and difficult to keep the z-values, especially with xy-duplicates
-- 3D DT is the solution
-- 2.5D specific triangulation == no idea how
-- only batch operation available, that is you give a certain of points and you get a list of triangles.
-- but for many apps one wants to modify this triangulation (to simplify it by removing least important points + perform interpolations + add points somewhere else where more differences in elevation)
-- SciPy has only batch, hte incremental is buggy and is very slow
-- Triangle from Shewchuk is not 2.5D and complex to manage
+There exists several Python libraries for computing the DT in 2D.
+A simple search for `"Delaunay"` in the *Python Package Index* (PyPI) returns 85 packages, the most notable ones being SciPy (specifically `scipy.spatial.Delaunay`, which is a wrapper around Qhull [@Barber96], written in C) and Triangle (which is a wrapper around the fast and robust C library that performs constrained DT and meshing [@Shewchuk96a]).
+
+When it comes to modelling 2.5D terrains, the existing Python libraries have four main shortcomings:
+
+  1. Libraries written in pure Python are simply too slow for modern datasets. Indeed, with recent lidar scanner, we can easily collect 50 samples/$m^2$ and this means that a small dataset will already contain several millions samples. 
+  2. While a 2D DT should be calculated, the *z*-values of the points should be preserved. Some libraries allows us to attach extra information to a vertex, but most often one has to build auxiliary data structure in Python to manage those, which is error-prone, tedious, and makes operations in 3D (eg calculating the slope of an area, finding the normals of a point, calculating volumes) complex operations.
+  3. Both SciPy and Triangle construct a 2D DT in a *batch* operation, that the DT for a set of points is constructed and cannot be modified. Being able to construct *incrementally* a DT has several benefits: one can for instance construct a simplified TIN that best approximate the original terrain with only 10% of the points, see for instance @Garland95 for different strategies. Also, available libraries do not allow to remove/delete points, which is useful when outliers are identified (by analysing the neighbouring triangles of vertices).
+  4. The data structure of the DT is not exposed, only a list of vertices and triangles (triplets of vertex identifiers) are returned. This means that the user has to build a network to be able to find the adjacent triangles of a given one, or to find all the triangles that are incident to a given vertex (eg to calculate the normal).
 
 
-# Functionalities of startinpy
+# Design and details of startinpy
 
-startinpy is incrementation insertion, deletion is possible, and is using NumPy for i/o so that it is easy to pair with laspy and others libraries.
+startinpy was developed specifically for needs of 2.5D terrain modelling.
 
+Its core (construction of the DT, deletion, interpolation, etc) is written in Rust (and called simply `startin`, source code is available at https://github.com/hugoledoux/startin) and can be used in Rust programs. 
+A C-interface to the library is also available, this allows us to use, for instance, the library in Julia (https://github.com/evetion/startin.jl); it has been used recently to build a global coastal terrain using measurements from the space station [@Pronk24].
+Observe that the robust predicates as described in @Shewchuk96 are used (the code has been converted to pure Rust, see https://docs.rs/robust/latest/robust/, which means that startinpy should not crash because of floating-point arithmetic.
 
-Several functions that are usful
+The name of the library comes from the fact that the data structure used is based on the concept of *stars* in a network [@Blandford05], which allows us to store adjacency and incidence and have a very compact data structure.
+
+The construction algorithm used is an incremental insertion based on flips, and the data structure is a cheap implementation of the star-based structure defined in Blandford et al. (2003), cheap because the link of each vertex is stored a simple array (Vec) and not in an optimised blob like they did. It results in a pretty fast library (comparison will come at some point), but it uses more space than the optimised one.
+
+The deletion of a vertex is also possible. The algorithm implemented is a modification of the one of Mostafavi, Gold, and Dakowicz (2003). The ears are filled by flipping, so it's in theory more robust. I have also extended the algorithm to allow the deletion of vertices on the boundary of the convex hull. The algorithm is sub-optimal, but in practice the number of neighbours of a given vertex in a DT is only 6, so it doesn't really matter.
+startinpy constructs a DT incrementally by implementating the 
+
+deletion by Gold
+incremental
+star-based data structure of XXX
+different optimisation to speed it up
+
+, and the interactive deletion of vertices is possible.
+
+1. insert incrementally points
+2. delete vertices (useful for simplification, interpolation, and other operations)
+3. interpolate and create grids with several methods: TIN, natural neighbours, IDW, Laplace, etc.
+4. use other useful terrain Python libraries that are also NumPy-based, eg [laszy](https://laspy.readthedocs.io), [meshio](https://github.com/nschloe/meshio)
+5. outputs the TIN to several formats: OBJ, PLY, GeoJSON, and CityJSON
+6. [extra attributes](attributes) (the ones from LAS/LAZ) can be stored with the vertices
+
+is incrementation insertion, deletion is possible, and is using NumPy for i/o so that it is easy to pair with laspy and others libraries.
+
+add/delete can also be used for QC
+
+Several functions that are useful
+
+github-action to compile and generate all the bindings for diff OSes.
 
 
 # Citations
-
-Citations to entries in paper.bib should be in
-[rMarkdown](http://rmarkdown.rstudio.com/authoring_bibliographies_and_citations.html)
-format.
-
-If you want to cite a software repository URL (e.g. something on GitHub without a preferred
-citation) then you can do it with the example BibTeX entry below for @fidgit.
 
 For a quick reference, the following citation commands can be used:
 - `@author:2001`  ->  "Author et al. (2001)"

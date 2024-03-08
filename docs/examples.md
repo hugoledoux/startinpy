@@ -118,7 +118,7 @@ pc.reset_transform()
 ps.show()
 ```
 
-```{image} figs/polyscope.jpg
+```{image} figs/polyscope_gui.jpg
 ```
 
 ## Plotting the DT with matplotlib
