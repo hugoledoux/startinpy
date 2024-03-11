@@ -16,7 +16,7 @@ startinpy uses the [startin Rust library](https://github.com/hugoledoux/startin)
 1. insert incrementally points
 2. delete vertices (useful for simplification, interpolation, and other operations)
 3. interpolate and create grids with several methods: TIN, natural neighbours, IDW, Laplace, etc.
-4. use other useful terrain Python libraries that are also NumPy-based, eg [laszy](https://laspy.readthedocs.io), [meshio](https://github.com/nschloe/meshio)
+4. use other useful terrain Python libraries that are also NumPy-based, eg [laspy](https://laspy.readthedocs.io), [meshio](https://github.com/nschloe/meshio)
 5. outputs the TIN to several formats: OBJ, PLY, GeoJSON, and CityJSON
 6. [extra attributes](attributes) (the ones from LAS/LAZ) can be stored with the vertices
 :::
