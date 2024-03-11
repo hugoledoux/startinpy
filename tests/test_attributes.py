@@ -34,7 +34,7 @@ def small_laz_intensity():
     d = np.vstack((las.x, las.y, las.z, las.intensity)).transpose()
     dt = startinpy.DT(extra_attributes=True)
     for each in d:
-        dt.insert_one_pt(each[0], each[1], each[2], intensity=each[3])
+        dt.insert_one_pt(each[:3], intensity=each[3])
     return dt
 
 def test_las_reading():
@@ -48,10 +48,10 @@ def test_las_reading():
 
 def test_set_vertex_attributes_1by1():
     dt = startinpy.DT(extra_attributes=True)
-    dt.insert_one_pt(0.0, 0.0, 12.5, humidity=33.3);
-    dt.insert_one_pt(1.0, 0.0, 7.65);
-    dt.insert_one_pt(1.0, 1.0, 33.0);
-    dt.insert_one_pt(0.0, 1.0, 21.0);
+    dt.insert_one_pt([0.0, 0.0, 12.5], humidity=33.3);
+    dt.insert_one_pt([1.0, 0.0, 7.65]);
+    dt.insert_one_pt([1.0, 1.0, 33.0]);
+    dt.insert_one_pt([0.0, 1.0, 21.0]);
     a = json.loads(dt.get_vertex_attributes(1))
     assert a['humidity'] == pytest.approx(33.3)
     i = dt.attribute('humidity')
@@ -61,11 +61,11 @@ def test_set_vertex_attributes_1by1():
 
 def test_list_attributes():
     dt = startinpy.DT(extra_attributes=True)
-    dt.insert_one_pt(0.0, 0.0, 12.5, a1=33.3);
-    dt.insert_one_pt(1.0, 0.0, 7.65, a2=33.3);
-    dt.insert_one_pt(1.0, 0.0, 7.65);
-    dt.insert_one_pt(1.0, 1.0, 33.0, a3=33.3);
-    dt.insert_one_pt(0.0, 1.0, 21.0, a4=33.3, a1=33.3);
+    dt.insert_one_pt([0.0, 0.0, 12.5], a1=33.3);
+    dt.insert_one_pt([1.0, 0.0, 7.65], a2=33.3);
+    dt.insert_one_pt([1.0, 0.0, 7.65]);
+    dt.insert_one_pt([1.0, 1.0, 33.0], a3=33.3);
+    dt.insert_one_pt([0.0, 1.0, 21.0], a4=33.3, a1=33.3);
     l = dt.list_attributes()
     assert len(l) == 4
 

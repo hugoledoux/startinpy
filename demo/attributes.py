@@ -11,19 +11,19 @@ d = d[::1] #-- thinning to speed up, put ::1 to keep all the points
 
 dt = startinpy.DT(extra_attributes=True)
 for each in d:
-    dt.insert_one_pt(each[0], each[1], each[2], intensity=each[3])
+    dt.insert_one_pt(each[:3], intensity=each[3])
 
 a = {'intensity': 155.5, 'reflectance': 111, 'something': True}
-dt.set_attribute(50, json.dumps(a))
+dt.set_vertex_attributes(50, json.dumps(a))
 
 print(dt)
 
 print("all extra attributes:", dt.list_attributes())
 
-a = dt.get_attribute(50)
+a = dt.get_vertex_attributes(50)
 print("=>", json.loads(a))
-a = dt.get_attribute(49)
+a = dt.get_vertex_attributes(49)
 print("=>", json.loads(a))
 
-i = dt.attributes('intensity')
+i = dt.attribute('intensity')
 print(i.shape)

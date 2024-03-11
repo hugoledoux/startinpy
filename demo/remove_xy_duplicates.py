@@ -15,14 +15,14 @@ dt.snap_tolerance = 0.05
 #-- insert and assign an id to each point
 i = 0
 for p in tqdm(d):
-    dt.insert_one_pt(p[0], p[1], p[2], pid=i)
+    dt.insert_one_pt(p, pid=i)
     i += 1
 
 #-- new LAZ
 new_las = laspy.LasData(las.header)
 
 #-- make a mask for the points that were kept
-a = dt.attributes('pid')
+a = dt.attribute('pid')
 mask = np.full((len(las.points)), False)
 for each in a[1:]:
     mask[int(each)] = True

@@ -46,13 +46,13 @@ def test_convexhull_empty():
     dt = startinpy.DT()
     ch = dt.convex_hull()
     assert len(ch) == 0
-    dt.insert_one_pt(1., 1., 1.)
+    dt.insert_one_pt([1., 1., 1.])
     ch = dt.convex_hull()
     assert len(ch) == 0
-    dt.insert_one_pt(2., 3., 4.)
+    dt.insert_one_pt([2., 3., 4.])
     ch = dt.convex_hull()
     assert len(ch) == 0
-    dt.insert_one_pt(1., 6., 4.)
+    dt.insert_one_pt([1., 6., 4.])
     ch = dt.convex_hull()
     assert len(ch) == 3
 
@@ -64,12 +64,12 @@ def test_convexhull():
     with pytest.raises(Exception):
         dt.is_vertex_convex_hull(-1) 
     assert dt.is_vertex_convex_hull(5) == False
-    assert dt.is_inside_convex_hull(7.1, 2.1) == True
-    assert dt.is_inside_convex_hull(-7.1, 2.1) == False
+    assert dt.is_inside_convex_hull([7.1, 2.1]) == True
+    assert dt.is_inside_convex_hull([-7.1, 2.1]) == False
 
 def test_locate():
     dt = dt_5_points()
-    assert (dt.locate(7.1, 2.1) == np.array([5, 1, 2])).all()
+    assert (dt.locate([7.1, 2.1]) == np.array([5, 1, 2])).all()
     with pytest.raises(Exception):
         dt.locate(-1., 9.0)   
     

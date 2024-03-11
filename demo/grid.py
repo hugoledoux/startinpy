@@ -17,7 +17,7 @@ def main():
     dt.duplicates_handling = "Highest"
     print("Constructing the TIN with {} points".format(len(d)))
     for each in tqdm(d):
-        dt.insert_one_pt(each[0], each[1], each[2])
+        dt.insert_one_pt(each)
 
     #-- grid with 1m resolution the bbox
     bbox = dt.get_bbox()

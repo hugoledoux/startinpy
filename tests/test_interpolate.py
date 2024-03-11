@@ -55,7 +55,7 @@ def test_nn():
     pts = four_points()
     dt = startinpy.DT()
     dt.insert(pts)    
-    dt.insert_one_pt(5.0, 5.0, 11.1)
+    dt.insert_one_pt([5.0, 5.0, 11.1])
     locs = [ [5.1, 5.1] ]
     re = dt.interpolate({"method": "NN"}, locs)
     assert re[0] == pytest.approx(11.1)
@@ -88,7 +88,7 @@ def test_exisiting_point():
     pts = four_points()
     dt = startinpy.DT()
     dt.insert(pts)    
-    dt.insert_one_pt(5.0, 5.0, 11.1)
+    dt.insert_one_pt([5.0, 5.0, 11.1])
     locs = [[5.0, 5.0]]
     re = dt.interpolate({"method": "Laplace"}, locs)
     assert re[0] == pytest.approx(11.1)
