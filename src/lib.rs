@@ -354,7 +354,7 @@ impl DT {
     ///
     /// :param attribute: the name (a string) of the attribute
     /// :return: an array all the values (including for the removed vertices).
-    ///          The array is empty is the extra attributes doesn't exist.
+    ///          The array is empty if the extra attributes doesn't exist.
     ///
     /// >>> dt = startinpy.DT(extra_attributes=True)
     /// >>> dt.insert_one_pt(85000.0, 444003.2, 2.2, intensity=111.1)
@@ -477,6 +477,7 @@ impl DT {
     ///
     /// >>> v = dt.get_point(4)
     /// array([13., 2.0, 11.])
+    #[pyo3(text_signature = "($self, vi)")]
     #[args(vi)]
     fn get_point<'py>(
         &self,
@@ -519,6 +520,7 @@ impl DT {
     ///
     /// :param p2: array with [x, y]-coordinates of point to test
     /// :return: True if [x,y] is inside the convex hull or on its boundary, False otherwise.
+    #[pyo3(text_signature = "($self, p2)")]
     #[args(x, y)]
     fn is_inside_convex_hull(&self, p2: [f64; 2]) -> PyResult<bool> {
         let re = self.t.locate(p2[0], p2[1]);
@@ -534,6 +536,7 @@ impl DT {
     /// :param vi: the vertex index
     /// :return: True if *vi* is on the boundary of the convex hull, False otherwise.
     ///          Also False is returned if the vertex doesn't exist in the DT.
+    #[pyo3(text_signature = "($self, vi)")]
     #[args(vi)]
     fn is_vertex_convex_hull(&self, vi: usize) -> PyResult<bool> {
         Ok(self.t.is_vertex_convex_hull(vi))
@@ -544,6 +547,7 @@ impl DT {
     /// :param vi: the vertex index
     /// :return: True if *vi* is labelled as removed, False otherwise.
     ///          An exception is raised if *vi* doesn't exist.  
+    #[pyo3(text_signature = "($self, vi)")]
     #[args(vi)]
     fn is_vertex_removed(&self, vi: usize) -> PyResult<bool> {
         let re = self.t.is_vertex_removed(vi);
@@ -566,6 +570,7 @@ impl DT {
     /// >>>     cp = dt.closest_point([32.1, 66.9])
     /// >>> except Exception as e:
     /// >>>     print(e)
+    #[pyo3(text_signature = "($self, p2)")]
     #[args(x, y)]
     fn closest_point(&self, p2: [f64; 2]) -> PyResult<usize> {
         let re = self.t.closest_point(p2[0], p2[1]);
@@ -593,6 +598,7 @@ impl DT {
     /// 3 [3 8 2]
     /// 4 [3 2 9]
     /// 5 [3 9 4]
+    #[pyo3(text_signature = "($self, vi)")]
     #[args(vi)]
     fn incident_triangles_to_vertex<'py>(
         &self,
@@ -621,8 +627,8 @@ impl DT {
     /// Return the triangles adjacent to Triangle *t*.
     /// Exception thrown if vertex index doesn't exist in the DT.
     ///
-    /// :param vi: the vertex index
-    /// :return: an array of 3 triangles (finite and infinite)
+    /// :param t: the Triangle, an array of 3 vertex indices
+    /// :return: an array of 3 Triangles (finite and infinite)
     ///
     /// >>> tris = dt.adjacent_triangles_to_triangle([1, 44, 23])
     /// >>> for i, t in enumerate(tris):
@@ -630,6 +636,7 @@ impl DT {
     /// 0 [3 4 6]
     /// 1 [3 6 7]
     /// 2 [3 7 8]
+    #[pyo3(text_signature = "($self, t)")]
     #[args(t)]
     fn adjacent_triangles_to_triangle<'py>(
         &self,
@@ -664,6 +671,7 @@ impl DT {
     ///
     /// :param vi: the vertex index
     /// :return: an array of vertex indices (ordered counter-clockwise)
+    #[pyo3(text_signature = "($self, vi)")]
     #[args(vi)]
     fn adjacent_vertices_to_vertex<'py>(
         &self,
@@ -685,10 +693,11 @@ impl DT {
     /// of its vertices.
     /// This doesn't verify wether the triangle exists (use is_valid()).
     ///
-    /// :param t: the triangle, an array of 3 vertex indices
+    /// :param t: the Triangle, an array of 3 vertex indices
     /// :return: True if t is finite, False is infinite
     ///
     /// >>> re = dt.is_finite(np.array([11, 162, 666])))
+    #[pyo3(text_signature = "($self, t)")]
     #[args(t)]
     fn is_finite(&self, t: Vec<usize>) -> PyResult<bool> {
         let tr = startin::Triangle {
@@ -699,11 +708,12 @@ impl DT {
 
     /// Verify if a triangle exists in the DT.
     ///
-    /// :param t: the triangle, an array of 3 vertex indices
+    /// :param t: the Triangle, an array of 3 vertex indices
     /// :return: True if t exists, False otherwise
     ///
     /// >>> dt.is_triangle(np.array([11, 162, 66]))
     /// False
+    #[pyo3(text_signature = "($self, t)")]
     #[args(t)]
     fn is_triangle(&self, t: Vec<usize>) -> PyResult<bool> {
         let tr = startin::Triangle {
@@ -720,6 +730,8 @@ impl DT {
     ///
     /// >>> tr = dt.locate([34.2, 55.6])
     /// array([65, 61, 23], dtype=uint64)
+    #[pyo3(text_signature = "($self, p2)")]
+    #[args(p2)]
     fn locate<'py>(
         &self,
         py: Python<'py>,
@@ -747,13 +759,14 @@ impl DT {
     /// 5. **TIN**: linear interpolation in TIN
     ///
     /// :param interpolant: a JSON/dict Python object with a `"method": "IDW"` (or others). IDW has 2 more params: "power" and "radius"
-    /// :param locations: an array of [x, y] locations where to interpolate
-    /// :param strict: if the interpolation cannot find a value (because outside convex hull or search radius too small) then strict==True will stop at the first error and return that error. If strict==False then numpy.nan is returned.
+    /// :param locations: an array of [x, y] locations where the function should interpolate
+    /// :param strict: (default=False) if the interpolation cannot find a value (because outside convex hull or search radius too small) then strict==True will stop at the first error and return that error. If strict==False then numpy.nan is returned.
     /// :return: a numpy array containing all the interpolation values (same order as input array)
     ///
     /// >>> locs = [ [50.0, 41.1], [101.1, 33.2], [80.0, 66.0] ]
     /// >>> re = dt.interpolate({"method": "NNI"}, locs)
     /// >>> re = dt.interpolate({"method": "IDW", "radius": 20, "power": 2.0}, locs, strict=True)
+    #[pyo3(text_signature = "($self, interpolant, locations, *, strict=True)")]
     #[args(interpolant, locations, strict = false)]
     fn interpolate<'py>(
         &mut self,
@@ -904,6 +917,7 @@ impl DT {
     /// :return: (nothing)
     ///
     /// >>> dt.write_obj("/home/elvis/myfile.obj")
+    #[pyo3(text_signature = "($self, path)")]
     #[args(path)]
     fn write_obj(&self, path: String) -> PyResult<()> {
         let re = self.t.write_obj(path.to_string());
@@ -920,6 +934,7 @@ impl DT {
     /// :return: (nothing)
     ///
     /// >>> dt.write_ply("/home/elvis/myfile.ply")
+    #[pyo3(text_signature = "($self, path)")]
     #[args(path)]
     fn write_ply(&self, path: String) -> PyResult<()> {
         let re = self.t.write_ply(path.to_string());
@@ -936,6 +951,7 @@ impl DT {
     /// :return: (nothing)
     ///
     /// >>> dt.write_geojson("/home/elvis/myfile.geojson")
+    #[pyo3(text_signature = "($self, path)")]
     #[args(path)]
     pub fn write_geojson(&self, path: String) -> PyResult<()> {
         let mut fc = FeatureCollection {
@@ -1007,6 +1023,7 @@ impl DT {
     /// :return: (nothing)
     ///
     /// >>> dt.write_cityjson("/home/elvis/myfile.city.json")
+    #[pyo3(text_signature = "($self, path, digits=3)")]
     #[args(path, digits = 3)]
     fn write_cityjson(&self, path: String, digits: usize) -> PyResult<()> {
         let bbox = self.t.get_bbox();
@@ -1085,6 +1102,7 @@ impl DT {
     ///
     /// >>> dt.vertical_exaggeration(2.0)
     /// >>> dt.vertical_exaggeration(0.5)
+    #[pyo3(text_signature = "($self, factor)")]
     #[args(factor)]
     fn vertical_exaggeration(&mut self, factor: f64) {
         self.t.vertical_exaggeration(factor);
