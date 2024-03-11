@@ -24,7 +24,7 @@ setup(
         "License :: OSI Approved :: MIT License",
     ],
     packages=["startinpy"],
-    python_requires='>=3.6',
+    python_requires='>=3.9',
 )
 
 
