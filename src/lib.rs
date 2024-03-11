@@ -113,24 +113,20 @@ impl DT {
     /// then :func:`startinpy.DT.duplicates_handling` decides which z-value (and eventually extra
     /// attributes) are kept.
     ///
-    /// :param x: x-coordinate of point to insert
-    /// :param y: y-coordinate of point to insert
-    /// :param z: z-coordinate of point to insert
+    /// :param p3: array with [x, y, z]-coordinates of point to insert
     /// :param optional extra_attributes: extra parameters with values
     /// :return: a tuple: 1) the index of the (created or kept) vertex in the triangulation;
     ///          2) whether a new vertex was inserted: True if yes; False is there was already
     ///          a vertex at that xy-location.
     ///
-    /// >>> (vi, new_vertex) = dt.insert_one_pt(3.2, 1.1, 17.0)
+    /// >>> (vi, new_vertex) = dt.insert_one_pt([3.2, 1.1, 17.0])
     /// (37, True)
-    /// >>> dt.insert_one_pt(13.2, 44.1, 74.2, intensity=77.2)
-    #[pyo3(text_signature = "($self, x, y, z, *, classification=1, intensity=78.0)")]
-    #[args(x, y, z, py_kwargs = "**")]
+    /// >>> dt.insert_one_pt([13.2, 44.1, 74.2], intensity=77.2)
+    #[pyo3(text_signature = "($self, p3, *, classification=1, intensity=78.0)")]
+    #[args(p3, py_kwargs = "**")]
     fn insert_one_pt(
         &mut self,
-        x: f64,
-        y: f64,
-        z: f64,
+        p3: [f64; 3],
         py_kwargs: Option<&PyDict>,
     ) -> PyResult<(usize, bool)> {
         let mut m = Map::new();
@@ -173,15 +169,18 @@ impl DT {
         }
         // println!("map={:?}", m);
         if m.is_empty() {
-            let re = self.t.insert_one_pt(x, y, z);
+            let re = self.t.insert_one_pt(p3[0], p3[1], p3[2]);
             match re {
                 Ok(x) => return Ok((x, true)),
                 Err(x) => return Ok((x, false)),
             };
         } else {
-            let re = self
-                .t
-                .insert_one_pt_with_attribute(x, y, z, serde_json::to_value(m).unwrap());
+            let re = self.t.insert_one_pt_with_attribute(
+                p3[0],
+                p3[1],
+                p3[2],
+                serde_json::to_value(m).unwrap(),
+            );
             match re {
                 Ok(x) => return Ok((x, true)),
                 Err(x) => return Ok((x, false)),
@@ -223,7 +222,7 @@ impl DT {
     /// given) or "BBox" (inserts first the BBox of the points, which speeds up the construction,
     /// works especially good for rasters).
     ///
-    /// :param pts: an array of points (which is an array)
+    /// :param pts: an array of points (which is itself an array)
     /// :param optional insertionstrategy:  "AsIs" (*default*) or "BBox"
     /// :return: (nothing)
     ///
@@ -518,12 +517,11 @@ impl DT {
 
     /// Is the point [x, y] located inside the convex hull of the DT.
     ///
-    /// :param x: the x-coordinate
-    /// :param y: the y-coordinate
+    /// :param p2: array with [x, y]-coordinates of point to test
     /// :return: True if [x,y] is inside the convex hull or on its boundary, False otherwise.
     #[args(x, y)]
-    fn is_inside_convex_hull(&self, x: f64, y: f64) -> PyResult<bool> {
-        let re = self.t.locate(x, y);
+    fn is_inside_convex_hull(&self, p2: [f64; 2]) -> PyResult<bool> {
+        let re = self.t.locate(p2[0], p2[1]);
         if re.is_ok() == true {
             return Ok(true);
         } else {
@@ -561,17 +559,16 @@ impl DT {
     /// Return the closest vertex index to [x, y] (distance in 2D).
     /// An Exception is thrown if [x, y] is outside the convex hull.
     ///
-    /// :param x: the x-coordinate
-    /// :param y: the y-coordinate
+    /// :param p2: array with [x, y]-coordinates of point
     /// :return: the vertex index of the closest point
     ///
     /// >>> try:
-    /// >>>     cp = dt.closest_point(32.1, 66.9)
+    /// >>>     cp = dt.closest_point([32.1, 66.9])
     /// >>> except Exception as e:
     /// >>>     print(e)
     #[args(x, y)]
-    fn closest_point(&self, x: f64, y: f64) -> PyResult<usize> {
-        let re = self.t.closest_point(x, y);
+    fn closest_point(&self, p2: [f64; 2]) -> PyResult<usize> {
+        let re = self.t.closest_point(p2[0], p2[1]);
         if re.is_err() {
             return Err(PyErr::new::<exceptions::PyException, _>("Outside CH"));
         } else {
@@ -718,17 +715,17 @@ impl DT {
     /// Locate the triangle containing the point [x, y] (projected to 2D).
     /// An error is thrown if it is outside the convex hull.
     ///
-    /// :param x: the x-coordinate
-    /// :param y: the y-coordinate
+    /// :param p2: array with [x, y]-coordinates of point
     /// :return: the triangle
-    #[args(x, y)]
+    ///
+    /// >>> tr = dt.locate([34.2, 55.6])
+    /// array([65, 61, 23], dtype=uint64)
     fn locate<'py>(
         &self,
         py: Python<'py>,
-        x: f64,
-        y: f64,
+        p2: [f64; 2],
     ) -> PyResult<&'py PyArray<usize, numpy::Ix1>> {
-        let re = self.t.locate(x, y);
+        let re = self.t.locate(p2[0], p2[1]);
         let mut tr: Vec<usize> = Vec::new();
         if re.is_ok() {
             let t = re.unwrap();
@@ -796,7 +793,7 @@ impl DT {
                                 ));
                             }
                             for loc in locations {
-                                let a = self.interpolate_idw(loc[0], loc[1], r1, p1);
+                                let a = self.interpolate_idw(loc, r1, p1);
                                 if a.is_ok() {
                                     re.push(a.unwrap());
                                 } else {
@@ -816,7 +813,7 @@ impl DT {
                     }
                     "Laplace" => {
                         for loc in locations {
-                            let a = self.interpolate_laplace(loc[0], loc[1]);
+                            let a = self.interpolate_laplace(loc);
                             if a.is_ok() {
                                 re.push(a.unwrap());
                             } else {
@@ -835,7 +832,7 @@ impl DT {
                     }
                     "NN" => {
                         for loc in locations {
-                            let a = self.interpolate_nn(loc[0], loc[1]);
+                            let a = self.interpolate_nn(loc);
                             if a.is_ok() {
                                 re.push(a.unwrap());
                             } else {
@@ -854,7 +851,7 @@ impl DT {
                     }
                     "NNI" => {
                         for loc in locations {
-                            let a = self.interpolate_nni(loc[0], loc[1]);
+                            let a = self.interpolate_nni(loc);
                             if a.is_ok() {
                                 re.push(a.unwrap());
                             } else {
@@ -873,7 +870,7 @@ impl DT {
                     }
                     "TIN" => {
                         for loc in locations {
-                            let a = self.interpolate_tin_linear(loc[0], loc[1]);
+                            let a = self.interpolate_tin_linear(loc);
                             if a.is_ok() {
                                 re.push(a.unwrap());
                             } else {
@@ -1117,9 +1114,9 @@ impl DT {
 }
 
 impl DT {
-    fn interpolate_nn(&mut self, x: f64, y: f64) -> PyResult<f64> {
+    fn interpolate_nn(&mut self, p2: [f64; 2]) -> PyResult<f64> {
         let i_nn = startin::interpolation::NN {};
-        let mut re = startin::interpolation::interpolate(&i_nn, &mut self.t, &vec![[x, y]]);
+        let mut re = startin::interpolation::interpolate(&i_nn, &mut self.t, &vec![p2]);
         let re1 = re.pop().expect("no results");
         if re1.is_err() {
             return Err(PyErr::new::<exceptions::PyException, _>("Outside CH"));
@@ -1127,9 +1124,9 @@ impl DT {
         Ok(re1.unwrap())
     }
 
-    fn interpolate_tin_linear(&mut self, x: f64, y: f64) -> PyResult<f64> {
+    fn interpolate_tin_linear(&mut self, p2: [f64; 2]) -> PyResult<f64> {
         let i_tin = startin::interpolation::TIN {};
-        let mut re = startin::interpolation::interpolate(&i_tin, &mut self.t, &vec![[x, y]]);
+        let mut re = startin::interpolation::interpolate(&i_tin, &mut self.t, &vec![p2]);
         let re1 = re.pop().expect("no results");
         if re1.is_err() {
             return Err(PyErr::new::<exceptions::PyException, _>("Outside CH"));
@@ -1137,9 +1134,9 @@ impl DT {
         Ok(re1.unwrap())
     }
 
-    fn interpolate_laplace(&mut self, x: f64, y: f64) -> PyResult<f64> {
+    fn interpolate_laplace(&mut self, p2: [f64; 2]) -> PyResult<f64> {
         let i_lp = startin::interpolation::Laplace {};
-        let mut re = startin::interpolation::interpolate(&i_lp, &mut self.t, &vec![[x, y]]);
+        let mut re = startin::interpolation::interpolate(&i_lp, &mut self.t, &vec![p2]);
         let re1 = re.pop().expect("no results");
         if re1.is_err() {
             return Err(PyErr::new::<exceptions::PyException, _>("Outside CH"));
@@ -1147,9 +1144,9 @@ impl DT {
         Ok(re1.unwrap())
     }
 
-    fn interpolate_nni(&mut self, x: f64, y: f64) -> PyResult<f64> {
+    fn interpolate_nni(&mut self, p2: [f64; 2]) -> PyResult<f64> {
         let i_nni = startin::interpolation::NNI { precompute: false };
-        let mut re = startin::interpolation::interpolate(&i_nni, &mut self.t, &vec![[x, y]]);
+        let mut re = startin::interpolation::interpolate(&i_nni, &mut self.t, &vec![p2]);
         let re1 = re.pop().expect("no results");
         if re1.is_err() {
             return Err(PyErr::new::<exceptions::PyException, _>("Outside CH"));
@@ -1157,12 +1154,12 @@ impl DT {
         Ok(re1.unwrap())
     }
 
-    fn interpolate_idw(&mut self, x: f64, y: f64, radius: f64, pow: f64) -> PyResult<f64> {
+    fn interpolate_idw(&mut self, p2: [f64; 2], radius: f64, pow: f64) -> PyResult<f64> {
         let i_idw = startin::interpolation::IDW {
             radius: radius,
             power: pow,
         };
-        let mut re = startin::interpolation::interpolate(&i_idw, &mut self.t, &vec![[x, y]]);
+        let mut re = startin::interpolation::interpolate(&i_idw, &mut self.t, &vec![p2]);
         let re1 = re.pop().expect("no results");
         if re1.is_err() {
             return Err(PyErr::new::<exceptions::PyException, _>(
