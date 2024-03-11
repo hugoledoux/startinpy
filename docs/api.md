@@ -8,7 +8,7 @@ A **Point** is an array of 3 floats (x-coordinate, y-coordinate, z-coordinate):
 ```python
 >>> import startinpy
 >>> dt = startinpy.DT()
->>> dt.insert_one_pt(11.3, 22.2, 4.7)
+>>> dt.insert_one_pt([11.3, 22.2, 4.7])
 >>> dt.points[1]
 array([11.3, 22.2, 4.7])
 ```
@@ -26,7 +26,7 @@ array([1, 3, 2], dtype=uint64)
 ```
 
 :::{IMPORTANT}
-The first vertex in the list of points is the **infinite vertex**, and has "infinity" coordinates (it has this: `[inf, inf, inf]`). It is used internally to ensure that the whole DT is consistent. No finite Triangle refers to the vertex. {ref}`See more info and some examples <infinite>`.
+The first vertex in the list of points is the **infinite vertex**, and has "infinity" coordinates (`[inf, inf, inf]`). It is used internally to ensure that the whole DT is consistent. No finite Triangle refers to the vertex, but infite Triangles do. {ref}`See more info and some examples <infinite>`.
 :::
 
 ```{eval-rst}
