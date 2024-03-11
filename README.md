@@ -38,6 +38,8 @@ pip
 
 To install the latest release: `pip install startinpy`
 
+(watch out: this does not work with Linux currently, it installs an old version!)
+
 
 If you want to compile it yourself
 ----------------------------------
@@ -55,8 +57,6 @@ Development
   2. install [maturin](https://github.com/PyO3/maturin) 
   3. `maturin develop`
   4. move to another folder, and `import startinpy` shouldn't return any error
-
-
 
 
 Examples
