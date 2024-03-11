@@ -14,7 +14,7 @@ pts = np.vstack((las.x, las.y, las.z)).transpose()
 pts = pts[::1] #-- thinning to speed up, put ::10 to keep 1/10 of the points
 dt = startinpy.DT()
 dt.insert(pts)
-print("# vertices:", dt.number_of_vertices())
+print("number vertices:", dt.number_of_vertices())
 ```
 
 ## Exporting the DT to GeoJSON
@@ -28,7 +28,7 @@ rng = np.random.default_rng(seed=42)
 pts = rng.random((100, 3))
 dt = startinpy.DT()
 dt.insert(pts, insertionstrategy="AsIs")
-dt.write_geojson("/home/elvis/myfile.geojson")
+dt.write_geojson("myfile.geojson")
 ```
 
 ## Exporting the DT to several mesh formats with [meshio](https://github.com/nschloe/meshio)
@@ -36,10 +36,13 @@ dt.write_geojson("/home/elvis/myfile.geojson")
 ```python
 import startinpy
 import meshio
+import laspy
+import numpy as np
 
-las = laspy.read("myfile.laz")
+las = laspy.read("../data/small.laz")
 pts = np.vstack((las.x, las.y, las.z)).transpose()
-dt = startinpy.DT(pts)
+dt = startinpy.DT()
+dt.insert(pts)
 vs = dt.points
 vs[0] = vs[1] #-- to ensure that infinite vertex is not blocking the viz
 cells = [("triangle", dt.triangles)]
@@ -63,7 +66,7 @@ import startinpy
 import rasterio
 import random
 
-d = rasterio.open('data/dem_01.tif')
+d = rasterio.open('../data/dem_01.tif')
 band1 = d.read(1)
 t = d.transform
 pts = []
