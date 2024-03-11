@@ -72,4 +72,10 @@ def test_locate():
     assert (dt.locate([7.1, 2.1]) == np.array([5, 1, 2])).all()
     with pytest.raises(Exception):
         dt.locate(-1., 9.0)   
+
+def test_closest_point():
+    dt = dt_5_points()
+    assert dt.closest_point([7.1, 2.1]) == 5
+    with pytest.raises(Exception):
+        dt.locate(-1., 9.0)           
     
