@@ -8,16 +8,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [0.11.0] - XXX
-### Added
-- xy-duplicates are now handled and the behaviour can be configured. Previous version it was first-come-first-served, but now these 4 options are possible: First/Last/Highest/Lowest (First==default). This means that if a new vertex is an xy-duplicate (based on `dt.snap_tolerance`, the z value kept is depending on the configuration.
-- vertices can now have extra attributes stored, eg to keep the LAS attributes (intensity, number_of_returns, etc.)
-- a full unit test suite (pytest) has been added, testing all functions
-- there is now a `./demo` with several examples 
 ### Changed
+- breaking change: all functions take one point (in 2D or 3D) now take an array `[x, y, z]` instead of the separate coordinates as different arguments. This harmonise all functions, and is better when dealing with NumPy. Functions affected: `insert_one_pt()`, `closest_point()`, `locate()`, and `is_inside_convex_hull()`.
 - improve the pydocs + added a section about the extra vertices
 - many bugs were fixed, eg PLY output is now valid, the CityJSON output now correctly omits the infinity vertex
 - the `dt.jump_and_walk` is now exposed and can be used (if your dataset has little spatial coherence it could be useful)
 - the latest version of maturin (to build the Python bindings from Rust) is now used
+### Added
+- xy-duplicates are now handled and the behaviour can be configured. Previous version it was first-come-first-served, but now these 4 options are possible: First/Last/Highest/Lowest (First==default). This means that if a new vertex is an xy-duplicate (based on `dt.snap_tolerance`), the z value kept is depending on the configuration.
+- vertices can now have extra attributes stored, eg to keep the LAS attributes (intensity, number_of_returns, etc.)
+- a full unit test suite (pytest) has been added, testing all functions
+- there is now a `./demo` with several examples 
 ### Removed
 - the function `read_las()` is removed, using "laspy" is simpler/better/flexible so this this the favoured option. Demos and examples are added.
 
