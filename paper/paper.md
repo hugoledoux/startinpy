@@ -66,22 +66,30 @@ Finally, it is possible to output the TIN to several formats: OBJ, PLY, GeoJSON,
 More format are possible through the use of other Python libraries, there are a few examples in the documentation.
 
 
-# Comparison with alternatives
+# Speed comparison with alternatives
 
- - 2D DT computation in batch mode
- - no extra attributes
- - random in a unit square
- - real-world part of AHN4 dataset
- - for GeoTIFF, centres of pixels by scanning each row and column of the file
+The table below shows the time it takes to construct the 2D DT, in a batch operation, for different datasets.
 
-|               | 10k random | 50k random | ~1M LAZ | ~33M LAZ | dem.tiff |
-|:------------- | ---------: | ---------: | ------: | -------: | -------: |
-| delaunay      |      5.41s |    205.47s |       X |        X |        X |
-| SciPy         |      0.43s |      0.51s |    4.3s |    59.9s |    40.3s |
-| SciPy-inc     |      0.44s |      0.51s |       X |        X |        X |
-| Triangle      |      0.24s |      0.27s |    0.7s |    17.9s |     0.9s |
-| __startinpy__ |      0.25s |      0.43s |    2.9s |    43.2s |     1.2s |
+The [delaunay package](https://pypi.org/project/delaunay/) is the most relevant pure Python package on PyPi.
+[SciPy](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.Delaunay.html)  is `scipy.spatial.Delaunay`, and SciPy-inc is the variation where an incremental algorithm is used.
+[Triangle](https://pypi.org/project/triangle/) is the Python bindings of the C code. 
 
+The datasets `random_X` are randomly generated points in unit square, the first one has 10.000 points and the other 50.000 points.
+The datasets `LAZ_X` are real-world lidar datasets obtained from the Netherlands, the `2M` contains exactly 2.144.049 points, and the `33M` 33.107.889 points. Both are openly available, see the `readme.md` in the `speed_comparison` folder in the repository for the URL to download them.
+The dataset `dem.tiff` is the GeoTIFF file in `/data/` and the centre of each grid cell is inserted by reading the rows and columns, the total is 277.750 points.
+
+|           | random_10k | random_50k | LAZ_2M | LAZ_33M | dem.tiff |
+|-----------| ---------: | ---------: | -----: | ------: | -------: |
+| delaunay  |    5.174   |  211.658   |     X  |      X  |      X   |
+| SciPy     |    0.035   |    0.102   |   9.9  |  367.8  |   1.56   |
+| SciPy-inc |    0.022   |    0.077   |     X  |      X  |      X   |
+| Triangle  |    0.004   |    0.017   |   0.9  |   16.2  |   0.16   |
+| startinpy |    0.023   |    0.166   |   4.0  |   40.0  |   0.43   |
+
+If X is written, it is because either it was too slow (for delaunay especially) or if it returned a wrong DT (Scipy-inc for large inputs returns a few triangles only, not the full DT).
+
+Notice that while startinpy is somewhat slower than Triangle, it is expected since, as explained above, it offers more convenience and its data structure is exposed.
+It is also faster and more stable (no crash or wrong results) than the SciPy.
 
 
 # Acknowledgements
