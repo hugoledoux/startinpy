@@ -66,6 +66,24 @@ Finally, it is possible to output the TIN to several formats: OBJ, PLY, GeoJSON,
 More format are possible through the use of other Python libraries, there are a few examples in the documentation.
 
 
+# Comparison with alternatives
+
+ - 2D DT computation in batch mode
+ - no extra attributes
+ - random in a unit square
+ - real-world part of AHN4 dataset
+ - for GeoTIFF, centres of pixels by scanning each row and column of the file
+
+|               | 10k random | 50k random | ~1M LAZ | ~33M LAZ | dem.tiff |
+|:------------- | ---------: | ---------: | ------: | -------: | -------: |
+| delaunay      |      5.41s |    205.47s |       X |        X |        X |
+| SciPy         |      0.43s |      0.51s |    4.3s |    59.9s |    40.3s |
+| SciPy-inc     |      0.44s |      0.51s |       X |        X |        X |
+| Triangle      |      0.24s |      0.27s |    0.7s |    17.9s |     0.9s |
+| __startinpy__ |      0.25s |      0.43s |    2.9s |    43.2s |     1.2s |
+
+
+
 # Acknowledgements
 
 I acknowledge the help of the students following the course *Digital terrain modelling (GEO1015)* at TUDelft over the last few years, their feedback, questions, and frustrations on preliminary versions of `startinpy` helped me greatly.
