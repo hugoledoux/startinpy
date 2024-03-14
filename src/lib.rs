@@ -459,20 +459,20 @@ impl DT {
         }
     }
 
-    /// Set/update the z-value for a specific vertex.
+    /// Update/set the z-value for a specific vertex.
     /// An exception is thrown if the vertex index is invalid.
     ///
     /// :param vi: the index of the vertex
     /// :param z: the new z-value/elevation
     /// :return: True if the attribute was assigned, False otherwise
     ///
-    /// >>> dt.set_vertex_z_value(17, 23.4)
+    /// >>> dt.update_vertex_z_value(17, 23.4)
     /// >>> dt.points[17]
     /// array([15.63303377, 26.9968598 ,  23.4])
     #[pyo3(text_signature = "($self, vi, z)")]
-    #[args(vi, attribute)]
-    fn set_vertex_z_value(&mut self, vi: usize, z: f64) -> PyResult<bool> {
-        match self.t.set_vertex_z_value(vi, z) {
+    #[args(vi, z)]
+    fn update_vertex_z_value(&mut self, vi: usize, z: f64) -> PyResult<bool> {
+        match self.t.update_vertex_z_value(vi, z) {
             Ok(b) => return Ok(b),
             Err(_) => return Ok(false),
         }
