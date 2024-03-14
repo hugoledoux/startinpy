@@ -46,3 +46,11 @@ def test_vertical_exaggeration():
     dt.vertical_exaggeration(2.0)
     assert dt.points[1][2] == pytest.approx(1.0)
     assert dt.points[5][2] == pytest.approx(9.0)
+
+def test_update_vertex_z_value():
+    dt = dt_5_points()
+    re = dt.update_vertex_z_value(3, 5.55)
+    assert re == True
+    assert dt.points[3][2] == pytest.approx(5.55)
+    re = dt.update_vertex_z_value(9, 5.55)
+    assert re == False
