@@ -10,17 +10,27 @@
 
 ## Datasets
 
-  1. __random_10k__: 10000 points randomly generated in a unit square
-  2. __random_50k__: 50000 points randomly generated in a unit square
-  3. __LAZ_2M__: a real-world subset of the [AHN4 dataset](https://www.ahn.nl/) (covering completely the Neterlands). The sub-tile [04GN2_21](https://geotiles.citg.tudelft.nl/AHN4_T/04GN2_21.LAZ) contains 2 144 049 points.
-  4. __LAZ_33M__: a real-world subset of the [AHN4 dataset](https://www.ahn.nl/). The sub-tile [69EZ1_21.LAZ](https://geotiles.citg.tudelft.nl/AHN4_T/69EZ1_21.LAZ) contains 33 107 889 points.
-  5. __dem.tiff__: the GeoTIFF file in `/data/` is a 550x505 gridded terrain. We take the centre of each cell and this create a 277 750 dataset.
+  1. __random_10k__: 10,000 points randomly generated in a unit square
+  2. __random_50k__: 50,000 points randomly generated in a unit square
+  3. __LAZ_2M__: a real-world subset of the [AHN4 dataset](https://www.ahn.nl/) (covering completely the Neterlands). The sub-tile [04GN2_21](https://geotiles.citg.tudelft.nl/AHN4_T/04GN2_21.LAZ) contains 2,144,049 points.
+  4. __LAZ_33M__: a real-world subset of the [AHN4 dataset](https://www.ahn.nl/). The sub-tile [69EZ1_21.LAZ](https://geotiles.citg.tudelft.nl/AHN4_T/69EZ1_21.LAZ) contains 33,107,889 points.
+  5. __dem.tiff__: the GeoTIFF file in `/data/` is a 550x505 gridded terrain. We take the centre of each cell, reading row-by-row and column-by-column, and this creates a 277,750 dataset of points that are collinear and cocircular with many others (degenerate cases for the DT).
 
 
 ## To replicate
 
-  1. install all the packages above
+  1. install those packages:
+    - numpy
+    - laspy
+    - rasterio
+    - time
+    - startinpy
+    - triangle
+    - scipy
+    - delaunay
+    - https://github.com/HakanSeven12/Delaunator-Python
+    - py_markdown_table
   2. download the 2 LAZ files
   3. change the path (lines 17+18)
-  4. `python comparisons`
+  4. `python comparisons`, this generates a summary table in Markdown
 
