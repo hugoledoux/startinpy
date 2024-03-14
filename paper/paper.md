@@ -69,14 +69,15 @@ More format are possible through the use of other Python libraries, there are a 
 # Speed comparison with alternatives
 
 The table below shows the time it takes to construct the 2D DT, in a batch operation, for different datasets.
+The details of the (openly available) datasets are available on the [GitHub repository of startinpy](https://github.com/hugoledoux/startinpy/tree/joss/dt_comparisons), and the Python code to replicate the table is available.
 
-The [delaunay package](https://pypi.org/project/delaunay/) is the most relevant pure Python package on PyPi.
+The [delaunay package](https://pypi.org/project/delaunay/) is the most relevant pure Python package on PyPi when one searches for "Delaunay", and the [Delaunator package](https://github.com/HakanSeven12/Delaunator-Python) is also pure Python but with promises to be "fast".
 [SciPy](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.Delaunay.html)  is `scipy.spatial.Delaunay`, and SciPy-inc is the variation where an incremental algorithm is used.
 [Triangle](https://pypi.org/project/triangle/) is the Python bindings of the C code. 
 
-The datasets `random_X` are randomly generated points in unit square, the first one has 10.000 points and the other 50.000 points.
-The datasets `LAZ_X` are real-world lidar datasets obtained from the Netherlands, the `2M` contains exactly 2.144.049 points, and the `33M` 33.107.889 points. Both are openly available, see the `readme.md` in the `speed_comparison` folder in the repository for the URL to download them.
-The dataset `dem.tiff` is the GeoTIFF file in `/data/` and the centre of each grid cell is inserted by reading the rows and columns, the total is 277.750 points.
+The datasets `random_X` are randomly generated points in unit square, the first one has 10,000 points and the other 50,000 points.
+The datasets `LAZ_X` are real-world lidar datasets obtained from the Netherlands, the `2M` contains exactly 2,144,049 points, and the `33M` 33,107,889 points. Both are openly available, see the `readme.md` in the `speed_comparison` folder in the repository for the URL to download them.
+The dataset `dem.tiff` is the GeoTIFF file in `/data/` and the centre of each grid cell is inserted by reading the rows and columns, the total is 277,750 points.
 
 |           | random_10k | random_50k | LAZ_2M | LAZ_33M | dem.tiff |
 |-----------| ---------: | ---------: | -----: | ------: | -------: |

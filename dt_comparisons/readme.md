@@ -17,6 +17,18 @@
   5. __dem.tiff__: the GeoTIFF file in `/data/` is a 550x505 gridded terrain. We take the centre of each cell, reading row-by-row and column-by-column, and this creates a 277,750 dataset of points that are collinear and cocircular with many others (degenerate cases for the DT).
 
 
+## Results
+
+
+|          |random_10k|random_50k|LAZ_2M|LAZ_33M|dem.tiff|
+|:---------|----------|---------:|-----:|------:|-------:|
+|delaunator|   0.219  |    0.16  | 49.2 |     X |   3.58 |
+| delaunay |   4.910  |  211.38  |    X |     X |      X |
+| scipy    |   0.017  |    0.09  | 10.1 | 650.3 |   1.79 |
+| scipy-inc|   0.015  |    0.08  |    X |     X |      X |
+| triangle |   0.004  |    0.02  |  0.9 |  16.8 |   0.19 |
+| startinpy|   0.018  |    0.18  |  4.2 |  41.8 |   0.46 |
+
 ## To replicate
 
   1. install those packages:
