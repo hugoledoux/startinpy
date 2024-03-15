@@ -392,7 +392,7 @@ impl DT {
     fn closest_point(&self, x: f64, y: f64) -> PyResult<usize> {
         let re = self.t.closest_point(x, y);
         if re.is_err() {
-            return Err(PyErr::new::<exceptions::Py, _>("Outside CH"));
+            return Err(PyErr::new::<exceptions::PyUnboundLocalError, _>("Outside CH"));
         } else {
             Ok(re.unwrap())
         }
