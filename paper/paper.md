@@ -45,7 +45,7 @@ When it comes to modelling 2.5D terrains, the existing Python libraries have in 
 
 startinpy was developed specifically for needs of 2.5D terrain modelling, and addresses the four issues described above.
 
-Its core (construction of the DT, deletion, interpolation, etc) is written in Rust (and called simply `startin`, the source code is available at https://github.com/hugoledoux/startin) and can be used in Rust programs. 
+Its core (construction of the DT, deletion, interpolation, etc) is written in Rust (and called simply 'startin', the source code is available at https://github.com/hugoledoux/startin) and can be used in Rust programs. 
 A C-interface to the library is also available, this allows us to use, for instance, the library in Julia (https://github.com/evetion/startin.jl); it has been used recently to build a global coastal terrain using laser altimetric measurements from the space station [@Pronk24].
 Observe that the robust predicates as described in @Shewchuk96 are used (the code has been converted to pure Rust, see https://docs.rs/robust/latest/robust/), which means that startinpy should not crash because of floating-point arithmetic.
 Also, since the library is not written in pure Python, a GitHub Action compiles the bindings for the lastest versions of Python, and for Windows/macOS/Linux.
