@@ -25,7 +25,7 @@ Moreover, unlike several triangulation libraries, startinpy exposes its data str
 This can be useful for quality control, to derive properties like slope, to convert to different formats, etc. 
 The underlying code of startinpy is written in the language Rust (so it is rather fast), robust arithmetic is used (so it should not crash), and it use NumPy for input/output of data, which allows it to integrate with other Python libraries.
 
-![A lidar dataset terrain reconstructed with startinpy and visualised with another Python library (Polyscope).](polyscope_gui.jpg){ width=75% }
+![A lidar dataset terrain reconstructed with startinpy and visualised with another Python library (Polyscope).](polyscope_gui.jpg)
 
 
 # Statement of need
@@ -98,7 +98,7 @@ The datasets `LAZ_X` are real-world lidar datasets obtained from the Netherlands
 The dataset `dem.tiff` is the GeoTIFF file in `/data/` and the centre of each grid cell is inserted by reading the rows and columns, the total is 277,750 points.
 
 |            |random_10k|random_50k|LAZ_2M|LAZ_33M|dem.tiff|
-|:-----------|----------|---------:|-----:|------:|-------:|
+|:-----------|---------:|---------:|-----:|------:|-------:|
 | Delaunator |   0.219  |    0.84  | 49.2 | 898.1 |   3.55 |
 | SciPy      |   0.017  |    0.09  | 10.1 | 650.3 |   1.79 |
 | SciPy-inc  |   0.015  |    0.08  |    X |     X |      X |
