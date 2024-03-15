@@ -369,7 +369,7 @@ impl DT {
     fn is_vertex_removed(&self, vi: usize) -> PyResult<bool> {
         let re = self.t.is_vertex_removed(vi);
         if re.is_err() {
-            return Err(PyErr::new::<exceptions::PyException, _>(
+            return Err(PyErr::new::<exceptions::PyIndexError, _>(
                 "Invalid vertex index.",
             ));
         } else {
@@ -392,7 +392,7 @@ impl DT {
     fn closest_point(&self, x: f64, y: f64) -> PyResult<usize> {
         let re = self.t.closest_point(x, y);
         if re.is_err() {
-            return Err(PyErr::new::<exceptions::PyException, _>("Outside CH"));
+            return Err(PyErr::new::<exceptions::Py, _>("Outside CH"));
         } else {
             Ok(re.unwrap())
         }
@@ -556,7 +556,7 @@ impl DT {
             tr.push(t.v[2]);
             return Ok(PyArray::from_vec(py, tr));
         } else {
-            return Err(PyErr::new::<exceptions::PyException, _>("Outside CH"));
+            return Err(PyErr::new::<exceptions::PyUnboundLocalError, _>("Outside CH"));
         }
     }
 
@@ -586,7 +586,7 @@ impl DT {
     ) -> PyResult<&'py PyArray<f64, numpy::Ix1>> {
         match interpolant.get_item("method") {
             None => {
-                return Err(PyErr::new::<exceptions::PyException, _>(
+                return Err(PyErr::new::<exceptions::PyValueError, _>(
                     "Wrong parameters.",
                 ))
             }
@@ -598,19 +598,19 @@ impl DT {
                         let radius = interpolant.get_item("radius");
                         let power = interpolant.get_item("power");
                         if radius.is_none() || power.is_none() {
-                            return Err(PyErr::new::<exceptions::PyException, _>(
+                            return Err(PyErr::new::<exceptions::PyValueError, _>(
                                 "Wrong parameters.",
                             ));
                         } else {
                             let r1: f64 = radius.unwrap().extract()?;
                             if r1 <= 0.0 {
-                                return Err(PyErr::new::<exceptions::PyException, _>(
+                                return Err(PyErr::new::<exceptions::PyValueError, _>(
                                     "Wrong parameters.",
                                 ));
                             }
                             let p1: f64 = power.unwrap().extract()?;
                             if p1 <= 0.0 {
-                                return Err(PyErr::new::<exceptions::PyException, _>(
+                                return Err(PyErr::new::<exceptions::PyValueError, _>(
                                     "Wrong parameters.",
                                 ));
                             }
@@ -710,7 +710,7 @@ impl DT {
                         Ok(PyArray::from_vec(py, re))
                     }
                     _ => {
-                        return Err(PyErr::new::<exceptions::PyException, _>(
+                        return Err(PyErr::new::<exceptions::PyValueError, _>(
                             "Unknown interpolation method.",
                         ))
                     }
@@ -942,7 +942,7 @@ impl DT {
         let mut re = startin::interpolation::interpolate(&i_nn, &mut self.t, &vec![[x, y]]);
         let re1 = re.pop().expect("no results");
         if re1.is_err() {
-            return Err(PyErr::new::<exceptions::PyException, _>("Outside CH"));
+            return Err(PyErr::new::<exceptions::PyUnboundLocalError, _>("Outside CH"));
         }
         Ok(re1.unwrap())
     }
@@ -952,7 +952,7 @@ impl DT {
         let mut re = startin::interpolation::interpolate(&i_tin, &mut self.t, &vec![[x, y]]);
         let re1 = re.pop().expect("no results");
         if re1.is_err() {
-            return Err(PyErr::new::<exceptions::PyException, _>("Outside CH"));
+            return Err(PyErr::new::<exceptions::PyUnboundLocalError, _>("Outside CH"));
         }
         Ok(re1.unwrap())
     }
@@ -962,7 +962,7 @@ impl DT {
         let mut re = startin::interpolation::interpolate(&i_lp, &mut self.t, &vec![[x, y]]);
         let re1 = re.pop().expect("no results");
         if re1.is_err() {
-            return Err(PyErr::new::<exceptions::PyException, _>("Outside CH"));
+            return Err(PyErr::new::<exceptions::PyUnboundLocalError, _>("Outside CH"));
         }
         Ok(re1.unwrap())
     }
@@ -972,7 +972,7 @@ impl DT {
         let mut re = startin::interpolation::interpolate(&i_nni, &mut self.t, &vec![[x, y]]);
         let re1 = re.pop().expect("no results");
         if re1.is_err() {
-            return Err(PyErr::new::<exceptions::PyException, _>("Outside CH"));
+            return Err(PyErr::new::<exceptions::PyUnboundLocalError, _>("Outside CH"));
         }
         Ok(re1.unwrap())
     }
@@ -985,7 +985,7 @@ impl DT {
         let mut re = startin::interpolation::interpolate(&i_idw, &mut self.t, &vec![[x, y]]);
         let re1 = re.pop().expect("no results");
         if re1.is_err() {
-            return Err(PyErr::new::<exceptions::PyException, _>(
+            return Err(PyErr::new::<exceptions::PyUnboundLocalError, _>(
                 "Search Circle Empty",
             ));
         }
