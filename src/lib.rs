@@ -541,7 +541,7 @@ impl DT {
     /// :return: True if [x,y] is inside the convex hull or on its boundary, False otherwise.
     #[pyo3(text_signature = "($self, p2)")]
     #[args(x, y)]
-    fn is_inside_convex_hull(&self, p2: [f64; 2]) -> PyResult<bool> {
+    fn is_inside_convex_hull(&mut self, p2: [f64; 2]) -> PyResult<bool> {
         let re = self.t.locate(p2[0], p2[1]);
         if re.is_ok() == true {
             return Ok(true);
@@ -591,7 +591,7 @@ impl DT {
     /// >>>     print(e)
     #[pyo3(text_signature = "($self, p2)")]
     #[args(x, y)]
-    fn closest_point(&self, p2: [f64; 2]) -> PyResult<usize> {
+    fn closest_point(&mut self, p2: [f64; 2]) -> PyResult<usize> {
         let re = self.t.closest_point(p2[0], p2[1]);
         if re.is_err() {
             return Err(PyErr::new::<exceptions::PyException, _>("Outside CH"));
@@ -752,7 +752,7 @@ impl DT {
     #[pyo3(text_signature = "($self, p2)")]
     #[args(p2)]
     fn locate<'py>(
-        &self,
+        &mut self,
         py: Python<'py>,
         p2: [f64; 2],
     ) -> PyResult<&'py PyArray<usize, numpy::Ix1>> {
