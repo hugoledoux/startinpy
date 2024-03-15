@@ -1,11 +1,10 @@
 
 ## Python library tested
 
-  1. [Delaunator](https://github.com/HakanSeven12/Delaunator-Python): pure Python
-  2. [delaunay](https://pypi.org/project/delaunay/): pure Python
-  3. [SciPy](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.Delaunay.html): wrapper around [Qhull](http://qhull.org/), written in C. Using the batch construction in 2D.
-  4. [SciPy-inc](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.Delaunay.html): wrapper around [Qhull](http://qhull.org/), written in C. Using the incremental insertion (as startinpy does).
-  5. [Triangle](https://pypi.org/project/triangle/): wrapper around the [fast and robust C library](https://www.cs.cmu.edu/~quake/triangle.html) that performs constrained DT and meshing
+  1. [Delaunator](https://github.com/HakanSeven12/Delaunator-Python): pure Python port of a proven fast triangulator written original in JavaScript https://github.com/mapbox/delaunator. 
+  2. [SciPy](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.Delaunay.html): wrapper around [Qhull](http://qhull.org/), written in C. Using the batch construction in 2D.
+  3. [SciPy-inc](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.Delaunay.html): wrapper around [Qhull](http://qhull.org/), written in C. Using the incremental insertion (as startinpy does).
+  4. [Triangle](https://pypi.org/project/triangle/): wrapper around the [fast and robust C library](https://www.cs.cmu.edu/~quake/triangle.html) that performs constrained DT and meshing
 
 
 ## Datasets
@@ -20,14 +19,13 @@
 ## Results
 
 
-|          |random_10k|random_50k|LAZ_2M|LAZ_33M|dem.tiff|
-|:---------|----------|---------:|-----:|------:|-------:|
-|delaunator|   0.219  |    0.16  | 49.2 |     X |   3.58 |
-| delaunay |   4.910  |  211.38  |    X |     X |      X |
-| scipy    |   0.017  |    0.09  | 10.1 | 650.3 |   1.79 |
-| scipy-inc|   0.015  |    0.08  |    X |     X |      X |
-| triangle |   0.004  |    0.02  |  0.9 |  16.8 |   0.19 |
-| startinpy|   0.018  |    0.18  |  4.2 |  41.8 |   0.46 |
+|            |random_10k|random_50k|LAZ_2M|LAZ_33M|dem.tiff|
+|:-----------|----------|---------:|-----:|------:|-------:|
+| delaunator |   0.219  |    0.84  | 49.2 | 898.1 |   3.55 |
+| scipy      |   0.017  |    0.09  | 10.1 | 650.3 |   1.79 |
+| scipy-inc  |   0.015  |    0.08  |    X |     X |      X |
+| triangle   |   0.004  |    0.02  |  0.9 |  16.8 |   0.19 |
+| startinpy  |   0.018  |    0.18  |  4.2 |  41.8 |   0.46 |
 
 ## To replicate
 
