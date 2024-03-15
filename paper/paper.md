@@ -74,16 +74,16 @@ The [Delaunator package](https://github.com/HakanSeven12/Delaunator-Python) is p
 [Triangle](https://pypi.org/project/triangle/) is the Python bindings of the C code. 
 
 |                        | Delaunator | SciPy | SciPy-inc | Triangle | startinpy |
-|------------------------|------------|-------|-----------|----------|-----------|
-| constrained DT         |    ❌      | ❌   |     ❌    |   ✅     |   ❌     |
-| data structure exposed |    ✅      | ❌   |     ❌    |   ❌     |   ✅     |
-| efficient searches     |    ✅      | ✅   |     ✅    |   ❌     |   ✅     |
-| elevation/2.5D         |    ❌      | ❌   |     ❌    |   ❌     |   ✅     |
-| extra attributes       |    ❌      | ❌   |     ❌    |   ❌     |   ✅     |
-| fast                   |    ❌      | ❌   |     ❌    |   🚀     |   ✅     |
-| incremental insertion  |    ❌      | ❌   |     ✅    |   ❌     |   ✅     |
-| remove vertices        |    ❌      | ❌   |     ❌    |   ❌     |   ✅     |
-| xy-duplicate handling  |    ❌      | ❌   |     ❌    |   ❌     |   ✅     |
+|------------------------|:----------:|:-----:|:---------:|:--------:|:---------:|
+| constrained DT         |    --      | --    |     --    |   +      |   --      |
+| data structure exposed |    +       | --    |     --    |   --     |   +       |
+| efficient searches     |    +       | +     |     +     |   --     |   +       |
+| elevation/2.5D         |    --      | --    |     --    |   --     |   +       |
+| extra attributes       |    --      | --    |     --    |   --     |   +       |
+| fast                   |    --      | --    |     --    |   ++     |   +       |
+| incremental insertion  |    --      | --    |     +     |   --     |   +       |
+| remove vertices        |    --      | --    |     --    |   --     |   +       |
+| xy-duplicate handling  |    --      | --    |     --    |   --     |   +       |
 
 
 Notice that startinpy is the only offering to store z-values and extra attributes, the others are pure 2D Delaunay triangulator.
