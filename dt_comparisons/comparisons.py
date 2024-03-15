@@ -35,7 +35,7 @@ def t_delaunator():
     t[-1]["random_10k"] = "{:.3f}".format(t2-t1)
     #-- 50k
     t1 = time.perf_counter()
-    Delaunator(pts_2d_10k)
+    Delaunator(pts_2d_50k)
     t2 = time.perf_counter()
     t[-1]["random_50k"] = "{:.3f}".format(t2-t1)
     #-- LAZ_2M
@@ -45,14 +45,14 @@ def t_delaunator():
     Delaunator(pts)
     t2 = time.perf_counter()
     t[-1]["LAZ_2M"] = "{:.3f}".format(t2-t1)
-    # #-- LAZ_33M
-    # las = laspy.read(path_laz_33m)
-    # pts = np.vstack((las.x, las.y)).transpose()
-    # t1 = time.perf_counter()
-    # Delaunator(pts)
-    # t2 = time.perf_counter()
-    # t[-1]["LAZ_33M"] = "{:.3f}".format(t2-t1)
-    t[-1]["LAZ_33M"] = "X"
+    #-- LAZ_33M
+    las = laspy.read(path_laz_33m)
+    pts = np.vstack((las.x, las.y)).transpose()
+    t1 = time.perf_counter()
+    Delaunator(pts)
+    t2 = time.perf_counter()
+    t[-1]["LAZ_33M"] = "{:.3f}".format(t2-t1)
+    # t[-1]["LAZ_33M"] = "X"
     #-- dem.tiff
     d = rasterio.open('/Users/hugo/projects/startinpy/data/dem_01.tif')
     band1 = d.read(1)
@@ -69,60 +69,6 @@ def t_delaunator():
     Delaunator(pts)
     t2 = time.perf_counter()
     t[-1]["dem.tiff"] = "{:.3f}".format(t2-t1)
-
-def t_delaunay():
-    t.append({"library": "delaunay"})
-    #-- 10k
-    vertices = [Vertex(uniform(0, 100), uniform(0, 100)) for v in range(10000)]
-    t1 = time.perf_counter()
-    m = Mesh() 
-    m.loadVertices(vertices)
-    end = len(vertices) - 1
-    delaunay(m, 0, end) 
-    t2 = time.perf_counter()
-    t[-1]["random_10k"] = "{:.3f}".format(t2-t1)
-    #-- 50k
-    vertices = [Vertex(uniform(0, 100), uniform(0, 100)) for v in range(50000)]
-    t1 = time.perf_counter()
-    m = Mesh() 
-    m.loadVertices(vertices)
-    end = len(vertices) - 1
-    delaunay(m, 0, end) 
-    t2 = time.perf_counter()
-    t[-1]["random_50k"] = "{:.3f}".format(t2-t1)
-    #-- LAZ_2M
-    # las = laspy.read(path_laz_2m)
-    # pts = np.vstack((las.x, las.y)).transpose()
-    # t1 = time.perf_counter()
-    # Delaunator(pts)
-    # t2 = time.perf_counter()
-    # t[-1]["LAZ_2M"] = "{:.3f}".format(t2-t1)
-    t[-1]["LAZ_2M"] = "X"
-    # #-- LAZ_33M
-    # las = laspy.read(path_laz_33m)
-    # pts = np.vstack((las.x, las.y)).transpose()
-    # t1 = time.perf_counter()
-    # Delaunator(pts)
-    # t2 = time.perf_counter()
-    # t[-1]["LAZ_33M"] = "{:.3f}".format(t2-t1)
-    t[-1]["LAZ_33M"] = "X"
-    #-- dem.tiff
-    # d = rasterio.open('/Users/hugo/projects/startinpy/data/dem_01.tif')
-    # band1 = d.read(1)
-    # tr = d.transform
-    # pts = []
-    # for i in range(band1.shape[0]):
-    #     for j in range(band1.shape[1]):
-    #          x = tr[2] + (j * tr[0]) + (tr[0] / 2)
-    #          y = tr[5] + (i * tr[4]) + (tr[4] / 2)
-    #          z = band1[i][j]
-    #          if z != d.nodatavals:
-    #              pts.append([x, y])
-    # t1 = time.perf_counter()
-    # Delaunator(pts)
-    # t2 = time.perf_counter()
-    # t[-1]["dem.tiff"] = "{:.3f}".format(t2-t1)
-    t[-1]["dem.tiff"] = "X"
 
 def t_startinpy():
     t.append({"library": "startinpy"})
@@ -233,38 +179,38 @@ def t_scipy_inc():
     t2 = time.perf_counter()
     t[-1]["random_50k"] = "{:.3f}".format(t2-t1)
     #-- LAZ_2M
-    # las = laspy.read(path_laz_2m)
-    # pts = np.vstack((las.x, las.y, las.z)).transpose()
-    # t1 = time.perf_counter()
-    # tri = Delaunay(pts, incremental=True)
-    # t2 = time.perf_counter()
-    # t[-1]["LAZ_2M"] = "{:.3f}".format(t2-t1)
-    t[-1]["LAZ_2M"] = "X"
+    las = laspy.read(path_laz_2m)
+    pts = np.vstack((las.x, las.y, las.z)).transpose()
+    t1 = time.perf_counter()
+    tri = Delaunay(pts, incremental=True)
+    t2 = time.perf_counter()
+    t[-1]["LAZ_2M"] = "{:.3f}".format(t2-t1)
+    # t[-1]["LAZ_2M"] = "X"
     #-- LAZ_33M
-    # las = laspy.read(path_laz_33m)
-    # pts = np.vstack((las.x, las.y, las.z)).transpose()
-    # t1 = time.perf_counter()
-    # tri = Delaunay(pts, incremental=True)
-    # t2 = time.perf_counter()
-    # t[-1]["LAZ_33M"] = "{:.3f}".format(t2-t1)
-    t[-1]["LAZ_33M"] = "X"
+    las = laspy.read(path_laz_33m)
+    pts = np.vstack((las.x, las.y, las.z)).transpose()
+    t1 = time.perf_counter()
+    tri = Delaunay(pts, incremental=True)
+    t2 = time.perf_counter()
+    t[-1]["LAZ_33M"] = "{:.3f}".format(t2-t1)
+    # t[-1]["LAZ_33M"] = "X"
     #-- dem.tiff
-    # d = rasterio.open('/Users/hugo/projects/startinpy/data/dem_01.tif')
-    # band1 = d.read(1)
-    # tr = d.transform
-    # pts = []
-    # for i in range(band1.shape[0]):
-    #     for j in range(band1.shape[1]):
-    #          x = tr[2] + (j * tr[0]) + (tr[0] / 2)
-    #          y = tr[5] + (i * tr[4]) + (tr[4] / 2)
-    #          z = band1[i][j]
-    #          if z != d.nodatavals:
-    #              pts.append([x, y, z])
-    # t1 = time.perf_counter()
-    # tri = Delaunay(pts, incremental=True)
-    # t2 = time.perf_counter()
-    # t[-1]["dem.tiff"] = "{:.3f}".format(t2-t1) 
-    t[-1]["dem.tiff"] = "X"
+    d = rasterio.open('/Users/hugo/projects/startinpy/data/dem_01.tif')
+    band1 = d.read(1)
+    tr = d.transform
+    pts = []
+    for i in range(band1.shape[0]):
+        for j in range(band1.shape[1]):
+             x = tr[2] + (j * tr[0]) + (tr[0] / 2)
+             y = tr[5] + (i * tr[4]) + (tr[4] / 2)
+             z = band1[i][j]
+             if z != d.nodatavals:
+                 pts.append([x, y, z])
+    t1 = time.perf_counter()
+    tri = Delaunay(pts, incremental=True)
+    t2 = time.perf_counter()
+    t[-1]["dem.tiff"] = "{:.3f}".format(t2-t1) 
+    # t[-1]["dem.tiff"] = "X"
 
 def t_triangle():
     t.append({"library": "triangle"})
@@ -317,11 +263,10 @@ def t_triangle():
 
 
 if __name__ == '__main__':
-    # t_delaunator()
-    # t_delaunay()
+    t_delaunator()
     t_startinpy()
-    # t_scipy()
-    # t_scipy_inc()
-    t_triangle()
+    t_scipy()
+    t_scipy_inc()
+    t_triangl¢e()
     markdown = markdown_table(t).get_markdown()
     print(markdown)
