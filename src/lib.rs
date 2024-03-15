@@ -359,7 +359,7 @@ impl DT {
     /// >>> dt = startinpy.DT(extra_attributes=True)
     /// >>> dt.insert_one_pt(85000.0, 444003.2, 2.2, intensity=111.1)
     /// >>> ...
-    /// >>> dt.attributes('intensity')
+    /// >>> dt.attribute('intensity')
     /// array([nan, 111.1, 22.2, 46.4, nan, ...,   77.8, 111.1])
     #[pyo3(text_signature = "($self, attribute)")]
     #[args(attribute)]
@@ -412,7 +412,7 @@ impl DT {
     /// >>> dt = startinpy.DT(extra_attributes=True)
     /// >>> dt.insert_one_pt(85000.0, 444003.2, 2.2, intensity=111.1, reflectance=29.9)
     /// >>> ...
-    /// >>> json.loads(dt.get_attribute(17))
+    /// >>> json.loads(dt.get_vertex_attributes(17))
     /// {'intensity': 111.1, 'reflectance': 99.1}
     #[pyo3(text_signature = "($self, vi)")]
     #[args(vi)]
@@ -446,8 +446,8 @@ impl DT {
     /// >>> dt.insert_one_pt(85000.0, 444003.2, 2.2, intensity=111.1, reflectance=29.9)
     /// >>> ...
     /// >>> new_a = {'intensity': 155.5, 'reflectance': 222.2, 'extra': 3}
-    /// >>> dt.set_attribute(17, json.dumps(new_a))
-    /// >>> dt.get_attribute(17)
+    /// >>> dt.set_vertex_attributes(17, json.dumps(new_a))
+    /// >>> dt.get_vertex_attributes(17)
     /// '{"extra":3,"intensity":155.5,"reflectance":222.2}'    
     #[pyo3(text_signature = "($self, vi, attribute)")]
     #[args(vi, attribute)]
