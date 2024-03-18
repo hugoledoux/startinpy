@@ -1,5 +1,8 @@
+extern crate startin;
+
 use numpy::PyArray;
 use pyo3::exceptions;
+
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
 
@@ -11,8 +14,6 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use serde_json::Value;
 use serde_json::{to_value, Map};
-
-extern crate startin;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Cityjson {
@@ -204,13 +205,13 @@ impl DT {
             Ok(_x) => return Ok(()),
             Err(why) => match why {
                 startin::StartinError::VertexInfinite => {
-                    return Err(PyErr::new::<exceptions::PyIndexError, _>(
-                        "Invalid index, cannot remove infinite vertex.",
+                    return Err(exceptions::PyIndexError::new_err(
+                        "Invalid vertex index: cannot remove infinite vertex",
                     ));
                 }
                 _ => {
-                    return Err(PyErr::new::<exceptions::PyIndexError, _>(
-                        "Invalid index, vertex doesn't exist.",
+                    return Err(exceptions::PyIndexError::new_err(
+                        "Invalid vertex index:vertex doesn't exist",
                     ));
                 }
             },
@@ -246,7 +247,7 @@ impl DT {
                     "'{}' is an unknown insertion strategy for insert()",
                     insertionstrategy
                 );
-                return Err(PyErr::new::<exceptions::PyException, _>(s));
+                return Err(exceptions::PyAttributeError::new_err(s));
             }
         }
         Ok(())
@@ -324,10 +325,10 @@ impl DT {
 
             _ => {
                 let s = format!(
-                    "'{}' is an unknown method to handle duplicates (First/Last/Lowest/Highest).",
+                    "'{}' is an unknown method to handle duplicates (First/Last/Lowest/Highest)",
                     m
                 );
-                return Err(PyErr::new::<exceptions::PyException, _>(s));
+                return Err(exceptions::PyAttributeError::new_err(s));
             }
         }
         Ok(())
@@ -421,16 +422,14 @@ impl DT {
             Ok(v) => return Ok(v.to_string()),
             Err(e) => match e {
                 startin::StartinError::VertexRemoved => {
-                    return Err(PyErr::new::<exceptions::PyException, _>(
-                        "Invalid vertex index.",
-                    ))
+                    return Err(exceptions::PyIndexError::new_err("Invalid vertex index"))
                 }
                 startin::StartinError::TinHasNoAttributes => {
-                    return Err(PyErr::new::<exceptions::PyException, _>(
-                        "TIN has no extra attributes.",
+                    return Err(exceptions::PyException::new_err(
+                        "TIN has no extra attributes",
                     ))
                 }
-                _ => return Err(PyErr::new::<exceptions::PyException, _>("Error")),
+                _ => return Err(exceptions::PyException::new_err("Error")),
             },
         }
     }
@@ -507,9 +506,7 @@ impl DT {
         if re.is_ok() {
             return Ok(PyArray::from_vec(py, re.unwrap()));
         } else {
-            return Err(PyErr::new::<exceptions::PyIndexError, _>(
-                "Invalid vertex index.",
-            ));
+            return Err(exceptions::PyIndexError::new_err("Invalid vertex index"));
         }
     }
 
@@ -571,9 +568,7 @@ impl DT {
     fn is_vertex_removed(&self, vi: usize) -> PyResult<bool> {
         let re = self.t.is_vertex_removed(vi);
         if re.is_err() {
-            return Err(PyErr::new::<exceptions::PyException, _>(
-                "Invalid vertex index.",
-            ));
+            return Err(exceptions::PyIndexError::new_err("Invalid vertex index"));
         } else {
             Ok(re.unwrap())
         }
@@ -594,7 +589,7 @@ impl DT {
     fn closest_point(&mut self, p2: [f64; 2]) -> PyResult<usize> {
         let re = self.t.closest_point(p2[0], p2[1]);
         if re.is_err() {
-            return Err(PyErr::new::<exceptions::PyException, _>("Outside CH"));
+            return Err(exceptions::PyException::new_err("Outside convex hull"));
         } else {
             Ok(re.unwrap())
         }
@@ -637,9 +632,7 @@ impl DT {
             }
             return Ok(PyArray::from_vec2(py, &trs).unwrap());
         } else {
-            return Err(PyErr::new::<exceptions::PyIndexError, _>(
-                "Invalid vertex index.",
-            ));
+            return Err(exceptions::PyIndexError::new_err("Invalid vertex index"));
         }
     }
 
@@ -678,9 +671,7 @@ impl DT {
             }
             return Ok(PyArray::from_vec2(py, &trs).unwrap());
         } else {
-            return Err(PyErr::new::<exceptions::PyIndexError, _>(
-                "Triangle Not Present.",
-            ));
+            return Err(exceptions::PyIndexError::new_err("Triangle not present"));
         }
     }
 
@@ -701,9 +692,7 @@ impl DT {
         if re.is_ok() {
             return Ok(PyArray::from_vec(py, re.unwrap()));
         } else {
-            return Err(PyErr::new::<exceptions::PyIndexError, _>(
-                "Invalid vertex index.",
-            ));
+            return Err(exceptions::PyIndexError::new_err("Invalid vertex index"));
         }
     }
 
@@ -765,7 +754,7 @@ impl DT {
             tr.push(t.v[2]);
             return Ok(PyArray::from_vec(py, tr));
         } else {
-            return Err(PyErr::new::<exceptions::PyException, _>("Outside CH"));
+            return Err(exceptions::PyException::new_err("Outside convex hull"));
         }
     }
 
@@ -795,11 +784,7 @@ impl DT {
         strict: bool,
     ) -> PyResult<&'py PyArray<f64, numpy::Ix1>> {
         match interpolant.get_item("method") {
-            None => {
-                return Err(PyErr::new::<exceptions::PyException, _>(
-                    "Wrong parameters.",
-                ))
-            }
+            None => return Err(exceptions::PyValueError::new_err("Wrong parameters")),
             Some(m) => {
                 let m: String = m.extract()?;
                 let mut re: Vec<f64> = Vec::with_capacity(locations.len());
@@ -808,21 +793,15 @@ impl DT {
                         let radius = interpolant.get_item("radius");
                         let power = interpolant.get_item("power");
                         if radius.is_none() || power.is_none() {
-                            return Err(PyErr::new::<exceptions::PyException, _>(
-                                "Wrong parameters.",
-                            ));
+                            return Err(exceptions::PyValueError::new_err("Wrong parameters"));
                         } else {
                             let r1: f64 = radius.unwrap().extract()?;
                             if r1 <= 0.0 {
-                                return Err(PyErr::new::<exceptions::PyException, _>(
-                                    "Wrong parameters.",
-                                ));
+                                return Err(exceptions::PyValueError::new_err("Wrong parameters"));
                             }
                             let p1: f64 = power.unwrap().extract()?;
                             if p1 <= 0.0 {
-                                return Err(PyErr::new::<exceptions::PyException, _>(
-                                    "Wrong parameters.",
-                                ));
+                                return Err(exceptions::PyValueError::new_err("Wrong parameters"));
                             }
                             for loc in locations {
                                 let a = self.interpolate_idw(loc, r1, p1);
@@ -831,10 +810,10 @@ impl DT {
                                 } else {
                                     if strict == true {
                                         let s = format!(
-                                            "({}, {}) no points in search radius.",
+                                            "({}, {}) no points in search radius",
                                             loc[0], loc[1]
                                         );
-                                        return Err(PyErr::new::<exceptions::PyException, _>(s));
+                                        return Err(exceptions::PyException::new_err(s));
                                     } else {
                                         re.push(f64::NAN);
                                     }
@@ -851,10 +830,10 @@ impl DT {
                             } else {
                                 if strict == true {
                                     let s = format!(
-                                        "({}, {}) is outside the convex hull.",
+                                        "({}, {}) is outside the convex hull",
                                         loc[0], loc[1]
                                     );
-                                    return Err(PyErr::new::<exceptions::PyException, _>(s));
+                                    return Err(exceptions::PyException::new_err(s));
                                 } else {
                                     re.push(f64::NAN);
                                 }
@@ -870,10 +849,10 @@ impl DT {
                             } else {
                                 if strict == true {
                                     let s = format!(
-                                        "({}, {}) is outside the convex hull.",
+                                        "({}, {}) is outside the convex hull",
                                         loc[0], loc[1]
                                     );
-                                    return Err(PyErr::new::<exceptions::PyException, _>(s));
+                                    return Err(exceptions::PyException::new_err(s));
                                 } else {
                                     re.push(f64::NAN);
                                 }
@@ -889,10 +868,10 @@ impl DT {
                             } else {
                                 if strict == true {
                                     let s = format!(
-                                        "({}, {}) is outside the convex hull.",
+                                        "({}, {}) is outside the convex hull",
                                         loc[0], loc[1]
                                     );
-                                    return Err(PyErr::new::<exceptions::PyException, _>(s));
+                                    return Err(exceptions::PyException::new_err(s));
                                 } else {
                                     re.push(f64::NAN);
                                 }
@@ -908,10 +887,10 @@ impl DT {
                             } else {
                                 if strict == true {
                                     let s = format!(
-                                        "({}, {}) is outside the convex hull.",
+                                        "({}, {}) is outside the convex hull",
                                         loc[0], loc[1]
                                     );
-                                    return Err(PyErr::new::<exceptions::PyException, _>(s));
+                                    return Err(exceptions::PyException::new_err(s));
                                 } else {
                                     re.push(f64::NAN);
                                 }
@@ -920,9 +899,9 @@ impl DT {
                         Ok(PyArray::from_vec(py, re))
                     }
                     _ => {
-                        return Err(PyErr::new::<exceptions::PyException, _>(
-                            "Unknown interpolation method.",
-                        ))
+                        return Err(exceptions::PyValueError::new_err(
+                            "Unknown interpolation method",
+                        ));
                     }
                 }
             }
@@ -941,7 +920,9 @@ impl DT {
     fn write_obj(&self, path: String) -> PyResult<()> {
         let re = self.t.write_obj(path.to_string());
         if re.is_err() {
-            return Err(PyErr::new::<exceptions::PyIOError, _>("Invalid path"));
+            return Err(exceptions::PyFileNotFoundError::new_err(
+                "No such file or directory",
+            ));
         }
         Ok(())
     }
@@ -958,7 +939,9 @@ impl DT {
     fn write_ply(&self, path: String) -> PyResult<()> {
         let re = self.t.write_ply(path.to_string());
         if re.is_err() {
-            return Err(PyErr::new::<exceptions::PyIOError, _>("Invalid path"));
+            return Err(exceptions::PyFileNotFoundError::new_err(
+                "No such file or directory",
+            ));
         }
         Ok(())
     }
@@ -1156,7 +1139,7 @@ impl DT {
         let mut re = startin::interpolation::interpolate(&i_nn, &mut self.t, &vec![p2]);
         let re1 = re.pop().expect("no results");
         if re1.is_err() {
-            return Err(PyErr::new::<exceptions::PyException, _>("Outside CH"));
+            return Err(exceptions::PyException::new_err("Outside convex hull"));
         }
         Ok(re1.unwrap())
     }
@@ -1166,7 +1149,7 @@ impl DT {
         let mut re = startin::interpolation::interpolate(&i_tin, &mut self.t, &vec![p2]);
         let re1 = re.pop().expect("no results");
         if re1.is_err() {
-            return Err(PyErr::new::<exceptions::PyException, _>("Outside CH"));
+            return Err(exceptions::PyException::new_err("Outside convex hull"));
         }
         Ok(re1.unwrap())
     }
@@ -1176,7 +1159,7 @@ impl DT {
         let mut re = startin::interpolation::interpolate(&i_lp, &mut self.t, &vec![p2]);
         let re1 = re.pop().expect("no results");
         if re1.is_err() {
-            return Err(PyErr::new::<exceptions::PyException, _>("Outside CH"));
+            return Err(exceptions::PyException::new_err("Outside convex hull"));
         }
         Ok(re1.unwrap())
     }
@@ -1186,7 +1169,7 @@ impl DT {
         let mut re = startin::interpolation::interpolate(&i_nni, &mut self.t, &vec![p2]);
         let re1 = re.pop().expect("no results");
         if re1.is_err() {
-            return Err(PyErr::new::<exceptions::PyException, _>("Outside CH"));
+            return Err(exceptions::PyException::new_err("Outside convex hull"));
         }
         Ok(re1.unwrap())
     }
@@ -1199,9 +1182,7 @@ impl DT {
         let mut re = startin::interpolation::interpolate(&i_idw, &mut self.t, &vec![p2]);
         let re1 = re.pop().expect("no results");
         if re1.is_err() {
-            return Err(PyErr::new::<exceptions::PyException, _>(
-                "Search Circle Empty",
-            ));
+            return Err(exceptions::PyException::new_err("Search Circle Empty"));
         }
         Ok(re1.unwrap())
     }
