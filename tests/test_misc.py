@@ -23,8 +23,9 @@ def random(n=20):
 def test_is_triangle():
     dt = startinpy.DT()
     assert dt.is_triangle([0, 1, 2]) == False
-    with pytest.raises(Exception):
-        dt.is_triangle([0, -1, 2])
+    assert dt.is_triangle([0, 11, 2]) == False
+    with pytest.raises(OverflowError):
+        dt.is_triangle([0, -1, 2])        
     dt = dt_5_points()
     assert dt.is_triangle([0, 2, 1]) == True
     assert dt.is_triangle([0, 1, 1]) == False

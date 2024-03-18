@@ -61,7 +61,7 @@ def test_convexhull():
     ch = dt.convex_hull()
     assert len(ch) == 4
     assert dt.is_vertex_convex_hull(1) == True
-    with pytest.raises(Exception):
+    with pytest.raises(OverflowError):
         dt.is_vertex_convex_hull(-1) 
     assert dt.is_vertex_convex_hull(5) == False
     assert dt.is_inside_convex_hull([7.1, 2.1]) == True

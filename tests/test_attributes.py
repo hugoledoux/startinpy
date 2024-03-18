@@ -43,7 +43,7 @@ def test_las_reading():
     assert a['intensity'] == pytest.approx(533.0)
     with pytest.raises(KeyError):
         assert a['blue'] 
-    with pytest.raises(Exception):
+    with pytest.raises(IndexError):
         dt.get_vertex_attributes(55555)
 
 def test_set_vertex_attributes_1by1():
