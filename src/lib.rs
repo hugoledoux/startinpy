@@ -421,7 +421,7 @@ impl DT {
         match self.t.get_vertex_attributes(vi) {
             Ok(v) => return Ok(v.to_string()),
             Err(e) => match e {
-                startin::StartinError::VertexRemoved => {
+                startin::StartinError::VertexRemoved | startin::StartinError::VertexUnknown => {
                     return Err(exceptions::PyIndexError::new_err("Invalid vertex index"))
                 }
                 startin::StartinError::TinHasNoAttributes => {
