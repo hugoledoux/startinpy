@@ -211,7 +211,7 @@ impl DT {
                 }
                 _ => {
                     return Err(exceptions::PyIndexError::new_err(
-                        "Invalid vertex index:vertex doesn't exist",
+                        "Invalid vertex index: vertex doesn't exist",
                     ));
                 }
             },
