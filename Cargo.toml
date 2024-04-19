@@ -11,8 +11,8 @@ edition = "2021"
 
 
 [dependencies]
-# startin = "0.7"
-startin = { path = "../startin" }
+startin = "0.7.1"
+# startin = { path = "../startin" }
 # startin = { git = "https://github.com/hugoledoux/startin", branch = "develop" }
 numpy = "~0.17"
 rand = "0.8.5"
