@@ -66,9 +66,9 @@ Finally, it is possible to output the TIN to several formats: OBJ, PLY, GeoJSON,
 More format are possible through the use of other Python libraries, there are a few examples in the documentation.
 
 
-# Comparison with a few alternatives
+# Comparison with the main alternatives
 
-The tables below compare a few Python packages to startinpy.
+The two tables below compare startinpy to its main alternatives.
 
 The [Delaunator package](https://github.com/HakanSeven12/Delaunator-Python) is a pure Python port of a proven fast triangulator [written original in JavaScript](https://github.com/mapbox/delaunator). 
 [SciPy](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.Delaunay.html)  is `scipy.spatial.Delaunay`, and SciPy-inc is the variation where an incremental algorithm is used.
@@ -105,6 +105,8 @@ The dataset `dem.tiff` is the GeoTIFF file in `/data/` and the centre of each gr
 | SciPy-inc  |   0.015  |    0.08  |    X |     X |      X |
 | Triangle   |   0.004  |    0.02  |  0.9 |  16.8 |   0.19 |
 | startinpy  |   0.018  |    0.18  |  4.2 |  41.8 |   0.46 |
+
+
 
 If "X" is written, it is because the returned DT was faulty: for large inputs Scipy-inc returns a few triangles only, not the full DT.
 
