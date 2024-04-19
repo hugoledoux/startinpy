@@ -5,31 +5,50 @@ on:
     types: [created]
 
 jobs:
-  # linux:
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     matrix:
-  #       target: ['x86_64-unknown-linux-gnu', 'aarch64-unknown-linux-gnu']
-  #     fail-fast: false
-  #   steps:
-  #   - uses: actions/checkout@v2
-  #   - uses: messense/maturin-action@v1
-  #     with:
-  #       maturin-version: 0.13.1
-  #       manylinux: auto
-  #       target: ${{ matrix.target }}
-  #       command: publish
-  #       args: --no-sdist -u __token__ -p ${{ secrets.PASSWORD_PYPI }}
 
-  win-p38:
-    runs-on: windows-latest
+linux-p39:
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
     - uses: messense/maturin-action@v1
       with:
         maturin-version: 0.13.1
+        manylinux: 2014
         command: publish
-        args: --no-sdist -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.8
+        args: --no-sdist -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.9
+
+linux-p310:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: messense/maturin-action@v1
+      with:
+        maturin-version: 0.13.1
+        manylinux: 2014
+        command: publish
+        args: --no-sdist -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.10
+
+linux-p311:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: messense/maturin-action@v1
+      with:
+        maturin-version: 0.13.1
+        manylinux: 2014
+        command: publish
+        args: --no-sdist -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.11
+
+linux-p312:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: messense/maturin-action@v1
+      with:
+        maturin-version: 0.13.1
+        manylinux: 2014
+        command: publish
+        args: --no-sdist -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.12
 
   win-p39:
     runs-on: windows-latest
@@ -70,21 +89,6 @@ jobs:
         maturin-version: 0.13.1
         command: publish
         args: --no-sdist -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.12    
-
-  macos-p38:
-    runs-on: macos-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Install aarch64-apple-darwin toolchain
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: stable
-        target: aarch64-apple-darwin
-    - uses: messense/maturin-action@v1
-      with:
-        maturin-version: 0.13.1
-        command: publish
-        args: --no-sdist --universal2 -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.8
 
   macos-p39:
     runs-on: macos-latest
