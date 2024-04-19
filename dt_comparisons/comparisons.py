@@ -267,6 +267,6 @@ if __name__ == '__main__':
     t_startinpy()
     t_scipy()
     t_scipy_inc()
-    t_triangl¢e()
+    t_triangle()
     markdown = markdown_table(t).get_markdown()
     print(markdown)

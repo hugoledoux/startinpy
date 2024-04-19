@@ -30,6 +30,7 @@
 ## To replicate
 
   1. install those packages:
+    
     - numpy
     - laspy
     - rasterio
@@ -37,10 +38,10 @@
     - startinpy
     - triangle
     - scipy
-    - delaunay
     - https://github.com/HakanSeven12/Delaunator-Python
     - py_markdown_table
+
   2. download the 2 LAZ files
   3. change the path (lines 17+18)
-  4. `python comparisons`, this generates a summary table in Markdown
+  4. `python comparisons.py`, this generates a summary table in Markdown
 
