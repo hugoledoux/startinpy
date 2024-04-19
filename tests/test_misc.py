@@ -14,12 +14,6 @@ def dt_5_points():
     dt.insert(pts)
     return dt
 
-def random(n=20):
-    rng = np.random.default_rng()
-    pts = rng.random((n, 3))
-    pts = pts * 100
-    return pts 
-
 def test_is_triangle():
     dt = startinpy.DT()
     assert dt.is_triangle([0, 1, 2]) == False

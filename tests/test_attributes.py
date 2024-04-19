@@ -16,19 +16,6 @@ def dt_5_points():
     dt.insert(pts)
     return dt
 
-def random(n=20):
-    rng = np.random.default_rng()
-    pts = rng.random((n, 3))
-    pts = pts * 100
-    return pts 
-
-def small_laz():
-    las = laspy.read("data/small.laz")
-    d = np.vstack((las.x, las.y, las.z)).transpose()
-    dt = startinpy.DT()
-    dt.insert(d)
-    return dt
-
 def small_laz_intensity():
     las = laspy.read("data/small.laz")
     d = np.vstack((las.x, las.y, las.z, las.intensity)).transpose()
