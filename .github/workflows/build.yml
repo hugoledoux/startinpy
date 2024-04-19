@@ -7,16 +7,16 @@ on:
     - cron:  '0 6 * * 1' # Run every monday at 06:00 UTC
 
 jobs:
-  # linux:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #   - uses: actions/checkout@v2
-  #   - uses: messense/maturin-action@v1
-  #     with:
-  #       maturin-version: latest
-  #       manylinux: auto
-  #       command: build
-  #       args: --release --sdist 
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: messense/maturin-action@v1
+      with:
+        maturin-version: latest
+        manylinux: auto
+        command: build
+        args: --release --sdist -i python3.12
 
   windows:
     runs-on: windows-latest
