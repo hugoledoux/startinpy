@@ -123,6 +123,8 @@ impl DT {
     /// >>> (vi, new_vertex) = dt.insert_one_pt([3.2, 1.1, 17.0])
     /// (37, True)
     /// >>> dt.insert_one_pt([13.2, 44.1, 74.2], intensity=77.2)
+    /// >>> a = {'intensity': 155.5, 'classification': 2, 'visited': False}
+    /// >>> dt.insert_one_pt([31.1, 24.2, 1.8], extra_attributes=json.dumps(a))
     #[pyo3(text_signature = "($self, p3, *, classification=1, intensity=78.0)")]
     #[args(p3, py_kwargs = "**")]
     fn insert_one_pt(
@@ -455,6 +457,104 @@ impl DT {
         match self.t.set_vertex_attributes(vi, v) {
             Ok(b) => return Ok(b),
             Err(_) => return Ok(false),
+        }
+    }
+
+    /// Add a new attributes to a vertex (even if it already has some).
+    /// Returns the values as a JSON dictionary in string.
+    ///
+    /// :param vi: the index of the vertex
+    /// :param optional extra_attributes: extra parameters with values
+    /// :return: True if the attribute was assigned, False otherwise
+    ///
+    /// >>> dt = startinpy.DT(extra_attributes=True)
+    /// >>> dt.insert_one_pt(85000.0, 444003.2, 2.2, intensity=111.1, reflectance=29.9)
+    /// >>> ...
+    /// >>> new_a = {'intensity': 155.5, 'reflectance': 222.2, 'extra': 3}
+    /// >>> dt.set_vertex_attributes(17, json.dumps(new_a))
+    /// >>> dt.add_vertex_attribute(17, classification=6)
+    /// >>> dt.get_vertex_attributes(17, classification=6)
+    /// '{"classification":6,"extra":3,"intensity":155.5,"reflectance":222.2}'    
+    #[pyo3(text_signature = "($self, vi, *, classification=1)")]
+    #[args(vi, py_kwargs = "**")]
+    fn add_vertex_attribute(&mut self, vi: usize, py_kwargs: Option<&PyDict>) -> PyResult<bool> {
+        let mut m = Map::new();
+        if py_kwargs.is_some() {
+            let tmp = py_kwargs.unwrap();
+            let keys = tmp.keys();
+            for k in keys {
+                let b: &String = &k.extract()?;
+                if tmp
+                    .get_item(b)
+                    .unwrap()
+                    .is_instance_of::<pyo3::types::PyInt>()?
+                {
+                    let t1: i32 = tmp.get_item(b).unwrap().extract()?;
+                    m.insert(b.to_string(), t1.into());
+                }
+                if tmp
+                    .get_item(b)
+                    .unwrap()
+                    .is_instance_of::<pyo3::types::PyBool>()?
+                {
+                    let t1: bool = tmp.get_item(b).unwrap().extract()?;
+                    m.insert(b.to_string(), t1.into());
+                }
+                if tmp
+                    .get_item(b)
+                    .unwrap()
+                    .is_instance_of::<pyo3::types::PyFloat>()?
+                {
+                    let t1: f64 = tmp.get_item(b).unwrap().extract()?;
+                    m.insert(b.to_string(), t1.into());
+                }
+            }
+        }
+        match self
+            .t
+            .add_vertex_attribute(vi, serde_json::to_value(m).unwrap())
+        {
+            Ok(b) => return Ok(b),
+            Err(_) => return Ok(false),
+        }
+    }
+
+    /// Calculate the normal of a given vertex.
+    /// An exception is thrown if the vertex index is invalid.
+    ///
+    /// :param vi: the index of the vertex
+    /// :return: a Vec with 3 values: nx, ny, nz (normalised normal)
+    ///
+    /// >>> dt.normal_vertex(17)
+    /// >>> dt.points[17]
+    /// array([15.63303377, 26.9968598 ,  23.4])
+    #[pyo3(text_signature = "($self, vi)")]
+    #[args(vi)]
+    fn normal_vertex(&self, vi: usize) -> PyResult<Vec<f64>> {
+        match self.t.normal_vertex(vi) {
+            Ok(b) => return Ok(b),
+            Err(_) => return Err(exceptions::PyIndexError::new_err("Invalid vertex index")),
+        }
+    }
+
+    /// Calculate the normal of a given triangle.
+    /// An exception is thrown if the triangle doesn't exist or is infinite.
+    ///
+    /// :param t: the index of the vertex
+    /// :return: a Vec with 3 values: nx, ny, nz (normalised normal)
+    ///
+    /// >>> dt.normal_triangle([17, 451, 22])
+    /// >>>
+    /// array([15.63303377, 26.9968598 ,  23.4])
+    #[pyo3(text_signature = "($self, vi)")]
+    #[args(vi)]
+    fn normal_triangle(&self, t: Vec<usize>) -> PyResult<Vec<f64>> {
+        let tr = startin::Triangle {
+            v: [t[0], t[1], t[2]],
+        };
+        match self.t.normal_triangle(&tr) {
+            Ok(b) => return Ok(b),
+            Err(_) => return Err(exceptions::PyIndexError::new_err("Invalid Triangle")),
         }
     }
 
