@@ -2,9 +2,10 @@ extern crate startin;
 
 use numpy::PyArray;
 use pyo3::exceptions;
+use pyo3::exceptions::PyTypeError;
 
 use pyo3::prelude::*;
-use pyo3::types::PyDict;
+use pyo3::types::{PyDict, PyList};
 
 use std::fs::File;
 use std::io::Write;
@@ -23,6 +24,73 @@ struct Cityjson {
     #[serde(rename = "CityObjects")]
     city_objects: Value,
     vertices: Vec<Vec<i64>>,
+}
+
+fn convert_json_value_to_pyobject(py: Python, value: &Value) -> PyResult<PyObject> {
+    match value {
+        Value::Null => Ok(py.None()),
+        Value::Bool(b) => Ok(b.to_object(py)),
+        Value::Number(num) => {
+            if let Some(i) = num.as_i64() {
+                Ok(i.to_object(py))
+            } else if let Some(u) = num.as_u64() {
+                Ok(u.to_object(py))
+            } else if let Some(f) = num.as_f64() {
+                Ok(f.to_object(py))
+            } else {
+                Err(pyo3::exceptions::PyTypeError::new_err("Invalid number"))
+            }
+        }
+        Value::String(s) => Ok(s.to_object(py)),
+        Value::Array(arr) => {
+            let py_list = PyList::new(
+                py,
+                arr.iter()
+                    .map(|v| convert_json_value_to_pyobject(py, v))
+                    .collect::<Result<Vec<_>, _>>()?,
+            );
+            Ok(py_list.to_object(py))
+        }
+        Value::Object(map) => {
+            let py_dict = PyDict::new(py);
+            for (k, v) in map {
+                py_dict.set_item(k, convert_json_value_to_pyobject(py, v)?)?;
+            }
+            Ok(py_dict.to_object(py))
+        }
+    }
+}
+
+fn convert_py_any_to_json(py_any: &PyAny) -> PyResult<Value> {
+    if py_any.is_none() {
+        Ok(Value::Null)
+    } else if let Ok(b) = py_any.extract::<bool>() {
+        Ok(Value::Bool(b))
+    } else if let Ok(i) = py_any.extract::<i64>() {
+        Ok(Value::Number(i.into()))
+    } else if let Ok(f) = py_any.extract::<f64>() {
+        Ok(Value::Number(serde_json::Number::from_f64(f).ok_or_else(
+            || PyTypeError::new_err("Invalid float value"),
+        )?))
+    } else if let Ok(s) = py_any.extract::<String>() {
+        Ok(Value::String(s))
+    } else if let Ok(py_list) = py_any.downcast::<PyList>() {
+        let mut vec = Vec::new();
+        for item in py_list {
+            vec.push(convert_py_any_to_json(item)?);
+        }
+        Ok(Value::Array(vec))
+    } else if let Ok(py_dict) = py_any.downcast::<PyDict>() {
+        let mut map = serde_json::Map::new();
+        for (key, value) in py_dict {
+            let key = key.extract::<String>()?;
+            let value = convert_py_any_to_json(value)?;
+            map.insert(key, value);
+        }
+        Ok(Value::Object(map))
+    } else {
+        Err(PyTypeError::new_err("Unsupported type"))
+    }
 }
 
 /// A Delaunay triangulator where the input are 2.5D points,
@@ -419,9 +487,15 @@ impl DT {
     /// {'intensity': 111.1, 'reflectance': 99.1}
     #[pyo3(text_signature = "($self, vi)")]
     #[args(vi)]
-    fn get_vertex_attributes(&self, vi: usize) -> PyResult<String> {
+    fn get_vertex_attributes(&self, vi: usize) -> PyResult<PyObject> {
         match self.t.get_vertex_attributes(vi) {
-            Ok(v) => return Ok(v.to_string()),
+            Ok(v) => {
+                // Convert serde_json::Value to Python object
+                Python::with_gil(|py| {
+                    let json_object = convert_json_value_to_pyobject(py, &v)?;
+                    Ok(json_object)
+                })
+            }
             Err(e) => match e {
                 startin::StartinError::VertexRemoved | startin::StartinError::VertexUnknown => {
                     return Err(exceptions::PyIndexError::new_err("Invalid vertex index"))
@@ -452,13 +526,21 @@ impl DT {
     /// '{"extra":3,"intensity":155.5,"reflectance":222.2}'    
     #[pyo3(text_signature = "($self, vi, attribute)")]
     #[args(vi, attribute)]
-    fn set_vertex_attributes(&mut self, vi: usize, attribute: String) -> PyResult<bool> {
-        let v: Value = serde_json::from_str(&attribute).unwrap();
+    fn set_vertex_attributes(&mut self, vi: usize, attribute: &PyDict) -> PyResult<bool> {
+        let v: Value = convert_py_any_to_json(attribute)?;
+        // let v: Value = serde_json::from_str(&attribute).unwrap();
         match self.t.set_vertex_attributes(vi, v) {
             Ok(b) => return Ok(b),
             Err(_) => return Ok(false),
         }
     }
+    // fn set_vertex_attributes(&mut self, vi: usize, attribute: String) -> PyResult<bool> {
+    //     let v: Value = serde_json::from_str(&attribute).unwrap();
+    //     match self.t.set_vertex_attributes(vi, v) {
+    //         Ok(b) => return Ok(b),
+    //         Err(_) => return Ok(false),
+    //     }
+    // }
 
     /// Add a new attributes to a vertex (even if it already has some).
     /// Returns the values as a JSON dictionary in string.
