@@ -14,16 +14,16 @@ for each in d:
     dt.insert_one_pt(each[:3], intensity=each[3])
 
 a = {'intensity': 155.5, 'reflectance': 111, 'something': True}
-dt.set_vertex_attributes(50, json.dumps(a))
+dt.set_vertex_attributes(50, a)
 
 print(dt)
 
 print("all extra attributes:", dt.list_attributes())
 
 a = dt.get_vertex_attributes(50)
-print("=>", json.loads(a))
+print("=>", a)
 a = dt.get_vertex_attributes(49)
-print("=>", json.loads(a))
+print("=>", a)
 
 i = dt.attribute('intensity')
 print(i.shape)
