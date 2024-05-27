@@ -9,16 +9,19 @@ las = laspy.read("../data/small.laz")
 d = np.vstack((las.x, las.y, las.z, las.intensity)).transpose()
 d = d[::1] #-- thinning to speed up, put ::1 to keep all the points
 
-dt = startinpy.DT(extra_attributes=True)
+dt = startinpy.DT()
+dt.add_attribute_map([("intensity", "f64")])
+
 for each in d:
     dt.insert_one_pt(each[:3], intensity=each[3])
 
-a = {'intensity': 155.5, 'reflectance': 111, 'something': True}
-dt.set_vertex_attributes(50, a)
+print("done")
+# a = {'intensity': 155.5, 'reflectance': 111, 'something': True}
+dt.add_vertex_attributes(50, intensity=112.2)
 
 print(dt)
 
-print("all extra attributes:", dt.list_attributes())
+# print("all extra attributes:", dt.list_attributes())
 
 a = dt.get_vertex_attributes(50)
 print("=>", a)

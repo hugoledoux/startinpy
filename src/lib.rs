@@ -5,7 +5,7 @@ use pyo3::exceptions;
 use pyo3::exceptions::PyTypeError;
 
 use pyo3::prelude::*;
-use pyo3::types::{PyDict, PyList};
+use pyo3::types::{PyDict, PyList, PyTuple};
 
 use std::fs::File;
 use std::io::Write;
@@ -118,11 +118,8 @@ impl DT {
     /// attache to them.
     #[args(extra_attributes = false)]
     #[new]
-    fn new(extra_attributes: bool) -> Self {
-        let mut tmp = startin::Triangulation::new();
-        if extra_attributes {
-            tmp.use_extra_attributes();
-        }
+    fn new() -> Self {
+        let tmp = startin::Triangulation::new();
         DT { t: tmp }
     }
 
@@ -217,7 +214,7 @@ impl DT {
                     .unwrap()
                     .is_instance_of::<pyo3::types::PyInt>()?
                 {
-                    let t1: i32 = tmp.get_item(b).unwrap().extract()?;
+                    let t1: i64 = tmp.get_item(b).unwrap().extract()?;
                     m.insert(b.to_string(), t1.into());
                 }
                 if tmp
@@ -236,27 +233,36 @@ impl DT {
                     let t1: f64 = tmp.get_item(b).unwrap().extract()?;
                     m.insert(b.to_string(), t1.into());
                 }
+                if tmp
+                    .get_item(b)
+                    .unwrap()
+                    .is_instance_of::<pyo3::types::PyString>()?
+                {
+                    let t1: String = tmp.get_item(b).unwrap().extract()?;
+                    m.insert(b.to_string(), t1.into());
+                }
             }
         }
         // println!("map={:?}", m);
-        if m.is_empty() {
-            let re = self.t.insert_one_pt(p3[0], p3[1], p3[2]);
-            match re {
-                Ok(x) => return Ok((x, true)),
-                Err(x) => return Ok((x, false)),
-            };
-        } else {
-            let re = self.t.insert_one_pt_with_attribute(
-                p3[0],
-                p3[1],
-                p3[2],
-                serde_json::to_value(m).unwrap(),
-            );
-            match re {
-                Ok(x) => return Ok((x, true)),
-                Err(x) => return Ok((x, false)),
-            };
-        }
+        let re = self.t.insert_one_pt(p3[0], p3[1], p3[2]);
+        match re {
+            Ok(x) => {
+                if m.is_empty() == false {
+                    let _ = self
+                        .t
+                        .add_vertex_attributes(x, serde_json::to_value(m).unwrap());
+                }
+                return Ok((x, true));
+            }
+            Err(x) => {
+                if m.is_empty() == false {
+                    let _ = self
+                        .t
+                        .add_vertex_attributes(x, serde_json::to_value(m).unwrap());
+                }
+                return Ok((x, false));
+            }
+        };
     }
 
     /// Remove/delete the vertex vi (an index) from the DT, and update the DT for the Delaunay criterion.
@@ -412,9 +418,66 @@ impl DT {
     /// >>> dt.insert_one_pt(85000.0, 444003.2, 2.2, intensity=111.1)
     /// >>> dt.list_attributes()
     /// ['intensity']
+    // TODO: to uncomment
+    // #[args()]
+    // fn list_attributes(&self) -> PyResult<Vec<String>> {
+    //     Ok(self.t.list_all_attributes())
+    // }
+
+    #[pyo3(text_signature = "($self, dtype)")]
+    #[args(name, dtype)]
+    pub fn add_attribute_map(&mut self, list: &PyList) -> PyResult<bool> {
+        for item in list.iter() {
+            let tuple: &PyTuple = item.downcast::<PyTuple>()?;
+            if tuple.len() != 2 {
+                return Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(
+                    "Each tuple must have exactly two elements",
+                ));
+            }
+            let first: String = tuple.get_item(0)?.extract()?;
+            let second: String = tuple.get_item(1)?.extract()?;
+            let _ = self.t.add_attribute_map(first, second);
+        }
+        Ok(true)
+    }
+
+    // #[pyo3(text_signature = "($self, dtype)")]
     #[args()]
-    fn list_attributes(&self) -> PyResult<Vec<String>> {
-        Ok(self.t.list_all_attributes())
+    pub fn all_attributes<'py>(&self, py: Python<'py>) -> PyResult<()> {
+        // let am = self.t.list_all_attributes();
+        // Get the numpy module
+        let np = py.import("numpy")?;
+        // Define the dtype for the structured array
+        let dtype = np.call_method1("dtype", (vec![("intensity", "f8"), ("visited", "i8")],))?;
+        let allt = self.t.all_attributes().unwrap();
+        // Create an empty array with the defined dtype
+        let arraydtype = np.call_method1("empty", (allt.len(), dtype))?;
+
+        for (i, each) in allt.iter().enumerate() {
+            let item = arraydtype.get_item(i)?;
+            let o = each.as_object().unwrap();
+            match o.get("intensity") {
+                Some(x) => item.set_item("intensity", x.as_f64())?,
+                None => item.set_item("intensity", std::f64::NAN)?,
+            }
+            match o.get("visited") {
+                Some(x) => item.set_item("visited", x.as_i64())?,
+                None => item.set_item("visited", std::f64::NAN)?,
+            }
+        }
+
+        // // Fill the structured array with data
+        // for (i, name) in names.iter().enumerate() {
+        //     let item = arraydtype.get_item(i)?;
+        //     item.set_item("name", name)?;
+        //     item.set_item("age", ages[i])?;
+        //     item.set_item("height", heights[i])?;
+        // }
+
+        println!("{:?}", arraydtype);
+
+        Ok(())
+        // Ok(arraydtype.into())
     }
 
     /// Get all the values for a given extra attribute stored for the vertices.
@@ -432,45 +495,45 @@ impl DT {
     /// >>> ...
     /// >>> dt.attribute('intensity')
     /// array([nan, 111.1, 22.2, 46.4, nan, ...,   77.8, 111.1])
-    #[pyo3(text_signature = "($self, attribute)")]
-    #[args(attribute)]
-    fn attribute<'py>(
-        &self,
-        py: Python<'py>,
-        attribute: String,
-    ) -> PyResult<&'py PyArray<f64, numpy::Ix1>> {
-        let mut attrs: Vec<f64> = Vec::new();
-        let mut b_found = false;
-        let a2 = &self.t.all_attributes();
-        match a2 {
-            Some(x) => {
-                for a in x {
-                    match a.get(&attribute) {
-                        Some(x) => {
-                            if x.is_boolean() {
-                                if x.as_bool().unwrap() == true {
-                                    attrs.push(1.0);
-                                } else {
-                                    attrs.push(0.0);
-                                }
-                            } else {
-                                attrs.push((*x).as_f64().unwrap());
-                            }
-                            b_found = true;
-                        }
-                        None => attrs.push(f64::NAN),
-                    }
-                }
-            }
-            None => (),
-        }
-        if b_found {
-            return Ok(PyArray::from_vec(py, attrs));
-        } else {
-            let empty: Vec<f64> = Vec::new();
-            Ok(PyArray::from_vec(py, empty))
-        }
-    }
+    // #[pyo3(text_signature = "($self, attribute)")]
+    // #[args(attribute)]
+    // fn attribute<'py>(
+    //     &self,
+    //     py: Python<'py>,
+    //     attribute: String,
+    // ) -> PyResult<&'py PyArray<f64, numpy::Ix1>> {
+    //     let mut attrs: Vec<f64> = Vec::new();
+    //     let mut b_found = false;
+    //     let a2 = &self.t.all_attributes();
+    //     match a2 {
+    //         Some(x) => {
+    //             for a in x {
+    //                 match a.get(&attribute) {
+    //                     Some(x) => {
+    //                         if x.is_boolean() {
+    //                             if x.as_bool().unwrap() == true {
+    //                                 attrs.push(1.0);
+    //                             } else {
+    //                                 attrs.push(0.0);
+    //                             }
+    //                         } else {
+    //                             attrs.push((*x).as_f64().unwrap());
+    //                         }
+    //                         b_found = true;
+    //                     }
+    //                     None => attrs.push(f64::NAN),
+    //                 }
+    //             }
+    //         }
+    //         None => (),
+    //     }
+    //     if b_found {
+    //         return Ok(PyArray::from_vec(py, attrs));
+    //     } else {
+    //         let empty: Vec<f64> = Vec::new();
+    //         Ok(PyArray::from_vec(py, empty))
+    //     }
+    // }
 
     /// Get all the extra attributes stored for a specific vertex.
     /// Returns the values as a JSON dictionary in string.
@@ -510,33 +573,26 @@ impl DT {
         }
     }
 
-    /// Set/overwrite the extra attributes for a specific vertex.
-    /// Returns the values as a JSON dictionary in string.
-    ///
-    /// :param vi: the index of the vertex
-    /// :param attribute: the JSON object (as a string) of the extra attribute, which contains all values
-    /// :return: True if the attribute was assigned, False otherwise
-    ///
-    /// >>> dt = startinpy.DT(extra_attributes=True)
-    /// >>> dt.insert_one_pt(85000.0, 444003.2, 2.2, intensity=111.1, reflectance=29.9)
-    /// >>> ...
-    /// >>> new_a = {'intensity': 155.5, 'reflectance': 222.2, 'extra': 3}
-    /// >>> dt.set_vertex_attributes(17, json.dumps(new_a))
-    /// >>> dt.get_vertex_attributes(17)
-    /// '{"extra":3,"intensity":155.5,"reflectance":222.2}'    
-    #[pyo3(text_signature = "($self, vi, attribute)")]
-    #[args(vi, attribute)]
-    fn set_vertex_attributes(&mut self, vi: usize, attribute: &PyDict) -> PyResult<bool> {
-        let v: Value = convert_py_any_to_json(attribute)?;
-        // let v: Value = serde_json::from_str(&attribute).unwrap();
-        match self.t.set_vertex_attributes(vi, v) {
-            Ok(b) => return Ok(b),
-            Err(_) => return Ok(false),
-        }
-    }
-    // fn set_vertex_attributes(&mut self, vi: usize, attribute: String) -> PyResult<bool> {
-    //     let v: Value = serde_json::from_str(&attribute).unwrap();
-    //     match self.t.set_vertex_attributes(vi, v) {
+    // /// Set/overwrite the extra attributes for a specific vertex.
+    // /// Returns the values as a JSON dictionary in string.
+    // ///
+    // /// :param vi: the index of the vertex
+    // /// :param attribute: the JSON object (as a string) of the extra attribute, which contains all values
+    // /// :return: True if the attribute was assigned, False otherwise
+    // ///
+    // /// >>> dt = startinpy.DT(extra_attributes=True)
+    // /// >>> dt.insert_one_pt(85000.0, 444003.2, 2.2, intensity=111.1, reflectance=29.9)
+    // /// >>> ...
+    // /// >>> new_a = {'intensity': 155.5, 'reflectance': 222.2, 'extra': 3}
+    // /// >>> dt.set_vertex_attributes(17, json.dumps(new_a))
+    // /// >>> dt.get_vertex_attributes(17)
+    // /// '{"extra":3,"intensity":155.5,"reflectance":222.2}'
+    // #[pyo3(text_signature = "($self, vi, attribute)")]
+    // #[args(vi, attribute)]
+    // fn add_vertex_attributes(&mut self, vi: usize, attribute: &PyDict) -> PyResult<bool> {
+    //     let v: Value = convert_py_any_to_json(attribute)?;
+    //     // let v: Value = serde_json::from_str(&attribute).unwrap();
+    //     match self.t.add_vertex_attributes(vi, v) {
     //         Ok(b) => return Ok(b),
     //         Err(_) => return Ok(false),
     //     }
@@ -559,7 +615,7 @@ impl DT {
     /// '{"classification":6,"extra":3,"intensity":155.5,"reflectance":222.2}'    
     #[pyo3(text_signature = "($self, vi, *, classification=1)")]
     #[args(vi, py_kwargs = "**")]
-    fn add_vertex_attribute(&mut self, vi: usize, py_kwargs: Option<&PyDict>) -> PyResult<bool> {
+    fn add_vertex_attributes(&mut self, vi: usize, py_kwargs: Option<&PyDict>) -> PyResult<bool> {
         let mut m = Map::new();
         if py_kwargs.is_some() {
             let tmp = py_kwargs.unwrap();
@@ -571,7 +627,7 @@ impl DT {
                     .unwrap()
                     .is_instance_of::<pyo3::types::PyInt>()?
                 {
-                    let t1: i32 = tmp.get_item(b).unwrap().extract()?;
+                    let t1: i64 = tmp.get_item(b).unwrap().extract()?;
                     m.insert(b.to_string(), t1.into());
                 }
                 if tmp
@@ -590,11 +646,27 @@ impl DT {
                     let t1: f64 = tmp.get_item(b).unwrap().extract()?;
                     m.insert(b.to_string(), t1.into());
                 }
+                if tmp
+                    .get_item(b)
+                    .unwrap()
+                    .is_instance_of::<pyo3::types::PyString>()?
+                {
+                    let t1: f64 = tmp.get_item(b).unwrap().extract()?;
+                    m.insert(b.to_string(), t1.into());
+                }
+                if tmp
+                    .get_item(b)
+                    .unwrap()
+                    .is_instance_of::<pyo3::types::PyString>()?
+                {
+                    let t1: String = tmp.get_item(b).unwrap().extract()?;
+                    m.insert(b.to_string(), t1.into());
+                }
             }
         }
         match self
             .t
-            .add_vertex_attribute(vi, serde_json::to_value(m).unwrap())
+            .add_vertex_attributes(vi, serde_json::to_value(m).unwrap())
         {
             Ok(b) => return Ok(b),
             Err(_) => return Ok(false),
