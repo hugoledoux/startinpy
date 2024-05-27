@@ -443,16 +443,26 @@ impl DT {
 
     // #[pyo3(text_signature = "($self, dtype)")]
     #[args()]
-    pub fn all_attributes<'py>(&self, py: Python<'py>) -> PyResult<()> {
-        // let am = self.t.list_all_attributes();
-        // Get the numpy module
+    pub fn all_attributes<'py>(&self, py: Python<'py>) -> PyResult<PyObject> {
         let np = py.import("numpy")?;
-        // Define the dtype for the structured array
-        let dtype = np.call_method1("dtype", (vec![("intensity", "f8"), ("visited", "i8")],))?;
-        let allt = self.t.all_attributes().unwrap();
-        // Create an empty array with the defined dtype
-        let arraydtype = np.call_method1("empty", (allt.len(), dtype))?;
+        // let dmap = self.t.list_all_attributes();
+        let mut vmap: Vec<(String, String)> = Vec::new();
+        for (key, dtype) in &self.t.list_all_attributes() {
+            match dtype.as_ref() {
+                "f64" => vmap.push((String::from(key), "f8".to_string())),
+                "i64" => vmap.push((String::from(key), "i8".to_string())),
+                "u64" => vmap.push((String::from(key), "u8".to_string())),
+                "bool" => vmap.push((String::from(key), "b1".to_string())),
+                "String" => vmap.push((String::from(key), "U10".to_string())),
+                &_ => continue,
+            }
+        }
+        println!("{:?}", vmap);
+        let dtype = np.call_method1("dtype", (vmap,))?;
+        // let dtype = np.call_method1("dtype", (vec![("intensity", "f8"), ("visited", "i8")],))?;
 
+        let allt = self.t.all_attributes().unwrap();
+        let arraydtype = np.call_method1("empty", (allt.len(), dtype))?;
         for (i, each) in allt.iter().enumerate() {
             let item = arraydtype.get_item(i)?;
             let o = each.as_object().unwrap();
@@ -462,22 +472,13 @@ impl DT {
             }
             match o.get("visited") {
                 Some(x) => item.set_item("visited", x.as_i64())?,
-                None => item.set_item("visited", std::f64::NAN)?,
+                None => item.set_item("visited", std::i64::MIN)?,
             }
         }
+        // println!("{:?}", arraydtype);
 
-        // // Fill the structured array with data
-        // for (i, name) in names.iter().enumerate() {
-        //     let item = arraydtype.get_item(i)?;
-        //     item.set_item("name", name)?;
-        //     item.set_item("age", ages[i])?;
-        //     item.set_item("height", heights[i])?;
-        // }
-
-        println!("{:?}", arraydtype);
-
-        Ok(())
-        // Ok(arraydtype.into())
+        // Ok(())
+        Ok(arraydtype.into())
     }
 
     /// Get all the values for a given extra attribute stored for the vertices.
