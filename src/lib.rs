@@ -180,7 +180,7 @@ impl DT {
     /// attributes) are kept.
     ///
     /// :param p3: array with [x, y, z]-coordinates of point to insert
-    /// :param optional extra_attributes: extra parameters with values
+    /// :param optional extra attributes: extra parameters with values
     /// :return: a tuple: 1) the index of the (created or kept) vertex in the triangulation;
     ///          2) whether a new vertex was inserted: True if yes; False is there was already
     ///          a vertex at that xy-location.
@@ -188,8 +188,6 @@ impl DT {
     /// >>> (vi, new_vertex) = dt.insert_one_pt([3.2, 1.1, 17.0])
     /// (37, True)
     /// >>> dt.insert_one_pt([13.2, 44.1, 74.2], intensity=77.2)
-    /// >>> a = {'intensity': 155.5, 'classification': 2, 'visited': False}
-    /// >>> dt.insert_one_pt([31.1, 24.2, 1.8], extra_attributes=json.dumps(a))
     #[pyo3(text_signature = "($self, p3, *, classification=1, intensity=78.0)")]
     #[args(p3, py_kwargs = "**")]
     fn insert_one_pt(
