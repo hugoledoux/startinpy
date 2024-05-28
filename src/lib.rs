@@ -201,45 +201,34 @@ impl DT {
         if py_kwargs.is_some() {
             let tmp = py_kwargs.unwrap();
             let keys = tmp.keys();
+            let am = self.t.get_attribute_map();
+
             for k in keys {
                 let b: &String = &k.extract()?;
-                if b == "extra_attributes" {
-                    let s: String = tmp.get_item(b).unwrap().to_string();
-                    let v: Value = serde_json::from_str(&s).unwrap();
-                    m = serde_json::from_value(v).unwrap();
-                    continue;
-                }
-                if tmp
-                    .get_item(b)
-                    .unwrap()
-                    .is_instance_of::<pyo3::types::PyInt>()?
-                {
-                    let t1: i64 = tmp.get_item(b).unwrap().extract()?;
-                    m.insert(b.to_string(), t1.into());
-                }
-                if tmp
-                    .get_item(b)
-                    .unwrap()
-                    .is_instance_of::<pyo3::types::PyBool>()?
-                {
-                    let t1: bool = tmp.get_item(b).unwrap().extract()?;
-                    m.insert(b.to_string(), t1.into());
-                }
-                if tmp
-                    .get_item(b)
-                    .unwrap()
-                    .is_instance_of::<pyo3::types::PyFloat>()?
-                {
-                    let t1: f64 = tmp.get_item(b).unwrap().extract()?;
-                    m.insert(b.to_string(), t1.into());
-                }
-                if tmp
-                    .get_item(b)
-                    .unwrap()
-                    .is_instance_of::<pyo3::types::PyString>()?
-                {
-                    let t1: String = tmp.get_item(b).unwrap().extract()?;
-                    m.insert(b.to_string(), t1.into());
+                if am.contains_key(b) {
+                    match am[b].as_ref() {
+                        "f64" => {
+                            let t1: f64 = tmp.get_item(b).unwrap().extract()?;
+                            m.insert(b.to_string(), t1.into());
+                        }
+                        "i64" => {
+                            let t1: i64 = tmp.get_item(b).unwrap().extract()?;
+                            m.insert(b.to_string(), t1.into());
+                        }
+                        "u64" => {
+                            let t1: u64 = tmp.get_item(b).unwrap().extract()?;
+                            m.insert(b.to_string(), t1.into());
+                        }
+                        "bool" => {
+                            let t1: bool = tmp.get_item(b).unwrap().extract()?;
+                            m.insert(b.to_string(), t1.into());
+                        }
+                        "String" => {
+                            let t1: String = tmp.get_item(b).unwrap().extract()?;
+                            m.insert(b.to_string(), t1.into());
+                        }
+                        &_ => continue,
+                    }
                 }
             }
         }
