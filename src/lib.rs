@@ -428,9 +428,15 @@ impl DT {
         Ok(true)
     }
 
-    // #[pyo3(text_signature = "($self, dtype)")]
+    #[pyo3(text_signature = "($self)")]
     #[args()]
-    pub fn all_attributes<'py>(&self, py: Python<'py>) -> PyResult<PyObject> {
+    fn get_attribute_map(&self) -> Vec<(String, String)> {
+        let mut vmap: Vec<(String, String)> = Vec::new();
+        for (key, dtype) in &self.t.get_attribute_map() {
+            vmap.push((String::from(key), String::from(dtype)));
+        }
+        vmap
+    }
         let np = py.import("numpy")?;
         // let dmap = self.t.list_all_attributes();
         let mut vmap: Vec<(String, String)> = Vec::new();
