@@ -437,10 +437,27 @@ impl DT {
         }
         vmap
     }
+
+    /// Get all the values for a given extra attribute stored for the vertices.
+    /// Returns the values as a numpy structured array.
+    /// Watch out, if a given vertex doesn't have a specific attribute then ``np.nan`` is inserted
+    /// for f64, max-values for i64 and u64, "" for String, 0 for bool.
+    ///
+    /// :param attribute: the name (a string) of the attribute
+    /// :return: an array with all the values (including for the removed vertices).
+    ///          The array is empty if the extra attributes don't exist.
+    ///
+    /// >>> dt = startinpy.DT()
+    /// >>> dt.add_attribute_map([("intensity", "f64"), ("classification", "u64")])
+    /// >>> dt.insert_one_pt(85000.0, 444003.2, 2.2, intensity=111.1, classification=6)
+    /// >>> ...
+    /// >>> dt.attributes()
+    /// array([nan, 111.1, 22.2, 46.4, nan, ...,   77.8, 111.1])
+    #[getter]
+    pub fn attributes<'py>(&self, py: Python<'py>) -> PyResult<PyObject> {
         let np = py.import("numpy")?;
-        // let dmap = self.t.list_all_attributes();
         let mut vmap: Vec<(String, String)> = Vec::new();
-        for (key, dtype) in &self.t.list_all_attributes() {
+        for (key, dtype) in &self.t.get_attribute_map() {
             match dtype.as_ref() {
                 "f64" => vmap.push((String::from(key), "f8".to_string())),
                 "i64" => vmap.push((String::from(key), "i8".to_string())),
@@ -450,84 +467,44 @@ impl DT {
                 &_ => continue,
             }
         }
-        println!("{:?}", vmap);
         let dtype = np.call_method1("dtype", (vmap,))?;
-        // let dtype = np.call_method1("dtype", (vec![("intensity", "f8"), ("visited", "i8")],))?;
-
-        let allt = self.t.all_attributes().unwrap();
+        let allt = self.t.all_attributes();
+        if allt.is_none() {
+            let arraydtype = np.call_method1("empty", (0, dtype))?;
+            return Ok(arraydtype.into());
+        }
+        let allt = allt.unwrap();
         let arraydtype = np.call_method1("empty", (allt.len(), dtype))?;
         for (i, each) in allt.iter().enumerate() {
             let item = arraydtype.get_item(i)?;
             let o = each.as_object().unwrap();
-            match o.get("intensity") {
-                Some(x) => item.set_item("intensity", x.as_f64())?,
-                None => item.set_item("intensity", std::f64::NAN)?,
-            }
-            match o.get("visited") {
-                Some(x) => item.set_item("visited", x.as_i64())?,
-                None => item.set_item("visited", std::i64::MIN)?,
+            for (key, dtype) in &self.t.get_attribute_map() {
+                match o.get(key) {
+                    Some(x) => {
+                        match dtype.as_ref() {
+                            "f64" => item.set_item(key, x.as_f64())?,
+                            "i64" => item.set_item(key, x.as_i64())?,
+                            "u64" => item.set_item(key, x.as_u64())?,
+                            "bool" => item.set_item(key, x.as_bool())?,
+                            "String" => item.set_item(key, x.as_str())?,
+                            &_ => continue,
+                        };
+                    }
+                    None => {
+                        match dtype.as_ref() {
+                            "f64" => item.set_item(key, std::f64::NAN)?,
+                            "i64" => item.set_item(key, std::i64::MAX)?,
+                            "u64" => item.set_item(key, std::u64::MAX)?,
+                            "bool" => item.set_item(key, false)?,
+                            "String" => item.set_item(key, "".to_string())?,
+                            &_ => continue,
+                        };
+                    }
+                }
             }
         }
-        // println!("{:?}", arraydtype);
-
-        // Ok(())
         Ok(arraydtype.into())
     }
-
-    /// Get all the values for a given extra attribute stored for the vertices.
-    /// Returns the values as a numpy array with type ``np.float64``,
-    /// those need to be casted if necessary.
-    /// Watch out, if a given vertex doesn't have that attribute then ``np.nan`` is inserted
-    /// in the array.
-    ///
-    /// :param attribute: the name (a string) of the attribute
-    /// :return: an array all the values (including for the removed vertices).
-    ///          The array is empty if the extra attributes doesn't exist.
-    ///
-    /// >>> dt = startinpy.DT(extra_attributes=True)
-    /// >>> dt.insert_one_pt(85000.0, 444003.2, 2.2, intensity=111.1)
-    /// >>> ...
-    /// >>> dt.attribute('intensity')
-    /// array([nan, 111.1, 22.2, 46.4, nan, ...,   77.8, 111.1])
-    // #[pyo3(text_signature = "($self, attribute)")]
-    // #[args(attribute)]
-    // fn attribute<'py>(
-    //     &self,
-    //     py: Python<'py>,
-    //     attribute: String,
-    // ) -> PyResult<&'py PyArray<f64, numpy::Ix1>> {
-    //     let mut attrs: Vec<f64> = Vec::new();
-    //     let mut b_found = false;
-    //     let a2 = &self.t.all_attributes();
-    //     match a2 {
-    //         Some(x) => {
-    //             for a in x {
-    //                 match a.get(&attribute) {
-    //                     Some(x) => {
-    //                         if x.is_boolean() {
-    //                             if x.as_bool().unwrap() == true {
-    //                                 attrs.push(1.0);
-    //                             } else {
-    //                                 attrs.push(0.0);
-    //                             }
-    //                         } else {
-    //                             attrs.push((*x).as_f64().unwrap());
-    //                         }
-    //                         b_found = true;
-    //                     }
-    //                     None => attrs.push(f64::NAN),
-    //                 }
-    //             }
-    //         }
-    //         None => (),
-    //     }
-    //     if b_found {
-    //         return Ok(PyArray::from_vec(py, attrs));
-    //     } else {
-    //         let empty: Vec<f64> = Vec::new();
-    //         Ok(PyArray::from_vec(py, empty))
-    //     }
-    // }
 
     /// Get all the extra attributes stored for a specific vertex.
     /// Returns the values as a JSON dictionary in string.
