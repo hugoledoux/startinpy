@@ -107,6 +107,7 @@ fn startinpy(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
 /// A Delaunay triangulation (DT), containing vertices+triangles
 pub struct DT {
     t: startin::Triangulation,
+    dtype: Vec<(String, String)>,
 }
 
 #[pymethods]
@@ -119,7 +120,11 @@ impl DT {
     #[new]
     fn new() -> Self {
         let tmp = startin::Triangulation::new();
-        DT { t: tmp }
+        let tmp2 = Vec::new();
+        DT {
+            t: tmp,
+            dtype: tmp2,
+        }
     }
 
     /// Get the points [x, y, z] of all vertices in the DT.
@@ -199,11 +204,11 @@ impl DT {
             let tmp = py_kwargs.unwrap();
             let keys = tmp.keys();
             let am = self.t.get_attributes_schema();
-
             for k in keys {
                 let b: &String = &k.extract()?;
-                if am.contains_key(b) {
-                    match am[b].as_ref() {
+                let c = am.iter().position(|(first, _)| first == b);
+                if c.is_some() {
+                    match am[c.unwrap()].1.as_ref() {
                         "f64" => {
                             let t1: f64 = tmp.get_item(b).unwrap().extract()?;
                             m.insert(b.to_string(), t1.into());
@@ -410,76 +415,89 @@ impl DT {
     //     Ok(self.t.list_all_attributes())
     // }
 
-    #[pyo3(text_signature = "($self, dtype)")]
-    #[args(name, dtype)]
-    pub fn set_attributes_schema(&mut self, list: &PyList) -> PyResult<bool> {
-        let mut v: BTreeMap<String, String> = BTreeMap::new();
-        for item in list.iter() {
-            let tuple: &PyTuple = item.downcast::<PyTuple>()?;
-            if tuple.len() != 2 {
-                return Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(
-                    "Each tuple must have exactly two elements",
-                ));
-            }
-            let first: String = tuple.get_item(0)?.extract()?;
-            let second: String = tuple.get_item(1)?.extract()?;
-            v.insert(first, second);
-        }
-        let _ = self.t.set_attributes_schema(v);
-        Ok(true)
-    }
+    // #[pyo3(text_signature = "($self, dtype)")]
+    // #[args(name, dtype)]
+    // pub fn set_attributes_schema(&mut self, list: &PyList) -> PyResult<bool> {
+    //     let mut v: BTreeMap<String, String> = BTreeMap::new();
+    //     for item in list.iter() {
+    //         let tuple: &PyTuple = item.downcast::<PyTuple>()?;
+    //         if tuple.len() != 2 {
+    //             return Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(
+    //                 "Each tuple must have exactly two elements",
+    //             ));
+    //         }
+    //         let first: String = tuple.get_item(0)?.extract()?;
+    //         let second: String = tuple.get_item(1)?.extract()?;
+    //         v.insert(first, second);
+    //     }
+    //     let _ = self.t.set_attributes_schema(v);
+    //     Ok(true)
+    // }
 
     #[pyo3(text_signature = "($self, dtype)")]
     #[args(name, dtype)]
-    pub fn set_attributes_schema_2<'py>(
-        &mut self,
-        py: Python<'py>,
-        dtype: &PyAny,
-    ) -> PyResult<bool> {
+    pub fn set_attributes_schema(&mut self, dtype: &PyAny) -> PyResult<bool> {
         let descr: &PyArrayDescr = dtype.extract()?;
-        // Get the names of the fields
         let names: &PyTuple = descr.getattr("names")?.extract()?;
-
-        // Create a vector to store field details
-        // let mut fields = Vec::new();
-
+        let mut v: Vec<(String, String)> = Vec::new();
+        self.dtype.clear();
         for name in names.iter() {
             let name: &str = name.extract()?;
             let field = descr.getattr("fields")?.get_item(name)?;
             let field_type = field.get_item(0)?;
-            // let offset: isize = field.get_item(1)?.extract()?;
-            // fields.push((name.to_string(), field_type.to_string(), offset));
-            println!("{:?}--{:?}", name, field_type);
+            println!("{:?}", field_type);
+            match field_type.to_string().as_ref() {
+                "bool" => {
+                    v.push((name.to_string(), "bool".to_string()));
+                    self.dtype.push((name.to_string(), "?".to_string()));
+                }
+                "float32" => {
+                    v.push((name.to_string(), "f64".to_string()));
+                    self.dtype.push((name.to_string(), "<f4".to_string()));
+                }
+                "float64" => {
+                    v.push((name.to_string(), "f64".to_string()));
+                    self.dtype.push((name.to_string(), "<f8".to_string()));
+                }
+                "int32" => {
+                    v.push((name.to_string(), "i64".to_string()));
+                    self.dtype.push((name.to_string(), "<i4".to_string()));
+                }
+                "int64" => {
+                    v.push((name.to_string(), "i64".to_string()));
+                    self.dtype.push((name.to_string(), "<i8".to_string()));
+                }
+                "uint32" => {
+                    v.push((name.to_string(), "u64".to_string()));
+                    self.dtype.push((name.to_string(), "<u4".to_string()));
+                }
+                "uint64" => {
+                    v.push((name.to_string(), "i64".to_string()));
+                    self.dtype.push((name.to_string(), "<u8".to_string()));
+                }
+                other if other.starts_with("<U") => {
+                    v.push((name.to_string(), "String".to_string()));
+                    self.dtype.push((name.to_string(), other.to_string()));
+                }
+                _ => {
+                    return {
+                        Err(PyErr::new::<pyo3::exceptions::PyAttributeError, _>(
+                            format!("{} is not a valid dype for startinpy", field_type),
+                        ))
+                    };
+                }
+            };
         }
 
-        // Ok(fields.to_object(py))
-        // let dtype_dict: &PyDict = descr.to_dict(py)?;
-
-        // Ok(dtype_dict.to_object(py))
-        // let mut v: BTreeMap<String, String> = BTreeMap::new();
-        // for item in list.iter() {
-        //     let tuple: &PyTuple = item.downcast::<PyTuple>()?;
-        //     if tuple.len() != 2 {
-        //         return Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(
-        //             "Each tuple must have exactly two elements",
-        //         ));
-        //     }
-        //     let first: String = tuple.get_item(0)?.extract()?;
-        //     let second: String = tuple.get_item(1)?.extract()?;
-        //     v.insert(first, second);
-        // }
-        // let _ = self.t.set_attributes_schema(v);
+        println!("=>{:?}", self.dtype);
+        let _ = self.t.set_attributes_schema(v);
         Ok(true)
     }
 
     #[pyo3(text_signature = "($self)")]
     #[args()]
     fn get_attributes_schema(&self) -> Vec<(String, String)> {
-        let mut vmap: Vec<(String, String)> = Vec::new();
-        for (key, dtype) in &self.t.get_attributes_schema() {
-            vmap.push((String::from(key), String::from(dtype)));
-        }
-        vmap
+        self.dtype.clone()
     }
 
     /// Get all the values for a given extra attribute stored for the vertices.
@@ -500,18 +518,18 @@ impl DT {
     #[getter]
     pub fn attributes<'py>(&self, py: Python<'py>) -> PyResult<PyObject> {
         let np = py.import("numpy")?;
-        let mut vmap: Vec<(String, String)> = Vec::new();
-        for (key, dtype) in &self.t.get_attributes_schema() {
-            match dtype.as_ref() {
-                "f64" => vmap.push((String::from(key), "f8".to_string())),
-                "i64" => vmap.push((String::from(key), "i8".to_string())),
-                "u64" => vmap.push((String::from(key), "u8".to_string())),
-                "bool" => vmap.push((String::from(key), "b1".to_string())),
-                "String" => vmap.push((String::from(key), "U10".to_string())),
-                &_ => continue,
-            }
-        }
-        let dtype = np.call_method1("dtype", (vmap,))?;
+        // let mut vmap: Vec<(String, String)> = Vec::new();
+        // for (key, dtype) in &self.t.get_attributes_schema() {
+        //     match dtype.as_ref() {
+        //         "f64" => vmap.push((String::from(key), "f8".to_string())),
+        //         "i64" => vmap.push((String::from(key), "i8".to_string())),
+        //         "u64" => vmap.push((String::from(key), "u8".to_string())),
+        //         "bool" => vmap.push((String::from(key), "b1".to_string())),
+        //         "String" => vmap.push((String::from(key), "U10".to_string())),
+        //         &_ => continue,
+        //     }
+        // }
+        let dtype = np.call_method1("dtype", (self.dtype.clone(),))?;
         let allt = self.t.all_attributes();
         if allt.is_none() {
             let arraydtype = np.call_method1("empty", (0, dtype))?;
@@ -526,7 +544,7 @@ impl DT {
                 match o.get(key) {
                     Some(x) => {
                         match dtype.as_ref() {
-                            "f64" => item.set_item(key, x.as_f64())?,
+                            "f64" => item.set_item(key, x.as_f64())?, // TODO: dtype and f32 and f64 works?
                             "i64" => item.set_item(key, x.as_i64())?,
                             "u64" => item.set_item(key, x.as_u64())?,
                             "bool" => item.set_item(key, x.as_bool())?,
