@@ -1,6 +1,6 @@
 extern crate startin;
 
-use numpy::PyArray;
+use numpy::{PyArray, PyArrayDescr};
 use pyo3::exceptions;
 use pyo3::exceptions::PyTypeError;
 
@@ -9,6 +9,8 @@ use pyo3::types::{PyDict, PyList, PyTuple};
 
 use std::fs::File;
 use std::io::Write;
+
+use std::collections::BTreeMap;
 
 use geojson::{Feature, FeatureCollection, Geometry, Value as GeoValue};
 use serde::{Deserialize, Serialize};
@@ -199,7 +201,7 @@ impl DT {
         if py_kwargs.is_some() {
             let tmp = py_kwargs.unwrap();
             let keys = tmp.keys();
-            let am = self.t.get_attribute_map();
+            let am = self.t.get_attributes_schema();
 
             for k in keys {
                 let b: &String = &k.extract()?;
@@ -424,8 +426,52 @@ impl DT {
             }
             let first: String = tuple.get_item(0)?.extract()?;
             let second: String = tuple.get_item(1)?.extract()?;
-            let _ = self.t.add_attribute_map(first, second);
+            v.insert(first, second);
         }
+        let _ = self.t.set_attributes_schema(v);
+        Ok(true)
+    }
+
+    #[pyo3(text_signature = "($self, dtype)")]
+    #[args(name, dtype)]
+    pub fn set_attributes_schema_2<'py>(
+        &mut self,
+        py: Python<'py>,
+        dtype: &PyAny,
+    ) -> PyResult<bool> {
+        let descr: &PyArrayDescr = dtype.extract()?;
+        // Get the names of the fields
+        let names: &PyTuple = descr.getattr("names")?.extract()?;
+
+        // Create a vector to store field details
+        // let mut fields = Vec::new();
+
+        for name in names.iter() {
+            let name: &str = name.extract()?;
+            let field = descr.getattr("fields")?.get_item(name)?;
+            let field_type = field.get_item(0)?;
+            // let offset: isize = field.get_item(1)?.extract()?;
+            // fields.push((name.to_string(), field_type.to_string(), offset));
+            println!("{:?}--{:?}", name, field_type);
+        }
+
+        // Ok(fields.to_object(py))
+        // let dtype_dict: &PyDict = descr.to_dict(py)?;
+
+        // Ok(dtype_dict.to_object(py))
+        // let mut v: BTreeMap<String, String> = BTreeMap::new();
+        // for item in list.iter() {
+        //     let tuple: &PyTuple = item.downcast::<PyTuple>()?;
+        //     if tuple.len() != 2 {
+        //         return Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(
+        //             "Each tuple must have exactly two elements",
+        //         ));
+        //     }
+        //     let first: String = tuple.get_item(0)?.extract()?;
+        //     let second: String = tuple.get_item(1)?.extract()?;
+        //     v.insert(first, second);
+        // }
+        // let _ = self.t.set_attributes_schema(v);
         Ok(true)
     }
 
