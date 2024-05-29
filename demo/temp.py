@@ -7,17 +7,21 @@ import json
 
 
 dt = startinpy.DT()
-dt.add_attribute_map([("intensity", "f64")])
-# dt.add_attribute_map([("intensity", "f64"), ("visited", "bool")])
+# d = np.dtype('i8, bool, f4, U3')
+d = np.dtype([('classification', np.float32), ('visited', bool), ('intensity', '<U8')])
+print(d)
+dt.set_attributes_schema(d)
 
-dt.insert_one_pt([20.0, 30.0, 1.1], intensity=11.1, visited=True);
-dt.insert_one_pt([120.0, 33.0, 12.5], intensity=22.2, visited=True);
-dt.insert_one_pt([124.0, 222.0, 7.65], intensity=33.3, visited=True);
-dt.insert_one_pt([20.0, 133.0, 21.0], intensity=44.4, visited=True);
-dt.insert_one_pt([23.0, 13.0, 11.0], intensity=55.5, visited=False);
-dt.insert_one_pt([60.0, 60.0, 33.0], intensity=66.6, visited=False);
+dt.insert_one_pt([20.0, 30.0, 1.1], classification=11.1, visited=True, intensity='12345678901');
+dt.insert_one_pt([120.0, 33.0, 12.5], classification=22.2, visited=True, intensity='a');
+dt.insert_one_pt([124.0, 222.0, 7.65], classification=33.3, visited=True, intensity='a');
+dt.insert_one_pt([20.0, 133.0, 21.0], classification=44.4, visited=True, intensity='a');
+dt.insert_one_pt([23.0, 13.0, 11.0], classification=55.5, visited=False, intensity='a');
+dt.insert_one_pt([60.0, 60.0, 33.0], classification=66.6, visited=False, intensity='a');
 
 
 print(dt)
-print(dt.get_attribute_map())
+# print("=>", dt.get_attributes_schema())
 print(dt.attributes)
+print(dt.attributes.dtype)
+#
