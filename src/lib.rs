@@ -445,7 +445,7 @@ impl DT {
             let name: &str = name.extract()?;
             let field = descr.getattr("fields")?.get_item(name)?;
             let field_type = field.get_item(0)?;
-            println!("{:?}", field_type);
+            // println!("{:?}", field_type);
             match field_type.to_string().as_ref() {
                 "bool" => {
                     v.push((name.to_string(), "bool".to_string()));
@@ -488,8 +488,6 @@ impl DT {
                 }
             };
         }
-
-        println!("=>{:?}", self.dtype);
         let _ = self.t.set_attributes_schema(v);
         Ok(true)
     }
@@ -518,17 +516,6 @@ impl DT {
     #[getter]
     pub fn attributes<'py>(&self, py: Python<'py>) -> PyResult<PyObject> {
         let np = py.import("numpy")?;
-        // let mut vmap: Vec<(String, String)> = Vec::new();
-        // for (key, dtype) in &self.t.get_attributes_schema() {
-        //     match dtype.as_ref() {
-        //         "f64" => vmap.push((String::from(key), "f8".to_string())),
-        //         "i64" => vmap.push((String::from(key), "i8".to_string())),
-        //         "u64" => vmap.push((String::from(key), "u8".to_string())),
-        //         "bool" => vmap.push((String::from(key), "b1".to_string())),
-        //         "String" => vmap.push((String::from(key), "U10".to_string())),
-        //         &_ => continue,
-        //     }
-        // }
         let dtype = np.call_method1("dtype", (self.dtype.clone(),))?;
         let allt = self.t.all_attributes();
         if allt.is_none() {
