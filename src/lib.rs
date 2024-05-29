@@ -2,15 +2,12 @@ extern crate startin;
 
 use numpy::{PyArray, PyArrayDescr};
 use pyo3::exceptions;
-use pyo3::exceptions::PyTypeError;
 
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyList, PyTuple};
 
 use std::fs::File;
 use std::io::Write;
-
-use std::collections::BTreeMap;
 
 use geojson::{Feature, FeatureCollection, Geometry, Value as GeoValue};
 use serde::{Deserialize, Serialize};
@@ -63,37 +60,37 @@ fn convert_json_value_to_pyobject(py: Python, value: &Value) -> PyResult<PyObjec
     }
 }
 
-fn convert_py_any_to_json(py_any: &PyAny) -> PyResult<Value> {
-    if py_any.is_none() {
-        Ok(Value::Null)
-    } else if let Ok(b) = py_any.extract::<bool>() {
-        Ok(Value::Bool(b))
-    } else if let Ok(i) = py_any.extract::<i64>() {
-        Ok(Value::Number(i.into()))
-    } else if let Ok(f) = py_any.extract::<f64>() {
-        Ok(Value::Number(serde_json::Number::from_f64(f).ok_or_else(
-            || PyTypeError::new_err("Invalid float value"),
-        )?))
-    } else if let Ok(s) = py_any.extract::<String>() {
-        Ok(Value::String(s))
-    } else if let Ok(py_list) = py_any.downcast::<PyList>() {
-        let mut vec = Vec::new();
-        for item in py_list {
-            vec.push(convert_py_any_to_json(item)?);
-        }
-        Ok(Value::Array(vec))
-    } else if let Ok(py_dict) = py_any.downcast::<PyDict>() {
-        let mut map = serde_json::Map::new();
-        for (key, value) in py_dict {
-            let key = key.extract::<String>()?;
-            let value = convert_py_any_to_json(value)?;
-            map.insert(key, value);
-        }
-        Ok(Value::Object(map))
-    } else {
-        Err(PyTypeError::new_err("Unsupported type"))
-    }
-}
+// fn convert_py_any_to_json(py_any: &PyAny) -> PyResult<Value> {
+//     if py_any.is_none() {
+//         Ok(Value::Null)
+//     } else if let Ok(b) = py_any.extract::<bool>() {
+//         Ok(Value::Bool(b))
+//     } else if let Ok(i) = py_any.extract::<i64>() {
+//         Ok(Value::Number(i.into()))
+//     } else if let Ok(f) = py_any.extract::<f64>() {
+//         Ok(Value::Number(serde_json::Number::from_f64(f).ok_or_else(
+//             || PyTypeError::new_err("Invalid float value"),
+//         )?))
+//     } else if let Ok(s) = py_any.extract::<String>() {
+//         Ok(Value::String(s))
+//     } else if let Ok(py_list) = py_any.downcast::<PyList>() {
+//         let mut vec = Vec::new();
+//         for item in py_list {
+//             vec.push(convert_py_any_to_json(item)?);
+//         }
+//         Ok(Value::Array(vec))
+//     } else if let Ok(py_dict) = py_any.downcast::<PyDict>() {
+//         let mut map = serde_json::Map::new();
+//         for (key, value) in py_dict {
+//             let key = key.extract::<String>()?;
+//             let value = convert_py_any_to_json(value)?;
+//             map.insert(key, value);
+//         }
+//         Ok(Value::Object(map))
+//     } else {
+//         Err(PyTypeError::new_err("Unsupported type"))
+//     }
+// }
 
 /// A Delaunay triangulator where the input are 2.5D points,
 /// the DT is computed in 2D but the elevation of the vertices are kept.
