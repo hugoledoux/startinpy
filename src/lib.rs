@@ -413,7 +413,8 @@ impl DT {
 
     #[pyo3(text_signature = "($self, dtype)")]
     #[args(name, dtype)]
-    pub fn add_attribute_map(&mut self, list: &PyList) -> PyResult<bool> {
+    pub fn set_attributes_schema(&mut self, list: &PyList) -> PyResult<bool> {
+        let mut v: BTreeMap<String, String> = BTreeMap::new();
         for item in list.iter() {
             let tuple: &PyTuple = item.downcast::<PyTuple>()?;
             if tuple.len() != 2 {
@@ -430,9 +431,9 @@ impl DT {
 
     #[pyo3(text_signature = "($self)")]
     #[args()]
-    fn get_attribute_map(&self) -> Vec<(String, String)> {
+    fn get_attributes_schema(&self) -> Vec<(String, String)> {
         let mut vmap: Vec<(String, String)> = Vec::new();
-        for (key, dtype) in &self.t.get_attribute_map() {
+        for (key, dtype) in &self.t.get_attributes_schema() {
             vmap.push((String::from(key), String::from(dtype)));
         }
         vmap
@@ -457,7 +458,7 @@ impl DT {
     pub fn attributes<'py>(&self, py: Python<'py>) -> PyResult<PyObject> {
         let np = py.import("numpy")?;
         let mut vmap: Vec<(String, String)> = Vec::new();
-        for (key, dtype) in &self.t.get_attribute_map() {
+        for (key, dtype) in &self.t.get_attributes_schema() {
             match dtype.as_ref() {
                 "f64" => vmap.push((String::from(key), "f8".to_string())),
                 "i64" => vmap.push((String::from(key), "i8".to_string())),
@@ -478,7 +479,7 @@ impl DT {
         for (i, each) in allt.iter().enumerate() {
             let item = arraydtype.get_item(i)?;
             let o = each.as_object().unwrap();
-            for (key, dtype) in &self.t.get_attribute_map() {
+            for (key, dtype) in &self.t.get_attributes_schema() {
                 match o.get(key) {
                     Some(x) => {
                         match dtype.as_ref() {
