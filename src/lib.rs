@@ -187,7 +187,8 @@ impl DT {
     /// :param optional extra attributes: extra parameters with values
     /// :return: a tuple: 1) the index of the (created or kept) vertex in the triangulation;
     ///          2) whether a new vertex was inserted: True if yes; False is there was already
-    ///          a vertex at that xy-location.
+    ///          a vertex at that xy-location. 3) whether the z/attributes were updated or not,
+    ///          based on the :func:`startinpy.DT.duplicates_handling`
     ///
     /// >>> (vi, new_vertex) = dt.insert_one_pt([3.2, 1.1, 17.0])
     /// (37, True)
@@ -198,60 +199,19 @@ impl DT {
         &mut self,
         p3: [f64; 3],
         py_kwargs: Option<&PyDict>,
-    ) -> PyResult<(usize, bool)> {
-        let mut m = Map::new();
-        if py_kwargs.is_some() {
-            let tmp = py_kwargs.unwrap();
-            let keys = tmp.keys();
-            let am = self.t.get_attributes_schema();
-            for k in keys {
-                let b: &String = &k.extract()?;
-                let c = am.iter().position(|(first, _)| first == b);
-                if c.is_some() {
-                    match am[c.unwrap()].1.as_ref() {
-                        "f64" => {
-                            let t1: f64 = tmp.get_item(b).unwrap().extract()?;
-                            m.insert(b.to_string(), t1.into());
-                        }
-                        "i64" => {
-                            let t1: i64 = tmp.get_item(b).unwrap().extract()?;
-                            m.insert(b.to_string(), t1.into());
-                        }
-                        "u64" => {
-                            let t1: u64 = tmp.get_item(b).unwrap().extract()?;
-                            m.insert(b.to_string(), t1.into());
-                        }
-                        "bool" => {
-                            let t1: bool = tmp.get_item(b).unwrap().extract()?;
-                            m.insert(b.to_string(), t1.into());
-                        }
-                        "String" => {
-                            let t1: String = tmp.get_item(b).unwrap().extract()?;
-                            m.insert(b.to_string(), t1.into());
-                        }
-                        &_ => continue,
-                    }
-                }
-            }
-        }
-        // println!("map={:?}", m);
+    ) -> PyResult<(usize, bool, bool)> {
+        // Result<usize, (usize, bool)>
         let re = self.t.insert_one_pt(p3[0], p3[1], p3[2]);
         match re {
             Ok(x) => {
-                if m.is_empty() == false {
-                    let _ = self
-                        .t
-                        .add_vertex_attributes(x, serde_json::to_value(m).unwrap());
-                }
-                return Ok((x, true));
+                let _ = self.set_vertex_attributes(x, py_kwargs);
+                return Ok((x, true, true));
             }
-            Err(x) => {
-                if m.is_empty() == false {
-                    let _ = self
-                        .t
-                        .add_vertex_attributes(x, serde_json::to_value(m).unwrap());
+            Err((x, b)) => {
+                if b == true {
+                    let _ = self.set_vertex_attributes(x, py_kwargs);
                 }
-                return Ok((x, false));
+                return Ok((x, false, b));
             }
         };
     }
@@ -593,31 +553,6 @@ impl DT {
         }
     }
 
-    // /// Set/overwrite the extra attributes for a specific vertex.
-    // /// Returns the values as a JSON dictionary in string.
-    // ///
-    // /// :param vi: the index of the vertex
-    // /// :param attribute: the JSON object (as a string) of the extra attribute, which contains all values
-    // /// :return: True if the attribute was assigned, False otherwise
-    // ///
-    // /// >>> dt = startinpy.DT(extra_attributes=True)
-    // /// >>> dt.insert_one_pt(85000.0, 444003.2, 2.2, intensity=111.1, reflectance=29.9)
-    // /// >>> ...
-    // /// >>> new_a = {'intensity': 155.5, 'reflectance': 222.2, 'extra': 3}
-    // /// >>> dt.set_vertex_attributes(17, json.dumps(new_a))
-    // /// >>> dt.get_vertex_attributes(17)
-    // /// '{"extra":3,"intensity":155.5,"reflectance":222.2}'
-    // #[pyo3(text_signature = "($self, vi, attribute)")]
-    // #[args(vi, attribute)]
-    // fn add_vertex_attributes(&mut self, vi: usize, attribute: &PyDict) -> PyResult<bool> {
-    //     let v: Value = convert_py_any_to_json(attribute)?;
-    //     // let v: Value = serde_json::from_str(&attribute).unwrap();
-    //     match self.t.add_vertex_attributes(vi, v) {
-    //         Ok(b) => return Ok(b),
-    //         Err(_) => return Ok(false),
-    //     }
-    // }
-
     /// Add a new attributes to a vertex (even if it already has some).
     /// Returns the values as a JSON dictionary in string.
     ///
@@ -635,52 +570,39 @@ impl DT {
     /// '{"classification":6,"extra":3,"intensity":155.5,"reflectance":222.2}'    
     #[pyo3(text_signature = "($self, vi, *, classification=1)")]
     #[args(vi, py_kwargs = "**")]
-    fn add_vertex_attributes(&mut self, vi: usize, py_kwargs: Option<&PyDict>) -> PyResult<bool> {
+    fn set_vertex_attributes(&mut self, vi: usize, py_kwargs: Option<&PyDict>) -> PyResult<bool> {
         let mut m = Map::new();
         if py_kwargs.is_some() {
             let tmp = py_kwargs.unwrap();
             let keys = tmp.keys();
+            let am = self.t.get_attributes_schema();
             for k in keys {
                 let b: &String = &k.extract()?;
-                if tmp
-                    .get_item(b)
-                    .unwrap()
-                    .is_instance_of::<pyo3::types::PyInt>()?
-                {
-                    let t1: i64 = tmp.get_item(b).unwrap().extract()?;
-                    m.insert(b.to_string(), t1.into());
-                }
-                if tmp
-                    .get_item(b)
-                    .unwrap()
-                    .is_instance_of::<pyo3::types::PyBool>()?
-                {
-                    let t1: bool = tmp.get_item(b).unwrap().extract()?;
-                    m.insert(b.to_string(), t1.into());
-                }
-                if tmp
-                    .get_item(b)
-                    .unwrap()
-                    .is_instance_of::<pyo3::types::PyFloat>()?
-                {
-                    let t1: f64 = tmp.get_item(b).unwrap().extract()?;
-                    m.insert(b.to_string(), t1.into());
-                }
-                if tmp
-                    .get_item(b)
-                    .unwrap()
-                    .is_instance_of::<pyo3::types::PyString>()?
-                {
-                    let t1: f64 = tmp.get_item(b).unwrap().extract()?;
-                    m.insert(b.to_string(), t1.into());
-                }
-                if tmp
-                    .get_item(b)
-                    .unwrap()
-                    .is_instance_of::<pyo3::types::PyString>()?
-                {
-                    let t1: String = tmp.get_item(b).unwrap().extract()?;
-                    m.insert(b.to_string(), t1.into());
+                let c = am.iter().position(|(first, _)| first == b);
+                if c.is_some() {
+                    match am[c.unwrap()].1.as_ref() {
+                        "f64" => {
+                            let t1: f64 = tmp.get_item(b).unwrap().extract()?;
+                            m.insert(b.to_string(), t1.into());
+                        }
+                        "i64" => {
+                            let t1: i64 = tmp.get_item(b).unwrap().extract()?;
+                            m.insert(b.to_string(), t1.into());
+                        }
+                        "u64" => {
+                            let t1: u64 = tmp.get_item(b).unwrap().extract()?;
+                            m.insert(b.to_string(), t1.into());
+                        }
+                        "bool" => {
+                            let t1: bool = tmp.get_item(b).unwrap().extract()?;
+                            m.insert(b.to_string(), t1.into());
+                        }
+                        "String" => {
+                            let t1: String = tmp.get_item(b).unwrap().extract()?;
+                            m.insert(b.to_string(), t1.into());
+                        }
+                        &_ => continue,
+                    }
                 }
             }
         }
