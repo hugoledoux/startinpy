@@ -147,7 +147,7 @@ impl DT {
         Ok(PyArray::from_vec2(py, &vs).unwrap())
     }
 
-    /// Get the triangles in the DT.
+    /// Get the triangles in the DT (only finite triangles).
     ///
     /// >>> trs = dt.triangles
     /// >>> print(trs.shape)
@@ -185,12 +185,14 @@ impl DT {
     ///
     /// :param p3: array with [x, y, z]-coordinates of point to insert
     /// :param optional extra attributes: extra parameters with values
-    /// :return: a tuple: 1) the index of the (created or kept) vertex in the triangulation;
+    /// :return: a tuple containing:
+    ///          1) the index of the (created or kept) vertex in the triangulation;
     ///          2) whether a new vertex was inserted: True if yes; False is there was already
-    ///          a vertex at that xy-location. 3) whether the z/attributes were updated or not,
-    ///          based on the :func:`startinpy.DT.duplicates_handling`
+    ///          a vertex at that xy-location.
+    ///          3) whether the z/attributes were updated or not, based on
+    ///          the :func:`startinpy.DT.duplicates_handling`
     ///
-    /// >>> (vi, new_vertex) = dt.insert_one_pt([3.2, 1.1, 17.0])
+    /// >>> (vi, bNewVertex, bZUpdated) = dt.insert_one_pt([3.2, 1.1, 17.0])
     /// (37, True)
     /// >>> dt.insert_one_pt([13.2, 44.1, 74.2], intensity=77.2)
     #[pyo3(text_signature = "($self, p3, *, classification=1, intensity=78.0)")]
@@ -361,39 +363,27 @@ impl DT {
         Ok(())
     }
 
-    /// List all the names of the extra attributes that the vertices have.
+    /// Set the attribute schema (the definition of the data type) for the
+    /// extra attributes that each vertex can store.
     ///
-    /// :return: an array of the names, empty if none
+    /// If that function is used, all previous stored attributes and
+    /// schema will be removed.
+    ///            
+    /// Adding attributes to a triangulation that has no schema will
+    /// result in no attributes stored, only those compliant with the
+    /// schema are stored.
     ///
-    /// >>> dt = startinpy.DT(extra_attributes=True)
-    /// >>> dt.insert_one_pt(85000.0, 444003.2, 2.2, intensity=111.1)
-    /// >>> dt.list_attributes()
-    /// ['intensity']
-    // TODO: to uncomment
-    // #[args()]
-    // fn list_attributes(&self) -> PyResult<Vec<String>> {
-    //     Ok(self.t.list_all_attributes())
-    // }
-
-    // #[pyo3(text_signature = "($self, dtype)")]
-    // #[args(name, dtype)]
-    // pub fn set_attributes_schema(&mut self, list: &PyList) -> PyResult<bool> {
-    //     let mut v: BTreeMap<String, String> = BTreeMap::new();
-    //     for item in list.iter() {
-    //         let tuple: &PyTuple = item.downcast::<PyTuple>()?;
-    //         if tuple.len() != 2 {
-    //             return Err(PyErr::new::<pyo3::exceptions::PyValueError, _>(
-    //                 "Each tuple must have exactly two elements",
-    //             ));
-    //         }
-    //         let first: String = tuple.get_item(0)?.extract()?;
-    //         let second: String = tuple.get_item(1)?.extract()?;
-    //         v.insert(first, second);
-    //     }
-    //     let _ = self.t.set_attributes_schema(v);
-    //     Ok(true)
-    // }
-
+    /// Only the following data types for each attribute are allowed:
+    /// numpy.bool_, numpy.int32, numpy.int64, numpy.uint32, numpy.uint64, unicode (string),
+    /// numpy.float32, numpy.float64.
+    ///
+    /// :param dtype: a NumPy Data type object (dtype)
+    /// :return: True if the schema is valid, otherwise an error is thrown.
+    ///
+    /// >>> dt = startinpy.DT()
+    /// >>> myschema = np.dtype([('classification', np.uint32), ('intensity', float)])
+    /// >>> dt.set_attributes_schema(myschema)
+    /// >>> dt.insert_one_pt(85000.0, 444003.2, 2.2, classification=2, intensity=111.1)
     #[pyo3(text_signature = "($self, dtype)")]
     #[args(name, dtype)]
     pub fn set_attributes_schema(&mut self, dtype: &PyAny) -> PyResult<bool> {
@@ -452,6 +442,16 @@ impl DT {
         Ok(true)
     }
 
+    /// Get the attribute schema that contains the data type definitions
+    /// for the extra attributes (if any).
+    ///
+    /// :return: a NumPy Data type object (dtype)
+    ///
+    /// >>> d = np.dtype([('classification', np.float32), ('name', '<U8')])
+    /// >>> dt.set_attributes_schema(d)
+    /// True
+    /// >>> dt.get_attributes_schema()
+    /// [('classification', '<f4'), ('name', '<U8')]
     #[pyo3(text_signature = "($self)")]
     #[args()]
     fn get_attributes_schema(&self) -> Vec<(String, String)> {
@@ -463,16 +463,15 @@ impl DT {
     /// Watch out, if a given vertex doesn't have a specific attribute then ``np.nan`` is inserted
     /// for f64, max-values for i64 and u64, "" for String, 0 for bool.
     ///
-    /// :param attribute: the name (a string) of the attribute
-    /// :return: an array with all the values (including for the removed vertices).
-    ///          The array is empty if the extra attributes don't exist.
+    /// :return: an NumPy array with all the values (including for the removed vertices and the infinite
+    ///          vertex). The array is empty if the extra attributes don't exist.
     ///
     /// >>> dt = startinpy.DT()
-    /// >>> dt.add_attribute_map([("intensity", "f64"), ("classification", "u64")])
-    /// >>> dt.insert_one_pt(85000.0, 444003.2, 2.2, intensity=111.1, classification=6)
+    /// >>> dt.add_attribute_map(np.dtype([("classification", "u64")]))
+    /// >>> dt.insert_one_pt(85000.0, 444003.2, 2.2, classification=6)
     /// >>> ...
-    /// >>> dt.attributes()
-    /// array([nan, 111.1, 22.2, 46.4, nan, ...,   77.8, 111.1])
+    /// >>> dt.attributes()[1:]
+    /// array([6, 2, 6, 6, ..., 6, 9])
     #[getter]
     pub fn attributes<'py>(&self, py: Python<'py>) -> PyResult<PyObject> {
         let np = py.import("numpy")?;
@@ -553,21 +552,18 @@ impl DT {
         }
     }
 
-    /// Add a new attributes to a vertex (even if it already has some).
+    /// Add new attributes to a vertex (even if it already has some).
     /// Returns the values as a JSON dictionary in string.
     ///
     /// :param vi: the index of the vertex
     /// :param optional extra_attributes: extra parameters with values
     /// :return: True if the attribute was assigned, False otherwise
     ///
-    /// >>> dt = startinpy.DT(extra_attributes=True)
-    /// >>> dt.insert_one_pt(85000.0, 444003.2, 2.2, intensity=111.1, reflectance=29.9)
+    /// >>> dt.insert_one_pt([85000.0, 444003.2, 2.2], intensity=111.1, reflectance=29.9)
     /// >>> ...
-    /// >>> new_a = {'intensity': 155.5, 'reflectance': 222.2, 'extra': 3}
-    /// >>> dt.set_vertex_attributes(17, json.dumps(new_a))
-    /// >>> dt.add_vertex_attribute(17, classification=6)
-    /// >>> dt.get_vertex_attributes(17, classification=6)
-    /// '{"classification":6,"extra":3,"intensity":155.5,"reflectance":222.2}'    
+    /// >>> dt.set_vertex_attributes(17, classification=2)
+    /// >>> dt.get_vertex_attributes(17)
+    /// {'intensity': 111.1, 'reflectance': 29.9, 'classification': 2, }'    
     #[pyo3(text_signature = "($self, vi, *, classification=1)")]
     #[args(vi, py_kwargs = "**")]
     fn set_vertex_attributes(&mut self, vi: usize, py_kwargs: Option<&PyDict>) -> PyResult<bool> {
