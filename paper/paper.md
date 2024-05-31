@@ -31,7 +31,7 @@ The underlying code of startinpy is written in the language Rust (so it is rathe
 # Statement of need
 
 There exists several Python libraries for computing the DT in 2D.
-A search for `"Delaunay triangulation"` in the *Python Package Index* (PyPI) returns 227 packages, the most notable ones being SciPy (specifically `scipy.spatial.Delaunay`, which is a wrapper around Qhull [@Barber96], written in C) and Triangle (which is a wrapper around the fast and robust C library that performs constrained DT and meshing [@Shewchuk96a]).
+A search for "Delaunay triangulation" in the *Python Package Index* (PyPI) returns 227 packages, the most notable ones being SciPy (specifically `scipy.spatial.Delaunay`, which is a wrapper around Qhull [@Barber96], written in C) and Triangle (which is a wrapper around the fast and robust C library that performs constrained DT and meshing [@Shewchuk96a]).
 
 When it comes to modelling 2.5D triangulated terrains, the existing Python libraries have in general four main shortcomings:
 
