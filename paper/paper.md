@@ -19,8 +19,8 @@ bibliography: ref.bib
 # Summary
 
 The Python library *startinpy* can construct, modify, and manipulate triangulated terrains, commonly called TINs (triangulated irregular networks).
-Given a dataset formed of elevation samples (eg collected with lidar or photogrammetry), it is possible to construct a TIN, remove points (eg outliers), convert to a gridded terrain (with spatial interpolation) or other known formats, etc.
-Observe that while it is built primarily for points having a *z*-elevation, a Delaunay triangulation (DT) in 2D is computed (a TIN is a so-called 2.5D object); this means that startinpy can be used for applications where a standard 2D DT is necessary.
+Given a dataset formed of elevation samples (eg collected with lidar or photogrammetry), it is possible to construct a TIN, remove points (eg outliers), convert to a gridded terrain (with spatial interpolation) or other known formats, attach attributes to the vertex, etc.
+Observe that while startinpy is built primarily for points having a *z*-elevation, a Delaunay triangulation (DT) in 2D is computed (a TIN is a so-called 2.5D object); this means that startinpy can be used for applications where a standard 2D DT is necessary.
 Moreover, unlike several triangulation libraries, startinpy exposes its data structure and this allows users to obtain incident and adjacent triangles to vertices/triangles. 
 This can be useful for quality control, to derive properties like slope, to convert to different formats, etc. 
 The underlying code of startinpy is written in the language Rust (so it is rather fast), robust arithmetic is used (so it should not crash), and it uses NumPy for input/output of data, which allows it to integrate with other Python libraries.
@@ -54,9 +54,9 @@ The name of the library comes from the fact that the data structure implemented 
 The construction algorithm used is an incremental insertion based on flips, and the deletion of a vertex is also possible. 
 The algorithm implemented is a modification of @Mostafavi03, I have extended it to allow the deletion of vertices on the boundary of the convex hull. 
 
-A few spatial interpolation methods that are based on the DT and/or its dual structure the Voronoi diagram have been implemented: linear interpolation in TINs, natural neighbours [@Sibson81], Laplace [@Belikov97], etc.
+A few spatial interpolation methods that are based on the DT and/or its dual structure the Voronoi diagram have been implemented: linear interpolation in TINs, natural neighbours [@Sibson81], Laplace interpolation [@Belikov97], etc.
 
-It is possible to store extra attributes with each vertex, each attribute is stored as a JSON object/dictionary, a key-value pair where the key is a string and the value is one of these 3 options: (1) an integer, (2) a float, or (3) a boolean.
+It is possible to store extra attributes with each vertex, each attribute is stored as a JSON object/dictionary, a key-value pair where the key is a string and the value is either a float, an integer, a boolean, or a string.
 This can be used to preserve the lidar properties of the input points (eg intensity, RGB, number of returns, etc.).
 The Python libraries mentioned above cannot directly attach such information, an auxiliary data structure needs to be built and maintain by the user.
 
@@ -116,6 +116,7 @@ Notice also that startinpy is faster and more stable than the SciPy (no crash or
 
 # Acknowledgements
 
-I acknowledge the help of the students following the course *Digital terrain modelling (GEO1015)* at TUDelft over the last few years, their feedback, questions, and frustrations on preliminary versions of startinpy helped me greatly.
+I acknowledge the help of the students following the course *Digital terrain modelling (GEO1015)* at TUDelft over the last few years.
+Their feedback, questions, and frustrations on preliminary versions of startinpy helped me greatly.
 
 # References
