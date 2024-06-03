@@ -19,14 +19,20 @@ def dt_5_points():
 def small_laz_intensity():
     las = laspy.read("data/small.laz")
     d = np.vstack((las.x, las.y, las.z, las.intensity)).transpose()
-    dt = startinpy.DT(extra_attributes=True)
+    dt = startinpy.DT(np.dtype([("intensity", np.float64)]))
     for each in d:
         dt.insert_one_pt(each[:3], intensity=each[3])
     return dt
 
+def test_schema():
+    dt = small_laz_intensity()
+    dtype = np.dtype([("intensity", np.float64)])
+    assert dtype == dt.get_attributes_schema()
+
+
 def test_las_reading():
     dt = small_laz_intensity()
-    a = json.loads(dt.get_vertex_attributes(11))
+    a = dt.get_vertex_attributes(11)
     assert a['intensity'] == pytest.approx(533.0)
     with pytest.raises(KeyError):
         assert a['blue'] 
@@ -34,43 +40,28 @@ def test_las_reading():
         dt.get_vertex_attributes(55555)
 
 def test_set_vertex_attributes_1by1():
-    dt = startinpy.DT(extra_attributes=True)
+    dt = startinpy.DT(np.dtype([("humidity", np.float64)]))
     dt.insert_one_pt([0.0, 0.0, 12.5], humidity=33.3);
     dt.insert_one_pt([1.0, 0.0, 7.65]);
     dt.insert_one_pt([1.0, 1.0, 33.0]);
     dt.insert_one_pt([0.0, 1.0, 21.0]);
-    a = json.loads(dt.get_vertex_attributes(1))
+    a = dt.get_vertex_attributes(1)
     assert a['humidity'] == pytest.approx(33.3)
-    i = dt.attribute('humidity')
+    i = dt.attributes
     assert i.shape[0] == 5
-    i = dt.attribute('smthelse')
-    assert i.shape[0] == 0
-
-def test_list_attributes():
-    dt = startinpy.DT(extra_attributes=True)
-    dt.insert_one_pt([0.0, 0.0, 12.5], a1=33.3);
-    dt.insert_one_pt([1.0, 0.0, 7.65], a2=33.3);
-    dt.insert_one_pt([1.0, 0.0, 7.65]);
-    dt.insert_one_pt([1.0, 1.0, 33.0], a3=33.3);
-    dt.insert_one_pt([0.0, 1.0, 21.0], a4=33.3, a1=33.3);
-    l = dt.list_attributes()
-    assert len(l) == 4
 
 def test_set_vertex_attributes():
     dt = small_laz_intensity()
-    new_a = {'intensity': 155.5, 'reflectance': 222.2, 'extra': 3}
-    assert dt.set_vertex_attributes(11, json.dumps(new_a)) == True
-    new2 = json.loads(dt.get_vertex_attributes(11))
-    assert new2['intensity'] == pytest.approx(155.5) 
-    assert new2['reflectance'] == pytest.approx(222.2) 
-    assert new2['extra'] == 3 
-    with pytest.raises(KeyError):
-        new2['hugo'] == 3
+    dt.set_vertex_attributes(11, intensity=66.6)
+    assert dt.attributes['intensity'][11] == 66.6
+    dt.set_vertex_attributes(11, allo=22.2)
+    assert dt.attributes['intensity'][11] == 66.6
+    
 
 def test_no_attribute():
     dt = dt_5_points()
     with pytest.raises(Exception):
-        a = json.loads(dt.get_vertex_attributes(2))
+        a = dt.get_vertex_attributes(2)
     with pytest.raises(Exception):
-        a = json.loads(dt.get_vertex_attributes(12))
+        a = dt.get_vertex_attributes(12)
 

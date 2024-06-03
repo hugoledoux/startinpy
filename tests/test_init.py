@@ -7,6 +7,11 @@ def test_init():
     dt = startinpy.DT()
     assert dt.number_of_vertices() == 0
     assert dt.number_of_triangles() == 0
+    assert dt.get_attributes_schema() == []
+    dt = startinpy.DT(np.dtype([('classification', np.float32), ('visited', bool)]))
+    assert dt.number_of_vertices() == 0
+    assert dt.number_of_triangles() == 0
+    assert dt.get_attributes_schema() == np.dtype([('classification', np.float32), ('visited', bool)])
 
 def test_wrong_array_size():
     dt = startinpy.DT()
