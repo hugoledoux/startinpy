@@ -18,6 +18,10 @@ dt = startinpy.DT()
 myschema = np.dtype([('classification', np.uint32), ('intensity', float)])
 dt.set_attributes_schema(myschema)
 ```
+or
+```python
+dt = startinpy.DT(np.dtype([('classification', np.uint32), ('intensity', float)]))
+```
 
 Adding attributes to a triangulation that has no schema defined will result in no attributes stored, only those compliant with the schema are stored.
 
@@ -79,9 +83,7 @@ d = d[::1] #-- thinning to speed up, put ::1 to keep all the points
 
 print(d)
 
-dt = startinpy.DT()
-dt.set_attributes_schema(np.dtype([("classification", np.uint64)]))
-
+dt = startinpy.DT(np.dtype([("classification", np.uint64)]))
 for each in d:
     dt.insert_one_pt(each[:3], classification=int(each[3]))
 
