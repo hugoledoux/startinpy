@@ -81,14 +81,22 @@ pub struct DT {
 #[pymethods]
 impl DT {
     /// Constructor for a DT (returns an empty DT).
+    ///
+    /// :param attributes_schema: Optional schema for attributes.
+    /// :type attributes_schema: Optional[PyAny]
     #[new]
-    fn new() -> Self {
+    #[args(attributes_schema = "None")]
+    fn new(attributes_schema: Option<&PyAny>) -> Self {
         let tmp = startin::Triangulation::new();
         let tmp2 = Vec::new();
-        DT {
+        let mut dt = DT {
             t: tmp,
             dtype: tmp2,
+        };
+        if attributes_schema.is_some() {
+            let _ = dt.set_attributes_schema(&attributes_schema.unwrap());
         }
+        dt
     }
 
     /// Get the points [x, y, z] of all vertices in the DT.
