@@ -6,6 +6,7 @@ The library for calculating the Delaunay triangulation is originally written in 
 
 Robust arithmetic for the geometric predicates are used ([Shewchuk's predicates](https://www.cs.cmu.edu/~quake/robust.html), well the [Rust port of the code](https://crates.io/crates/robust)), so startin/py is robust and shouldn't crash (touch wood).
 
+
 ## Insertion + deletion are possible
 
 It uses an incremental algorithm for the construction of a Delaunay triangulation (constraints are *not* supported), that is each point are inserted one after another and triangulation is updated between each insertion.
@@ -16,6 +17,7 @@ The algorithm implemented is a modification of the one of [Mostafavi, Gold, and 
 The ears are filled by flipping, so it's in theory more robust.
 I have also extended the algorithm to allow the deletion of vertices on the boundary of the convex hull.
 The algorithm is sub-optimal, but in practice the number of neighbours of a given vertex in a DT is only 6, so it doesn't really matter.
+
 
 ## The data structure
 
@@ -32,6 +34,7 @@ The data structure of startinpy has 2 arrays:
 A **Vertex** is an integer, it is the index in the array of points ({func}`startinpy.DT.points`, which is 0-based).
 
 If you delete a vertex (with {func}`startinpy.DT.remove`) then the entry in the array of **Points** is not deleted (this would be slow because arrays are contiguous and a lot of copying would be necessary), instead the vertex/point is flagged as being removed and none of the **Triangles** will refer to it.
+
 
 (infinite)=
 
@@ -54,6 +57,7 @@ In the figure, notice that there are 5 finite triangles (126, 236, 346, 456, 516
 Those are adjacent to the 5 edges on the boundary of the convex hull of the dataset.
 You can conceptualise the triangulation has being embedded on a sphere, and the infinite vertex is on the other side.
 
+
 ## Some examples of the data structure and infinity
 
 ```{image} figs/tr.png
@@ -70,11 +74,11 @@ import numpy as np
 np.set_printoptions(precision=10)
 
 t = startinpy.DT()
-t.insert_one_pt(0.5, 0.5, 1.0)
-t.insert_one_pt(0.0, 0.0, 2.0)
-t.insert_one_pt(1.0, 0.0, 3.0)
-t.insert_one_pt(1.0, 1.0, 4.0)
-t.insert_one_pt(0.0, 1.0, 5.0)
+t.insert_one_pt([0.5, 0.5, 1.0])
+t.insert_one_pt([0.0, 0.0, 2.0])
+t.insert_one_pt([1.0, 0.0, 3.0])
+t.insert_one_pt([1.0, 1.0, 4.0])
+t.insert_one_pt([0.0, 1.0, 5.0])
 
 print(t.points)
 print(t.triangles)

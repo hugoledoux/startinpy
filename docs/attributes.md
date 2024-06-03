@@ -6,60 +6,61 @@
 
 ## Attaching extra attributes
 
-It is possible to store extra attributes with each vertex, to do so the class `startin.DT` must be initialised with the option `extra_attributes=True`.
+It is possible to store extra attributes with each vertex (besides the xyz-coordinates).
+
+Those attributes are stored as a JSON object/dictionary, a key-value pair where the key is a string and the value is one of the following [NumPy data types](https://numpy.org/doc/stable/user/basics.types.html): numpy.bool_, numpy.int32, numpy.int64, numpy.uint32, numpy.uint64, unicode (string), numpy.float32, numpy.float64.
+
+To attach extra attributes, you first need to define a *schema*, it a list of the attribute names and their data types.
+[NumPy data types](https://numpy.org/doc/stable/reference/arrays.dtypes.html#arrays-dtypes) must be used to create the schema.
 
 ```python
-dt = startinpy.DT(extra_attributes=True)
+dt = startinpy.DT()
+myschema = np.dtype([('classification', np.uint32), ('intensity', float)])
+dt.set_attributes_schema(myschema)
 ```
 
-Each attribute is stored as a JSON object/dictionary, a key-value pair where the key is a string and the value is one of these 3 options: (1) an integer, (2) a float, or (3) a boolean.
+Adding attributes to a triangulation that has no schema defined will result in no attributes stored, only those compliant with the schema are stored.
 
-An attribute can be passed with the function `insert_one_pt()` using the parameter `extra_attributes`, observe that the function accepts a string, therefore `json.dumps()` must be used.
+Attributes can be attached while adding new points with the function `insert_one_pt()` using extra parameters:
+
 ```python
-a = {'intensity': 155.5, 'classification': 2, 'visited': False}
-dt.insert_one_pt([31.1, 24.2, 1.8], extra_attributes=json.dumps(a))
+dt.insert_one_pt([85000.0, 444003.2, 2.2], classification=2, intensity=111.1)
 ```
 
-Alternatively, any key/attribute can be added by using it as an extra parameter:
+Alternatively, you can attach attributes with the vertex index:
 ```python
-dt.insert_one_pt([31.1, 24.2, 1.8], intensity=155.5, reflectance=111.0)
+(vi, bNewVertex, bZUpdated) = dt.insert_one_pt([85000.0, 444003.2, 2.2])
+dt.set_vertex_attributes(vi, classification=2, intensity=111.1)
 ```
 
-Also, we can set/overwrite the extra attributes for a specific vertex:
-```python
-dt.insert_one_pt([85000.0, 444003.2, 2.2], intensity=111.1, reflectance=29.9)
-new_a = {'intensity': 155.5, 'classification': 3}
-dt.set_vertex_attributes(17, json.dumps(new_a))
-```
 
 ## Retrieving the extra attributes
 
-It is possible to obtain the attributes attached to a single vertex, eg for the vertex with ID 50:
+It is possible to obtain the attributes attached to a single vertex as a JSON object, eg for the vertex with ID 50:
 ```python
 a = dt.get_vertex_attributes(50)
-print("=>", json.loads(a))
+print("=>", a)
 ```
-
+    
 Notice that the vertices can have different attributes attached to them, or some can have attributes and some not.
-You obtain the list of all the attributes stored in the triangulation with `list_attributes()`:
+
+You obtain the schema of the triangulation with `get_attributes_schema()`:
 ```python
-dt = startinpy.DT(extra_attributes=True)
-dt.insert_one_pt([85000.0, 444003.2, 2.2], intensity=111.1)
-dt.list_attributes()
-#-- ['intensity']
+dt.get_attributes_schema()
 ```
 
-To retrieve all the values for all the vertices, for a given attribute, use the function `attributes()`. 
-For example for all the values named `"intensity"`:
+To retrieve the extra attributes for all the vertices, use the property `attributes`.
+It returns all the values as a [NumPy structured array](https://numpy.org/doc/stable/user/basics.rec.html).
+Watch out, if a given vertex doesn't have a specific attribute then ``np.nan`` is inserted
+for f64, max-values for i64 and u64, "" for String, 0 for bool.
+    
 ```python
-i = dt.attribute('intensity')
-#-- array([nan, 111.1, 22.2, 46.4, nan, ...,   77.8, 111.1])
-```
-This returns an array (or type `np.float64`) for all the vertices (including the infinity vertex!), and if there is no attribute `"intensity"` then `np.nan` is added.
-It is your responsibility as user to cast the values if floats are not wanted, eg:
-```python
-i = dt.attributes('classification').astype(int)
-#-- [0 2 2 2 1 3 2 6 2]
+dt = startinpy.DT()
+dt.add_attribute_map(np.dtype([("classification", np.uint32)]))
+dt.insert_one_pt([85000.0, 444003.2, 2.2], classification=6)
+...
+dt.attributes[1:]
+#-- array([6, 2, 6, 6, ..., 6, 9])
 ```
 
 
@@ -72,27 +73,26 @@ import json
 import laspy
 
 las = laspy.read("../data/small.laz")
-
 #-- read intensity and store it as extra_attribute in the startinpy DT
-d = np.vstack((las.x, las.y, las.z, las.intensity)).transpose()
+d = np.vstack((las.x, las.y, las.z, las.classification)).transpose()
 d = d[::1] #-- thinning to speed up, put ::1 to keep all the points
 
-dt = startinpy.DT(extra_attributes=True)
-for each in d:
-    dt.insert_one_pt(each[:3], intensity=each[3])
+print(d)
 
-a = {'intensity': 155.5, 'reflectance': 111, 'something': True}
-dt.set_vertex_attributes(50, json.dumps(a))
+dt = startinpy.DT()
+dt.set_attributes_schema(np.dtype([("classification", np.uint64)]))
+
+for each in d:
+    dt.insert_one_pt(each[:3], classification=int(each[3]))
+
+dt.add_vertex_attributes(50, classification=int(112.2))
 
 print(dt)
-
-print("all extra attributes:", dt.list_attributes())
+print(dt.get_attributes_schema())
+print(dt.attributes[1:])
 
 a = dt.get_vertex_attributes(50)
-print("=>", json.loads(a))
+print("=>", a)
 a = dt.get_vertex_attributes(49)
-print("=>", json.loads(a))
-
-i = dt.attribute('intensity')
-print(i.shape)
+print("=>", a)
 ```

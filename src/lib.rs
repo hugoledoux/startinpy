@@ -113,10 +113,6 @@ pub struct DT {
 #[pymethods]
 impl DT {
     /// Constructor for a DT (returns an empty DT).
-    ///
-    /// :param optional extra_attributes: a Boolean stating whether the vertices can have extra attributes
-    /// attache to them.
-    #[args(extra_attributes = false)]
     #[new]
     fn new() -> Self {
         let tmp = startin::Triangulation::new();
@@ -374,16 +370,16 @@ impl DT {
     /// schema are stored.
     ///
     /// Only the following data types for each attribute are allowed:
-    /// numpy.bool_, numpy.int32, numpy.int64, numpy.uint32, numpy.uint64, unicode (string),
-    /// numpy.float32, numpy.float64.
+    /// 'numpy.bool_', 'numpy.int32', 'numpy.int64', 'numpy.uint32', 'numpy.uint64', unicode (string),
+    /// 'numpy.float32', 'numpy.float64'.
     ///
-    /// :param dtype: a NumPy Data type object (dtype)
+    /// :param dtype: a `NumPy Data type object (dtype) <https://numpy.org/doc/stable/reference/arrays.dtypes.html#arrays-dtypes>`_
     /// :return: True if the schema is valid, otherwise an error is thrown.
     ///
     /// >>> dt = startinpy.DT()
     /// >>> myschema = np.dtype([('classification', np.uint32), ('intensity', float)])
     /// >>> dt.set_attributes_schema(myschema)
-    /// >>> dt.insert_one_pt(85000.0, 444003.2, 2.2, classification=2, intensity=111.1)
+    /// >>> dt.insert_one_pt([85000.0, 444003.2, 2.2], classification=2, intensity=111.1)
     #[pyo3(text_signature = "($self, dtype)")]
     #[args(name, dtype)]
     pub fn set_attributes_schema(&mut self, dtype: &PyAny) -> PyResult<bool> {
@@ -467,10 +463,10 @@ impl DT {
     ///          vertex). The array is empty if the extra attributes don't exist.
     ///
     /// >>> dt = startinpy.DT()
-    /// >>> dt.add_attribute_map(np.dtype([("classification", "u64")]))
-    /// >>> dt.insert_one_pt(85000.0, 444003.2, 2.2, classification=6)
+    /// >>> dt.add_attribute_map(np.dtype([("classification", np.uint32)]))
+    /// >>> dt.insert_one_pt([85000.0, 444003.2, 2.2], classification=6)
     /// >>> ...
-    /// >>> dt.attributes()[1:]
+    /// >>> dt.attributes[1:]
     /// array([6, 2, 6, 6, ..., 6, 9])
     #[getter]
     pub fn attributes<'py>(&self, py: Python<'py>) -> PyResult<PyObject> {
@@ -520,12 +516,9 @@ impl DT {
     /// the vertex index is invalid.
     ///
     /// :param vi: the index of the vertex
-    /// :return: a JSON object as a string
+    /// :return: a JSON object
     ///
-    /// >>> dt = startinpy.DT(extra_attributes=True)
-    /// >>> dt.insert_one_pt(85000.0, 444003.2, 2.2, intensity=111.1, reflectance=29.9)
-    /// >>> ...
-    /// >>> json.loads(dt.get_vertex_attributes(17))
+    /// >>> dt.get_vertex_attributes(17)
     /// {'intensity': 111.1, 'reflectance': 99.1}
     #[pyo3(text_signature = "($self, vi)")]
     #[args(vi)]
@@ -1100,7 +1093,8 @@ impl DT {
         }
     }
 
-    /// Write an OBJ of the DT to the path (a string).
+    /// Write an `OBJ <https://en.wikipedia.org/wiki/Wavefront_.obj_file>`_ of
+    /// the DT to the path (a string).
     /// Throws an exception if the path is invalid.
     ///
     /// :param path: full path (a string) on disk of the file to create (will overwrite)
@@ -1119,7 +1113,7 @@ impl DT {
         Ok(())
     }
 
-    /// Write an PLY of the DT to the path (a string).
+    /// Write an `PLY <https://en.wikipedia.org/wiki/PLY_(file_format)>`_ of the DT to the path (a string).
     /// Throws an exception if the path is invalid.
     ///
     /// :param path: full path (a string) on disk of the file to create (will overwrite)
