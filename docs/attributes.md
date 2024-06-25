@@ -18,12 +18,14 @@ dt = startinpy.DT()
 myschema = np.dtype([('classification', np.uint32), ('intensity', float)])
 dt.set_attributes_schema(myschema)
 ```
+
 or
+
 ```python
 dt = startinpy.DT(np.dtype([('classification', np.uint32), ('intensity', float)]))
 ```
 
-Adding attributes to a triangulation that has no schema defined will result in no attributes stored, only those compliant with the schema are stored.
+Adding attributes to a triangulation that has no schema defined will result in no extra attributes stored, only those compliant with the schema are stored.
 
 Attributes can be attached while adding new points with the function `insert_one_pt()` using extra parameters:
 
@@ -32,6 +34,7 @@ dt.insert_one_pt([85000.0, 444003.2, 2.2], classification=2, intensity=111.1)
 ```
 
 Alternatively, you can attach attributes with the vertex index:
+
 ```python
 (vi, bNewVertex, bZUpdated) = dt.insert_one_pt([85000.0, 444003.2, 2.2])
 dt.set_vertex_attributes(vi, classification=2, intensity=111.1)
@@ -41,14 +44,16 @@ dt.set_vertex_attributes(vi, classification=2, intensity=111.1)
 ## Retrieving the extra attributes
 
 It is possible to obtain the attributes attached to a single vertex as a JSON object, eg for the vertex with ID 50:
+
 ```python
 a = dt.get_vertex_attributes(50)
 print("=>", a)
 ```
-    
+
 Notice that the vertices can have different attributes attached to them, or some can have attributes and some not.
 
 You obtain the schema of the triangulation with `get_attributes_schema()`:
+
 ```python
 dt.get_attributes_schema()
 ```
@@ -57,7 +62,7 @@ To retrieve the extra attributes for all the vertices, use the property `attribu
 It returns all the values as a [NumPy structured array](https://numpy.org/doc/stable/user/basics.rec.html).
 Watch out, if a given vertex doesn't have a specific attribute then ``np.nan`` is inserted
 for f64, max-values for i64 and u64, "" for String, 0 for bool.
-    
+
 ```python
 dt = startinpy.DT()
 dt.add_attribute_map(np.dtype([("classification", np.uint32)]))
