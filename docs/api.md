@@ -26,7 +26,7 @@ array([1, 3, 2], dtype=uint64)
 ```
 
 :::{IMPORTANT}
-The first vertex in the list of points is the **infinite vertex**, and has "infinity" coordinates (`[inf, inf, inf]`). It is used internally to ensure that the whole DT is consistent. No finite Triangle refers to the vertex, but infite Triangles do. {ref}`See more info and some examples <infinite>`.
+The first vertex in the list of points is the **infinite vertex**, and has "infinity" coordinates (`[inf, inf, inf]`). It is used internally to ensure that the whole DT is consistent. No finite Triangle refers to the vertex, but infinite Triangles do. {ref}`See more info and some examples <infinite>`.
 :::
 
 ```{eval-rst}

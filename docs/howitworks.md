@@ -2,21 +2,21 @@
 
 ## Original code written in rust
 
-The library for calculating the Delaunay triangulation is originally written in [Rust](https://www.rust-lang.org/), it is called just 'startin' and its [ source code is open](https://github.com/hugoledoux/startin).
+The library for calculating the Delaunay triangulation is originally written in [Rust](https://www.rust-lang.org/), it is called 'startin' and its [source code is open](https://github.com/hugoledoux/startin).
 
-Robust arithmetic for the geometric predicates are used ([Shewchuk's predicates](https://www.cs.cmu.edu/~quake/robust.html), well the [Rust port of the code](https://crates.io/crates/robust)), so startin/py is robust and shouldn't crash (touch wood).
+Robust arithmetic for the geometric predicates is used ([Shewchuk's predicates](https://www.cs.cmu.edu/~quake/robust.html), well the [Rust port of the code](https://crates.io/crates/robust)), so startin/py is robust and shouldn't crash (touch wood).
 
 
 ## Insertion + deletion are possible
 
-It uses an incremental algorithm for the construction of a Delaunay triangulation (constraints are *not* supported), that is each point are inserted one after another and triangulation is updated between each insertion.
+It uses an incremental algorithm for the construction of a Delaunay triangulation (constraints are *not* supported), that is each point is inserted one after another and the triangulation is updated between each insertion.
 The algorithm is based on flips.
 
 The deletion of a vertex is also possible.
 The algorithm implemented is a modification of the one of [Mostafavi, Gold, and Dakowicz (2003)](<https://doi.org/10.1016/S0098-3004(03)00017-7>).
-The ears are filled by flipping, so it's in theory more robust.
+The ears are filled by flipping, so it's, in theory, more robust.
 I have also extended the algorithm to allow the deletion of vertices on the boundary of the convex hull.
-The algorithm is sub-optimal, but in practice the number of neighbours of a given vertex in a DT is only 6, so it doesn't really matter.
+The algorithm is sub-optimal, but, in practice, the number of neighbours of a given vertex in a DT is only 6, so it doesn't really matter.
 
 
 ## The data structure
@@ -33,7 +33,7 @@ The data structure of startinpy has 2 arrays:
 
 A **Vertex** is an integer, it is the index in the array of points ({func}`startinpy.DT.points`, which is 0-based).
 
-If you delete a vertex (with {func}`startinpy.DT.remove`) then the entry in the array of **Points** is not deleted (this would be slow because arrays are contiguous and a lot of copying would be necessary), instead the vertex/point is flagged as being removed and none of the **Triangles** will refer to it.
+If you delete a vertex (with {func}`startinpy.DT.remove`), then the entry in the array of **Points** is not deleted (this would be slow because arrays are contiguous and a lot of copying would be necessary), instead the vertex/point is flagged as being removed and none of the **Triangles** will refer to it.
 
 
 (infinite)=
@@ -45,17 +45,17 @@ If you delete a vertex (with {func}`startinpy.DT.remove`) then the entry in the 
 :width: 40%
 ```
 
-The implementation of startinpy has *infinite triangles* and one *infinite vertex*, this simplifies a lot the algorithms and ensures that one can insert new points outside the convex hull of a dataset (or even delete some vertices on the boundary of the convex hull).
+The implementation of startinpy has *infinite triangles* and one *infinite vertex*, this greatly simplifies the algorithms and ensures that one can insert new points outside the convex hull of a dataset (or even delete some vertices on the boundary of the convex hull).
 The CGAL library also does this, and [it is well explained here](https://doc.cgal.org/latest/Triangulation_2/classCGAL_1_1Triangulation__2.html).
 
-The *infinite vertex* is the first vertex in the array of points ({func}`startinpy.DT.points`) and thus it has the index of 0 (zero).
-It has infinite coordinates (`[inf inf inf]`), they are of type [numpy infinity](https://numpy.org/devdocs/reference/constants.html#numpy.inf).
+The *infinite vertex* is the first vertex in the array of points ({func}`startinpy.DT.points`), and thus, it has the index of 0 (zero).
+It has infinite coordinates (`[inf inf inf]`), those are of type [numpy infinity](https://numpy.org/devdocs/reference/constants.html#numpy.inf).
 
 An *infinite triangle* is a triangle having the infinite vertex as one of its vertices.
 
 In the figure, notice that there are 5 finite triangles (126, 236, 346, 456, 516), but the data structure actually stores 5 extra infinite triangles (102, 150, 540, 304, 203).
 Those are adjacent to the 5 edges on the boundary of the convex hull of the dataset.
-You can conceptualise the triangulation has being embedded on a sphere, and the infinite vertex is on the other side.
+You can conceptualise the triangulation as being embedded on a sphere, and the infinite vertex is on the other side.
 
 
 ## Some examples of the data structure and infinity
@@ -86,7 +86,7 @@ print(t.triangles)
 
 Which outputs this below.
 Notice first that there are a total of 6 vertices: the 5 we inserted plus the infinite vertex (at index-0 with infinity coordinates `[inf inf inf]`).
-Notice also no finite triangles refers to the vertex 0.
+Notice also that no finite triangle refers to the vertex 0.
 
 ```
 [[inf inf inf]
