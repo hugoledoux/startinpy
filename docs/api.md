@@ -1,7 +1,7 @@
 # API 
 
 startinpy does not have specific classes and/or objects for points, vertices, and triangles.
-[NumPy arrays](https://numpy.org/doc/stable/reference/arrays.html) of floats and integers are used.
+[NumPy arrays](https://numpy.org/doc/stable/reference/arrays.html) of floats and integers are instead used.
 
 A **Point** is an array of 3 floats (x-coordinate, y-coordinate, z-coordinate):
 
