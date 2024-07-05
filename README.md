@@ -43,17 +43,17 @@ To install the latest release: `pip install startinpy`
 If you want to compile it yourself
 ----------------------------------
 
-1. install latest [Rust](https://www.rust-lang.org/)
-2. install [maturin](https://github.com/PyO3/maturin)
-3. `maturin build --release`
-4. `cd ./target/wheels/`
-5. `pip install [name-wheel].whl` will install it to your local Python
+  1. install latest [Rust](https://www.rust-lang.org/)
+  2. install [maturin](https://github.com/PyO3/maturin)
+  3. `maturin build --release`
+  4. `cd ./target/wheels/`
+  5. `pip install [name-wheel].whl` will install it to your local Python
 
 Development
 -----------
 
   1. install [Rust](https://www.rust-lang.org/) (v1.39+)
-  2. install [maturin](https://github.com/PyO3/maturin) 
+  2. install [maturin](https://github.com/PyO3/maturin)
   3. `maturin develop`
   4. move to another folder, and `import startinpy` shouldn't return any error
 
