@@ -75,6 +75,7 @@ for i in range(band1.shape[0]):
          x = t[2] + (j * t[0]) + (t[0] / 2)
          y = t[5] + (i * t[4]) + (t[4] / 2)
          z = band1[i][j]
+         #-- skip no_data + select randomly only 1% of the points
          if (z != d.nodatavals) and (random.randint(0, 100) == 5):
              pts.append([x, y, z])
 dt = startinpy.DT()
@@ -193,6 +194,8 @@ def main():
     centres = np.asarray(centres)
     print("Interpolating at {} locations".format(centres.shape[0]))
     zhat = dt.interpolate({"method": "TIN"}, centres)
+    # zhat = dt.interpolate({"method": "Laplace"}, centres)
+    # zhat = dt.interpolate({"method": "IDW", "radius": 20, "power": 2.0}, centres, strict=True)
 
     #-- save to a GeoTIFF with rasterio
     write_rasterio('grid.tiff', zhat.reshape((deltay, deltax)), (bbox[0], bbox[1]), cellsize)

@@ -919,13 +919,16 @@ impl DT {
         }
     }
 
-    /// Interpolate with 5 different methods:
+    /// Estimate the z-value with 5 different spatial interpolation methods:
     ///
     /// 1. **IDW**: inverse distance weighing
     /// 2. **Laplace**: a faster NNI with almost the same results
     /// 3. **NN**: nearest neighbour
     /// 4. **NNI**: natural neighbour interpolation
     /// 5. **TIN**: linear interpolation in TIN
+    ///
+    /// The interpolation does not modify the triangulation, it only returns an estimation for
+    /// the z-values at the xy-location provided as argument.
     ///
     /// :param interpolant: a JSON/dict Python object with a `"method": "IDW"` (or others). IDW has 2 more params: "power" and "radius"
     /// :param locations: an array of [x, y] locations where the function should interpolate
