@@ -68,7 +68,7 @@ dt = startinpy.DT()
 dt.add_attribute_map(np.dtype([("classification", np.uint32)]))
 dt.insert_one_pt([85000.0, 444003.2, 2.2], classification=6)
 ...
-dt.attributes[1:]
+dt.attributes[1:]['classification']
 #-- array([6, 2, 6, 6, ..., 6, 9])
 ```
 
@@ -96,7 +96,7 @@ dt.set_vertex_attributes(50, classification=int(112.2))
 
 print(dt)
 print(dt.get_attributes_schema())
-print(dt.attributes[1:])
+print(dt.attributes[1:]['classification'])
 
 a = dt.get_vertex_attributes(50)
 print("=>", a)
