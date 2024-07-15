@@ -33,7 +33,7 @@ The underlying code of startinpy is written in the language Rust (so it is relat
 There exist several Python libraries for computing the DT in 2D.
 A search for "Delaunay triangulation" in the *Python Package Index* (PyPI) returns 227 packages, the most notable ones being SciPy (specifically `scipy.spatial.Delaunay`, which is a wrapper around Qhull [@Barber96], written in C) and Triangle (which is a wrapper around the fast and robust C library that performs constrained DT and meshing [@Shewchuk96a]).
 
-When it comes to modelling 2.5D triangulated terrains, the existing Python libraries have, in general, four main shortcomings:
+When it comes to modelling 2.5D triangulated terrains, the existing Python libraries have, in general, four main issues:
 
   1. Libraries written in pure Python are too slow for modern datasets. Indeed, with a recent lidar scanner, we can easily collect 50 samples/$m^2$ (compared to 1 or 2 samples/$m^2$ a mere 15 years ago), which means that a 1$km^2$ area can contain around 50 million samples. Since constructing a DT requires several steps, if those steps are implemented in Python then the library becomes very slow.
   2. The data structure of the DT is not exposed; only a list of vertices and triangles (triplets of vertex identifiers) are returned. This means that the user has to build a graph to be able to find the adjacent triangles of a given one, or to find all the triangles that are incident to a given vertex (eg to calculate the normal).
@@ -46,25 +46,25 @@ When it comes to modelling 2.5D triangulated terrains, the existing Python libra
 startinpy was developed specifically for modelling 2.5D terrain with TINs, and addresses the four issues described above.
 
 
-## Issue #1: startinpy is written in Rust
+## #1: startinpy is written in Rust
 
 The core of startinpy (construction of the DT, deletion, interpolation, etc) is written in Rust (and called "startin", the source code is available at https://github.com/hugoledoux/startin) and can be used in Rust programs.
 A C-interface to the library is also available, it allows us to use, for instance, the library in Julia (https://github.com/evetion/startin.jl); it has been used recently to build a global coastal terrain using laser altimetric measurements from the space station [@Pronk24].
 Observe that the robust predicates, as described in @Shewchuk96, are used (the code has been converted to pure Rust, see https://docs.rs/robust/latest/robust/), which means that startinpy should not crash because of floating-point arithmetic.
 Also, since the library is not written in pure Python, a GitHub Action compiles the wheels for the lastest four versions of Python, and also for  Windows/macOS/Linux.
 
-## Issue #2: the data structure is partly exposed
+## #2: the data structure is partly exposed
 
 The library's name comes from the fact that the data structure implemented is based on the concept of *stars* in a graph [@Blandford05], which allows us to store adjacency and incidence, and have a very compact data structure.
 startinpy exposes methods to obtain the adjacent triangles of a triangle, and the incident triangles to a vertex.
 
 
-## Issue #3: incremental insertion + deletion are possible
+## #3: incremental insertion + deletion are possible
 
 The construction algorithm used is an incremental insertion based on flips, and the deletion of a vertex is also possible.
 The algorithm implemented is a modification of @Mostafavi03; I have extended it to allow the deletion of vertices on the boundary of the convex hull.
 
-## Issue #4: extra attributes can be stored
+## #4: extra attributes can be stored
 
 It is possible to store extra attributes with each vertex, each attribute is stored as a JSON object/dictionary, a key-value pair where the key is a string and the value is either a float, an integer, a boolean, or a string.
 This can be used to preserve the lidar properties of the input points (eg intensity, RGB, number of returns, etc.).
@@ -84,9 +84,9 @@ More formats are possible through the use of other Python libraries, there are a
 
 The two tables below compare startinpy to its main alternatives.
 
-The [Delaunator package](https://github.com/HakanSeven12/Delaunator-Python) is a pure Python port of a proven fast triangulator [originally written in JavaScript](https://github.com/mapbox/delaunator). 
+The [Delaunator package](https://github.com/HakanSeven12/Delaunator-Python) is a pure Python port of a proven fast triangulator [originally written in JavaScript](https://github.com/mapbox/delaunator).
 [SciPy](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.Delaunay.html) is `scipy.spatial.Delaunay`, and SciPy-inc is the variation where an incremental algorithm is used (instead of a batch process).
-[Triangle](https://pypi.org/project/triangle/) is the Python bindings of the C code. 
+[Triangle](https://pypi.org/project/triangle/) is the Python bindings of the C code.
 
 |                        | Delaunator | SciPy | SciPy-inc | Triangle | startinpy |
 |------------------------|:----------:|:-----:|:---------:|:--------:|:---------:|
@@ -109,7 +109,7 @@ The parameter 'xy-duplicate handling' refers to the fact that startinpy allows u
 The table below shows the time it takes to construct the 2D DT--in a batch operation--for different datasets.
 The details of the (openly available) datasets are available on the [GitHub repository of startinpy](https://github.com/hugoledoux/startinpy/tree/develop/dt_comparisons), and the Python code to replicate the experiments is available.
 The datasets `random_X` are randomly generated points in a unit square, the first one has 10,000 points and the other 50,000 points.
-The datasets `LAZ_X` are real-world aerial lidar datasets publicly available in the Netherlands, the `2M` contains exactly 2,144,049 points, and the `33M` contains exactly 33,107,889 points. 
+The datasets `LAZ_X` are real-world aerial lidar datasets publicly available in the Netherlands, the `2M` contains exactly 2,144,049 points, and the `33M` contains exactly 33,107,889 points.
 The dataset `dem.tiff` is the GeoTIFF file in `/data/`, the centre of each grid cell is inserted by reading sequentially the rows and columns, the total is 277,750 points.
 
 |            |random_10k|random_50k|LAZ_2M|LAZ_33M|dem.tiff|
@@ -124,6 +124,35 @@ If "X" is written, it is because the returned DT was faulty: for large inputs, S
 
 Notice that while startinpy is somewhat slower than Triangle, it is somewhat expected since, as explained above, it offers more convenience for the modelling of triangulated terrains, and its data structure is exposed.
 Notice also that startinpy is faster and more stable than SciPy (no crash or wrong results) for large datasets.
+
+
+# An example use-case
+
+Imagine you have the aerial lidar of your city, and you would like to create the DSM (digital surface model) of it, which is a 2.5D triangulation containing all buildings and trees, and export it to a GIS software.
+If a 2D triangulator was used, then several points located on the façades of buildings would be located very close to each others, and in case of xy-duplicates only the first inserted points would be kept (and not the highest, which is what we want for a DSM!).
+With startinpy, this can be performed easily, as the example below shows.
+The LAZ file is read using the Python library [laspy](https://laspy.readthedocs.io), a rather large tolerance for xy-duplicates is set (0.10m), and the highest of duplicates is kept.
+Furthermore, the intensity property of the input LAZ points are preserved.
+The resulting file is exported to the [PLY format](https://en.wikipedia.org/wiki/PLY_(file_format)), which can be read by several software, the open-source [QGIS](https://qgis.org/) being one of them.
+
+```python
+import startinpy
+import numpy as np
+import laspy
+
+las = laspy.read("../data/small.laz")
+pts = np.vstack((las.x, las.y, las.z, las.intensity)).transpose()
+dt = startinpy.DT(np.dtype([('intensity', float)]))
+dt.snap_tolerance = 0.10
+dt.duplicates_handling = "Highest"
+for pt in pts:
+    dt.insert_one_pt([pt[0], pt[1], pt[2]], intensity=pt[3])
+dt.write_ply("mydt.ply")
+```
+
+![QGIS is used to visualise the PLY output of the small Python script above.](qgis.png)
+
+The documentation of startinpy contains several other examples.
 
 
 # Acknowledgements
