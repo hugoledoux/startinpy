@@ -155,7 +155,7 @@ dt.write_ply("mydt.ply")
 
 ![QGIS is used to visualise the PLY output of the small Python script above.](qgis.png)
 
-The documentation of startinpy contains several other examples.
+The [documentation of startinpy](https://startinpy.rtfd.io) contains several other examples.
 
 
 # Acknowledgements
