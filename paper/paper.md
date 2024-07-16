@@ -53,18 +53,18 @@ A C-interface to the library is also available, it allows us to use, for instanc
 Observe that the robust predicates, as described in @Shewchuk96, are used (the code has been converted to pure Rust, see https://docs.rs/robust/latest/robust/), which means that startinpy should not crash because of floating-point arithmetic.
 Also, since the library is not written in pure Python, a GitHub Action compiles the wheels for the lastest four versions of Python, and also for  Windows/macOS/Linux.
 
-## #2: the data structure is partly exposed
+## #2: The data structure is partly exposed
 
 The library's name comes from the fact that the data structure implemented is based on the concept of *stars* in a graph [@Blandford05], which allows us to store adjacency and incidence, and have a very compact data structure.
 startinpy exposes methods to obtain the adjacent triangles of a triangle, and the incident triangles to a vertex.
 
 
-## #3: incremental insertion + deletion are possible
+## #3: Incremental insertion + deletion are possible
 
 The construction algorithm used is an incremental insertion based on flips, and the deletion of a vertex is also possible.
 The algorithm implemented is a modification of @Mostafavi03; I have extended it to allow the deletion of vertices on the boundary of the convex hull.
 
-## #4: extra attributes can be stored
+## #4: Extra attributes can be stored
 
 It is possible to store extra attributes with each vertex, each attribute is stored as a JSON object/dictionary, a key-value pair where the key is a string and the value is either a float, an integer, a boolean, or a string.
 This can be used to preserve the lidar properties of the input points (eg intensity, RGB, number of returns, etc.).
@@ -100,14 +100,12 @@ The [Delaunator package](https://github.com/HakanSeven12/Delaunator-Python) is a
 | remove vertices        |    --      | --    |     --    |   --     |   +       |
 | xy-duplicate handling  |    --      | --    |     --    |   --     |   +       |
 
-
 Notice that startinpy is the only one capable of storing z-values and extra attributes, the others are pure 2D Delaunay triangulators.
 The parameter 'efficient searches' refers to the availability of a point location function to find the closest triangles to a given point.
-The parameter 'xy-duplicate handling' refers to the fact that startinpy allows us to merge vertices that are close to each other (in the xy-plane, the tolerance can be defined by the user) and that if there are xy-duplicates, then a user-defined z-value can be kept (eg lowest or highest, depending on the application).
-
+The parameter 'xy-duplicate handling' refers to the fact that startinpy allows us to merge vertices that are close to each other (in the xy-plane; the tolerance can be defined by the user) and that if there are xy-duplicates, then a user-defined z-value can be kept (eg lowest or highest, depending on the application).
 
 The table below shows the time it takes to construct the 2D DT--in a batch operation--for different datasets.
-The details of the (openly available) datasets are available on the [GitHub repository of startinpy](https://github.com/hugoledoux/startinpy/tree/develop/dt_comparisons), and the Python code to replicate the experiments is available.
+The details of the (openly available) datasets are available on the [GitHub repository of startinpy](https://github.com/hugoledoux/startinpy/tree/master/dt_comparisons), and the Python code to replicate the experiments is available.
 The datasets `random_X` are randomly generated points in a unit square, the first one has 10,000 points and the other 50,000 points.
 The datasets `LAZ_X` are real-world aerial lidar datasets publicly available in the Netherlands, the `2M` contains exactly 2,144,049 points, and the `33M` contains exactly 33,107,889 points.
 The dataset `dem.tiff` is the GeoTIFF file in `/data/`, the centre of each grid cell is inserted by reading sequentially the rows and columns, the total is 277,750 points.
@@ -122,17 +120,22 @@ The dataset `dem.tiff` is the GeoTIFF file in `/data/`, the centre of each grid 
 
 If "X" is written, it is because the returned DT was faulty: for large inputs, Scipy-inc returns a few triangles only, not the full DT.
 
-Notice that while startinpy is somewhat slower than Triangle, it is somewhat expected since, as explained above, it offers more convenience for the modelling of triangulated terrains, and its data structure is exposed.
+Notice that while startinpy is somewhat slower than Triangle, it is expected since, as explained above, it offers more convenience for the modelling of triangulated terrains, and its data structure is exposed.
 Notice also that startinpy is faster and more stable than SciPy (no crash or wrong results) for large datasets.
 
 
 # An example use-case
 
-Imagine you have the aerial lidar of your city, and you would like to create the DSM (digital surface model) of it, which is a 2.5D triangulation containing all buildings and trees, and export it to a GIS software.
-If a 2D triangulator was used, then several points located on the façades of buildings would be located very close to each others, and in case of xy-duplicates only the first inserted points would be kept (and not the highest, which is what we want for a DSM!).
+Imagine you have the aerial lidar dataset of your city, and you would like to create the DSM (digital surface model) of it.
+This DSM is a 2.5D triangulation containing all buildings and trees, and you want to export it to GIS software.
+
+If a 2D triangulator was used, several points located on the façades of buildings would be very close to each other and/or would be xy-duplicates.
+In the case of xy-duplicates, only the first inserted points would be kept (and not the highest, which is what we want for a DSM!).
+
 With startinpy, this can be performed easily, as the example below shows.
-The LAZ file is read using the Python library [laspy](https://laspy.readthedocs.io), a rather large tolerance for xy-duplicates is set (0.10m), and the highest of duplicates is kept.
-Furthermore, the intensity property of the input LAZ points are preserved.
+The LAZ file is read using the Python library [laspy](https://laspy.readthedocs.io), a rather large tolerance for xy-duplicates is set (0.10m), and the highest z-values of the xy-duplicates is kept.
+Furthermore, the intensity property of the input LAZ points is preserved.
+
 The resulting file is exported to the [PLY format](https://en.wikipedia.org/wiki/PLY_(file_format)), which can be read by several software, the open-source [QGIS](https://qgis.org/) being one of them.
 
 ```python
