@@ -613,17 +613,17 @@ impl DT {
     /// An exception is thrown if the triangle doesn't exist or is infinite.
     ///
     /// :param t: the Triangle, an array of 3 vertex indices
-    /// :param planez: (default=0.0)the z-value of the base plane
+    /// :param zplane: (default=0.0)the z-value of the base plane
     /// :return: the signed volume in 3D
     ///
     /// >>> dt.volume_triangle([34, 21, 1], 10.0)
     /// 32.2
-    #[pyo3(signature = (t, planez=0.0))]
-    fn volume_triangle(&self, t: Vec<usize>, planez: f64) -> PyResult<f64> {
+    #[pyo3(signature = (t, zplane=0.0))]
+    fn volume_triangle(&self, t: Vec<usize>, zplane: f64) -> PyResult<f64> {
         let tr = startin::Triangle {
             v: [t[0], t[1], t[2]],
         };
-        match self.t.volume_triangle(&tr, planez) {
+        match self.t.volume_triangle(&tr, zplane) {
             Ok(b) => return Ok(b),
             Err(_) => return Err(exceptions::PyIndexError::new_err("Invalid vertex index")),
         }
