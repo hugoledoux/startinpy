@@ -39,6 +39,6 @@ jobs:
         target: aarch64-apple-darwin
     - uses: messense/maturin-action@v1
       with:
-        maturin-version: 0.13.1
+        maturin-version: 1.6.0
         command: build
         args: --release --sdist --universal2 -i python3.12
