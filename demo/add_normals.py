@@ -16,7 +16,7 @@ dt.insert(las.xyz)
 pts = dt.points
 for vi in range(1, len(pts)):
     n = dt.normal_vertex(vi)
-    dt.add_vertex_attributes(vi, nx=n[0], ny=n[1], nz=n[2])
+    dt.set_vertex_attributes(vi, nx=n[0], ny=n[1], nz=n[2])
 
 print(dt)
 print(dt.attributes)

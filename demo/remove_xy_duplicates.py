@@ -7,7 +7,7 @@ las = laspy.read("../data/small.laz")
 las.points = las.points[::1] #-- thinning
 d = np.vstack((las.x, las.y, las.z)).transpose()
 
-dt = startinpy.DT(extra_attributes=True)
+dt = startinpy.DT(np.dtype([("pid", np.uint64)]))
 #-- keep the highest z-value when xy-duplicates arise
 dt.duplicates_handling = "Highest"
 dt.snap_tolerance = 0.05
@@ -22,7 +22,7 @@ for p in tqdm(d):
 new_las = laspy.LasData(las.header)
 
 #-- make a mask for the points that were kept
-a = dt.attribute('pid')
+a = dt.attributes['pid']
 mask = np.full((len(las.points)), False)
 for each in a[1:]:
     mask[int(each)] = True

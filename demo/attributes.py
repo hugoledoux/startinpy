@@ -20,7 +20,7 @@ for each in d:
 
 print("done")
 # a = {'intensity': 155.5, 'reflectance': 111, 'something': True}
-dt.add_vertex_attributes(50, classification=int(112.2))
+dt.set_vertex_attributes(50, classification=int(112.2))
 
 print(dt)
 print(dt.get_attributes_schema())
