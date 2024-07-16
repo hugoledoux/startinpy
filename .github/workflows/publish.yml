@@ -103,7 +103,7 @@ jobs:
       with:
         maturin-version: 1.6.0
         command: publish
-        args: --no-sdist --universal2 -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.9
+        args: --no-sdist -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.9
 
   macos-p310:
     runs-on: macos-latest
@@ -118,7 +118,7 @@ jobs:
       with:
         maturin-version: 1.6.0
         command: publish
-        args: --no-sdist --universal2 -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.10        
+        args: --no-sdist -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.10        
 
   macos-p311:
     runs-on: macos-latest
@@ -133,7 +133,7 @@ jobs:
       with:
         maturin-version: 1.6.0
         command: publish
-        args: --no-sdist --universal2 -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.11         
+        args: --no-sdist -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.11         
 
   macos-p312:
     runs-on: macos-latest
@@ -148,4 +148,4 @@ jobs:
       with:
         maturin-version: 1.6.0
         command: publish
-        args: --no-sdist --universal2 -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.12        
+        args: --no-sdist -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.12        
