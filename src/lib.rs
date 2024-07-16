@@ -574,7 +574,7 @@ impl DT {
     /// Calculate the area in 2D of a given triangle (projection xy-plane).
     /// An exception is thrown if the triangle doesn't exist or is infinite.
     ///
-    /// :param t: the 3 indices of the triangle
+    /// :param t: the Triangle, an array of 3 vertex indices
     /// :return: the area in 2D
     ///
     /// >>> dt.area2d_triangle([34, 21, 1])
@@ -593,7 +593,7 @@ impl DT {
     /// Calculate the area in 3D of a given triangle.
     /// An exception is thrown if the triangle doesn't exist or is infinite.
     ///
-    /// :param t: the 3 indices of the triangle
+    /// :param t: the Triangle, an array of 3 vertex indices
     /// :return: the area in 3D
     ///
     /// >>> dt.area3d_triangle([34, 21, 1])
@@ -612,7 +612,7 @@ impl DT {
     /// Calculate the volume of a given triangle wrt to a base z-plane.
     /// An exception is thrown if the triangle doesn't exist or is infinite.
     ///
-    /// :param t: the 3 indices of the triangle
+    /// :param t: the Triangle, an array of 3 vertex indices
     /// :param planez: (default=0.0)the z-value of the base plane
     /// :return: the signed volume in 3D
     ///
@@ -649,7 +649,7 @@ impl DT {
     /// Calculate the normal of a given triangle.
     /// An exception is thrown if the triangle doesn't exist or is infinite.
     ///
-    /// :param t: the 3 indices of the triangle
+    /// :param t: the Triangle, an array of 3 vertex indices
     /// :return: a Vec with 3 values: nx, ny, nz (normalised normal)
     ///
     /// >>> dt.normal_triangle([17, 451, 22])
