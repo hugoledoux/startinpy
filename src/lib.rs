@@ -580,6 +580,46 @@ impl DT {
         }
     }
 
+    /// Calculate the area in 2D of a given triangle (projection xy-plane).
+    /// An exception is thrown if the triangle doesn't exist or is infinite.
+    ///
+    /// :param t: the 3 indices of the triangle
+    /// :return: the area in 2D
+    ///
+    /// >>> dt.area2d_triangle([34, 21, 1])
+    /// 22.1
+    #[pyo3(text_signature = "($self, t)")]
+    #[args(t)]
+    fn area2d_triangle(&self, t: Vec<usize>) -> PyResult<f64> {
+        let tr = startin::Triangle {
+            v: [t[0], t[1], t[2]],
+        };
+        match self.t.area2d_triangle(&tr) {
+            Ok(b) => return Ok(b),
+            Err(_) => return Err(exceptions::PyIndexError::new_err("Invalid vertex index")),
+        }
+    }
+
+    /// Calculate the area in 3D of a given triangle.
+    /// An exception is thrown if the triangle doesn't exist or is infinite.
+    ///
+    /// :param t: the 3 indices of the triangle
+    /// :return: the area in 3D
+    ///
+    /// >>> dt.area3d_triangle([34, 21, 1])
+    /// 32.2
+    #[pyo3(text_signature = "($self, t)")]
+    #[args(t)]
+    fn area3d_triangle(&self, t: Vec<usize>) -> PyResult<f64> {
+        let tr = startin::Triangle {
+            v: [t[0], t[1], t[2]],
+        };
+        match self.t.area3d_triangle(&tr) {
+            Ok(b) => return Ok(b),
+            Err(_) => return Err(exceptions::PyIndexError::new_err("Invalid vertex index")),
+        }
+    }
+
     /// Calculate the normal of a given vertex.
     /// An exception is thrown if the vertex index is invalid.
     ///
@@ -601,7 +641,7 @@ impl DT {
     /// Calculate the normal of a given triangle.
     /// An exception is thrown if the triangle doesn't exist or is infinite.
     ///
-    /// :param t: the index of the vertex
+    /// :param t: the 3 indices of the triangle
     /// :return: a Vec with 3 values: nx, ny, nz (normalised normal)
     ///
     /// >>> dt.normal_triangle([17, 451, 22])
