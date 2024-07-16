@@ -15,6 +15,7 @@ edition = "2021"
 # startin = { path = "../startin" }
 startin = { git = "https://github.com/hugoledoux/startin", branch = "develop" }
 numpy = "~0.17"
+numpy = "0.19"
 rand = "0.8.5"
 geojson = "0.24"
 serde = "1.0"
@@ -23,7 +24,7 @@ bincode = "1.3.3"
 
 
 [dependencies.pyo3]
-version = "~0.17.0"
+version = "0.19.2"
 features = ["extension-module"]
 
 

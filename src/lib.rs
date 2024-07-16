@@ -85,7 +85,6 @@ impl DT {
     /// :param attributes_schema: Optional schema for attributes.
     /// :type attributes_schema: Optional[PyAny]
     #[new]
-    #[args(attributes_schema = "None")]
     fn new(attributes_schema: Option<&PyAny>) -> Self {
         let tmp = startin::Triangulation::new();
         let tmp2 = Vec::new();
@@ -167,8 +166,7 @@ impl DT {
     /// >>> (vi, bNewVertex, bZUpdated) = dt.insert_one_pt([3.2, 1.1, 17.0])
     /// (37, True)
     /// >>> dt.insert_one_pt([13.2, 44.1, 74.2], intensity=77.2)
-    #[pyo3(text_signature = "($self, p3, *, classification=1, intensity=78.0)")]
-    #[args(p3, py_kwargs = "**")]
+    #[pyo3(signature = (p3, **py_kwargs))]
     fn insert_one_pt(
         &mut self,
         p3: [f64; 3],
@@ -199,7 +197,6 @@ impl DT {
     /// >>>     t.remove(45)
     /// >>> except Exception as e:
     /// >>>     print(e)
-    #[args(vi)]
     fn remove(&mut self, vi: usize) -> PyResult<()> {
         let re = self.t.remove(vi);
         match re {
@@ -237,8 +234,7 @@ impl DT {
     /// >>> dt.insert(pts)
     /// OR
     /// >>> dt.insert(pts, insertionstrategy="BBox")
-    #[pyo3(text_signature = "($self, pts, *, insertionstrategy='AsIs')")]
-    #[args(pts, insertionstrategy = "\"AsIs\"")]
+    #[pyo3(signature = (pts, insertionstrategy="AsIs"))]
     fn insert(&mut self, pts: Vec<[f64; 3]>, insertionstrategy: &str) -> PyResult<()> {
         match insertionstrategy {
             "AsIs" => self.t.insert(&pts, startin::InsertionStrategy::AsIs),
@@ -356,8 +352,7 @@ impl DT {
     /// >>> myschema = np.dtype([('classification', np.uint32), ('intensity', float)])
     /// >>> dt.set_attributes_schema(myschema)
     /// >>> dt.insert_one_pt([85000.0, 444003.2, 2.2], classification=2, intensity=111.1)
-    #[pyo3(text_signature = "($self, dtype)")]
-    #[args(name, dtype)]
+    #[pyo3(signature = (dtype))]
     fn set_attributes_schema(&mut self, dtype: &PyAny) -> PyResult<bool> {
         let descr: &PyArrayDescr = dtype.extract()?;
         let names: &PyTuple = descr.getattr("names")?.extract()?;
@@ -424,8 +419,6 @@ impl DT {
     /// True
     /// >>> dt.get_attributes_schema()
     /// [('classification', '<f4'), ('name', '<U8')]
-    #[pyo3(text_signature = "($self)")]
-    #[args()]
     fn get_attributes_schema(&self) -> Vec<(String, String)> {
         self.dtype.clone()
     }
@@ -496,8 +489,7 @@ impl DT {
     ///
     /// >>> dt.get_vertex_attributes(17)
     /// {'intensity': 111.1, 'reflectance': 99.1}
-    #[pyo3(text_signature = "($self, vi)")]
-    #[args(vi)]
+    #[pyo3(signature = (vi))]
     fn get_vertex_attributes(&self, vi: usize) -> PyResult<PyObject> {
         match self.t.get_vertex_attributes(vi) {
             Ok(v) => {
@@ -533,8 +525,7 @@ impl DT {
     /// >>> dt.set_vertex_attributes(17, classification=2)
     /// >>> dt.get_vertex_attributes(17)
     /// {'intensity': 111.1, 'reflectance': 29.9, 'classification': 2, }'    
-    #[pyo3(text_signature = "($self, vi, *, classification=1)")]
-    #[args(vi, py_kwargs = "**")]
+    #[pyo3(signature = (vi, **py_kwargs))]
     fn set_vertex_attributes(&mut self, vi: usize, py_kwargs: Option<&PyDict>) -> PyResult<bool> {
         let mut m = Map::new();
         if py_kwargs.is_some() {
@@ -588,8 +579,7 @@ impl DT {
     ///
     /// >>> dt.area2d_triangle([34, 21, 1])
     /// 22.1
-    #[pyo3(text_signature = "($self, t)")]
-    #[args(t)]
+    #[pyo3(signature = (t))]
     fn area2d_triangle(&self, t: Vec<usize>) -> PyResult<f64> {
         let tr = startin::Triangle {
             v: [t[0], t[1], t[2]],
@@ -608,8 +598,7 @@ impl DT {
     ///
     /// >>> dt.area3d_triangle([34, 21, 1])
     /// 32.2
-    #[pyo3(text_signature = "($self, t)")]
-    #[args(t)]
+    #[pyo3(signature = (t))]
     fn area3d_triangle(&self, t: Vec<usize>) -> PyResult<f64> {
         let tr = startin::Triangle {
             v: [t[0], t[1], t[2]],
@@ -624,13 +613,12 @@ impl DT {
     /// An exception is thrown if the triangle doesn't exist or is infinite.
     ///
     /// :param t: the 3 indices of the triangle
-    /// :param planez: the z-value of the base plane
+    /// :param planez: (default=0.0)the z-value of the base plane
     /// :return: the signed volume in 3D
     ///
     /// >>> dt.volume_triangle([34, 21, 1], 10.0)
     /// 32.2
-    #[pyo3(text_signature = "($self, t, planez)")]
-    #[args(t, planez)]
+    #[pyo3(signature = (t, planez=0.0))]
     fn volume_triangle(&self, t: Vec<usize>, planez: f64) -> PyResult<f64> {
         let tr = startin::Triangle {
             v: [t[0], t[1], t[2]],
@@ -650,8 +638,7 @@ impl DT {
     /// >>> dt.normal_vertex(17)
     /// >>> dt.points[17]
     /// array([15.63303377, 26.9968598 ,  23.4])
-    #[pyo3(text_signature = "($self, vi)")]
-    #[args(vi)]
+    #[pyo3(signature = (vi))]
     fn normal_vertex(&self, vi: usize) -> PyResult<Vec<f64>> {
         match self.t.normal_vertex(vi) {
             Ok(b) => return Ok(b),
@@ -668,8 +655,7 @@ impl DT {
     /// >>> dt.normal_triangle([17, 451, 22])
     /// >>>
     /// array([15.63303377, 26.9968598 ,  23.4])
-    #[pyo3(text_signature = "($self, vi)")]
-    #[args(vi)]
+    #[pyo3(signature = (t))]
     fn normal_triangle(&self, t: Vec<usize>) -> PyResult<Vec<f64>> {
         let tr = startin::Triangle {
             v: [t[0], t[1], t[2]],
@@ -690,8 +676,7 @@ impl DT {
     /// >>> dt.update_vertex_z_value(17, 23.4)
     /// >>> dt.points[17]
     /// array([15.63303377, 26.9968598 ,  23.4])
-    #[pyo3(text_signature = "($self, vi, z)")]
-    #[args(vi, z)]
+    #[pyo3(signature = (vi, z))]
     fn update_vertex_z_value(&mut self, vi: usize, z: f64) -> PyResult<bool> {
         match self.t.update_vertex_z_value(vi, z) {
             Ok(b) => return Ok(b),
@@ -717,8 +702,7 @@ impl DT {
     ///
     /// >>> v = dt.get_point(4)
     /// array([13., 2.0, 11.])
-    #[pyo3(text_signature = "($self, vi)")]
-    #[args(vi)]
+    #[pyo3(signature = (vi))]
     fn get_point<'py>(
         &self,
         py: Python<'py>,
@@ -738,7 +722,6 @@ impl DT {
     ///
     /// >>> dt.convex_hull()
     /// array([2, 13, 4, 51, 27], dtype=uint64)
-    #[args()]
     fn convex_hull<'py>(&self, py: Python<'py>) -> PyResult<&'py PyArray<usize, numpy::Ix1>> {
         Ok(PyArray::from_vec(py, self.t.convex_hull()))
     }
@@ -749,7 +732,6 @@ impl DT {
     ///
     /// >>> bbox = dt.get_bbox()
     /// array([ 0., 0., 10., 12. ])
-    #[args()]
     fn get_bbox<'py>(&self, py: Python<'py>) -> PyResult<&'py PyArray<f64, numpy::Ix1>> {
         Ok(PyArray::from_vec(py, self.t.get_bbox()))
     }
@@ -758,8 +740,7 @@ impl DT {
     ///
     /// :param p2: array with [x, y]-coordinates of point to test
     /// :return: True if [x,y] is inside the convex hull or on its boundary, False otherwise.
-    #[pyo3(text_signature = "($self, p2)")]
-    #[args(x, y)]
+    #[pyo3(signature = (p2))]
     fn is_inside_convex_hull(&mut self, p2: [f64; 2]) -> PyResult<bool> {
         let re = self.t.locate(p2[0], p2[1]);
         if re.is_ok() == true {
@@ -774,8 +755,7 @@ impl DT {
     /// :param vi: the vertex index
     /// :return: True if *vi* is on the boundary of the convex hull, False otherwise.
     ///          Also False is returned if the vertex doesn't exist in the DT.
-    #[pyo3(text_signature = "($self, vi)")]
-    #[args(vi)]
+    #[pyo3(signature = (vi))]
     fn is_vertex_convex_hull(&self, vi: usize) -> PyResult<bool> {
         Ok(self.t.is_vertex_convex_hull(vi))
     }
@@ -785,8 +765,7 @@ impl DT {
     /// :param vi: the vertex index
     /// :return: True if *vi* is labelled as removed, False otherwise.
     ///          An exception is raised if *vi* doesn't exist.  
-    #[pyo3(text_signature = "($self, vi)")]
-    #[args(vi)]
+    #[pyo3(signature = (vi))]
     fn is_vertex_removed(&self, vi: usize) -> PyResult<bool> {
         let re = self.t.is_vertex_removed(vi);
         if re.is_err() {
@@ -806,8 +785,7 @@ impl DT {
     /// >>>     cp = dt.closest_point([32.1, 66.9])
     /// >>> except Exception as e:
     /// >>>     print(e)
-    #[pyo3(text_signature = "($self, p2)")]
-    #[args(x, y)]
+    #[pyo3(signature = (p2))]
     fn closest_point(&mut self, p2: [f64; 2]) -> PyResult<usize> {
         let re = self.t.closest_point(p2[0], p2[1]);
         if re.is_err() {
@@ -834,8 +812,7 @@ impl DT {
     /// 3 [3 8 2]
     /// 4 [3 2 9]
     /// 5 [3 9 4]
-    #[pyo3(text_signature = "($self, vi)")]
-    #[args(vi)]
+    #[pyo3(signature = (vi))]
     fn incident_triangles_to_vertex<'py>(
         &self,
         py: Python<'py>,
@@ -870,8 +847,7 @@ impl DT {
     /// 0 [3 4 6]
     /// 1 [3 6 7]
     /// 2 [3 7 8]
-    #[pyo3(text_signature = "($self, t)")]
-    #[args(t)]
+    #[pyo3(signature = (t))]
     fn adjacent_triangles_to_triangle<'py>(
         &self,
         py: Python<'py>,
@@ -903,8 +879,7 @@ impl DT {
     ///
     /// :param vi: the vertex index
     /// :return: an array of vertex indices (ordered counter-clockwise)
-    #[pyo3(text_signature = "($self, vi)")]
-    #[args(vi)]
+    #[pyo3(signature = (vi))]
     fn adjacent_vertices_to_vertex<'py>(
         &self,
         py: Python<'py>,
@@ -927,8 +902,7 @@ impl DT {
     /// :return: True if t is finite, False is infinite
     ///
     /// >>> re = dt.is_finite(np.array([11, 162, 666])))
-    #[pyo3(text_signature = "($self, t)")]
-    #[args(t)]
+    #[pyo3(signature = (t))]
     fn is_finite(&self, t: Vec<usize>) -> PyResult<bool> {
         let tr = startin::Triangle {
             v: [t[0], t[1], t[2]],
@@ -943,8 +917,7 @@ impl DT {
     ///
     /// >>> dt.is_triangle(np.array([11, 162, 66]))
     /// False
-    #[pyo3(text_signature = "($self, t)")]
-    #[args(t)]
+    #[pyo3(signature = (t))]
     fn is_triangle(&self, t: Vec<usize>) -> PyResult<bool> {
         let tr = startin::Triangle {
             v: [t[0], t[1], t[2]],
@@ -960,8 +933,7 @@ impl DT {
     ///
     /// >>> tr = dt.locate([34.2, 55.6])
     /// array([65, 61, 23], dtype=uint64)
-    #[pyo3(text_signature = "($self, p2)")]
-    #[args(p2)]
+    #[pyo3(signature = (p2))]
     fn locate<'py>(
         &mut self,
         py: Python<'py>,
@@ -999,8 +971,7 @@ impl DT {
     /// >>> locs = [ [50.0, 41.1], [101.1, 33.2], [80.0, 66.0] ]
     /// >>> re = dt.interpolate({"method": "NNI"}, locs)
     /// >>> re = dt.interpolate({"method": "IDW", "radius": 20, "power": 2.0}, locs, strict=True)
-    #[pyo3(text_signature = "($self, interpolant, locations, *, strict=True)")]
-    #[args(interpolant, locations, strict = false)]
+    #[pyo3(signature = (interpolant, locations, strict=false))]
     fn interpolate<'py>(
         &mut self,
         py: Python<'py>,
@@ -1141,8 +1112,7 @@ impl DT {
     /// :return: (nothing)
     ///
     /// >>> dt.write_obj("/home/elvis/myfile.obj")
-    #[pyo3(text_signature = "($self, path)")]
-    #[args(path)]
+    #[pyo3(signature = (path))]
     fn write_obj(&self, path: String) -> PyResult<()> {
         let re = self.t.write_obj(path.to_string());
         if re.is_err() {
@@ -1160,8 +1130,7 @@ impl DT {
     /// :return: (nothing)
     ///
     /// >>> dt.write_ply("/home/elvis/myfile.ply")
-    #[pyo3(text_signature = "($self, path)")]
-    #[args(path)]
+    #[pyo3(signature = (path))]
     fn write_ply(&self, path: String) -> PyResult<()> {
         let re = self.t.write_ply(path.to_string());
         if re.is_err() {
@@ -1179,8 +1148,7 @@ impl DT {
     /// :return: (nothing)
     ///
     /// >>> dt.write_geojson("/home/elvis/myfile.geojson")
-    #[pyo3(text_signature = "($self, path)")]
-    #[args(path)]
+    #[pyo3(signature = (path))]
     pub fn write_geojson(&self, path: String) -> PyResult<()> {
         let mut fc = FeatureCollection {
             bbox: None,
@@ -1251,8 +1219,7 @@ impl DT {
     /// :return: (nothing)
     ///
     /// >>> dt.write_cityjson("/home/elvis/myfile.city.json")
-    #[pyo3(text_signature = "($self, path, digits=3)")]
-    #[args(path, digits = 3)]
+    #[pyo3(signature = (path, digits=3))]
     fn write_cityjson(&self, path: String, digits: usize) -> PyResult<()> {
         let bbox = self.t.get_bbox();
         let d: f64 = 1.0 / (f64::powf(10., digits as f64));
@@ -1330,8 +1297,7 @@ impl DT {
     ///
     /// >>> dt.vertical_exaggeration(2.0)
     /// >>> dt.vertical_exaggeration(0.5)
-    #[pyo3(text_signature = "($self, factor)")]
-    #[args(factor)]
+    #[pyo3(signature = (factor))]
     fn vertical_exaggeration(&mut self, factor: f64) {
         self.t.vertical_exaggeration(factor);
     }
