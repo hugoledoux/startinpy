@@ -620,6 +620,27 @@ impl DT {
         }
     }
 
+    /// Calculate the volume of a given triangle wrt to a base z-plane.
+    /// An exception is thrown if the triangle doesn't exist or is infinite.
+    ///
+    /// :param t: the 3 indices of the triangle
+    /// :param planez: the z-value of the base plane
+    /// :return: the signed volume in 3D
+    ///
+    /// >>> dt.volume_triangle([34, 21, 1])
+    /// 32.2
+    #[pyo3(text_signature = "($self, t, planez)")]
+    #[args(t, planez)]
+    fn volume_triangle(&self, t: Vec<usize>, planez: f64) -> PyResult<f64> {
+        let tr = startin::Triangle {
+            v: [t[0], t[1], t[2]],
+        };
+        match self.t.volume_triangle(&tr, planez) {
+            Ok(b) => return Ok(b),
+            Err(_) => return Err(exceptions::PyIndexError::new_err("Invalid vertex index")),
+        }
+    }
+
     /// Calculate the normal of a given vertex.
     /// An exception is thrown if the vertex index is invalid.
     ///
