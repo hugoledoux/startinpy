@@ -358,7 +358,7 @@ impl DT {
     /// >>> dt.insert_one_pt([85000.0, 444003.2, 2.2], classification=2, intensity=111.1)
     #[pyo3(text_signature = "($self, dtype)")]
     #[args(name, dtype)]
-    pub fn set_attributes_schema(&mut self, dtype: &PyAny) -> PyResult<bool> {
+    fn set_attributes_schema(&mut self, dtype: &PyAny) -> PyResult<bool> {
         let descr: &PyArrayDescr = dtype.extract()?;
         let names: &PyTuple = descr.getattr("names")?.extract()?;
         let mut v: Vec<(String, String)> = Vec::new();
@@ -445,7 +445,7 @@ impl DT {
     /// >>> dt.attributes[1:]
     /// array([6, 2, 6, 6, ..., 6, 9])
     #[getter]
-    pub fn attributes<'py>(&self, py: Python<'py>) -> PyResult<PyObject> {
+    fn attributes<'py>(&self, py: Python<'py>) -> PyResult<PyObject> {
         let np = py.import("numpy")?;
         let dtype = np.call_method1("dtype", (self.dtype.clone(),))?;
         let allt = self.t.all_attributes();
