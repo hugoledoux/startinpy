@@ -627,7 +627,7 @@ impl DT {
     /// :param planez: the z-value of the base plane
     /// :return: the signed volume in 3D
     ///
-    /// >>> dt.volume_triangle([34, 21, 1])
+    /// >>> dt.volume_triangle([34, 21, 1], 10.0)
     /// 32.2
     #[pyo3(text_signature = "($self, t, planez)")]
     #[args(t, planez)]
