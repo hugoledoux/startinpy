@@ -14,7 +14,6 @@ edition = "2021"
 # startin = "0.7.1"
 # startin = { path = "../startin" }
 startin = { git = "https://github.com/hugoledoux/startin", branch = "develop" }
-numpy = "~0.17"
 numpy = "0.19"
 rand = "0.8.5"
 geojson = "0.24"
