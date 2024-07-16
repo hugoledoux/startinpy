@@ -6,55 +6,55 @@ on:
 
 jobs:
 
-linux-p39:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - uses: messense/maturin-action@v1
-      with:
-        maturin-version: 1.6.0
-        manylinux: 2014
-        command: publish
-        args: --no-sdist -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.9
+  linux-p39:
+      runs-on: ubuntu-latest
+      steps:
+      - uses: actions/checkout@v2
+      - uses: PyO3/maturin-action@v1
+        with:
+          maturin-version: 1.6.0
+          manylinux: 2014
+          command: publish
+          args: --no-sdist -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.9
 
-linux-p310:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - uses: messense/maturin-action@v1
-      with:
-        maturin-version: 1.6.0
-        manylinux: 2014
-        command: publish
-        args: --no-sdist -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.10
+  linux-p310:
+      runs-on: ubuntu-latest
+      steps:
+      - uses: actions/checkout@v2
+      - uses: PyO3/maturin-action@v1
+        with:
+          maturin-version: 1.6.0
+          manylinux: 2014
+          command: publish
+          args: --no-sdist -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.10
 
-linux-p311:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - uses: messense/maturin-action@v1
-      with:
-        maturin-version: 1.6.0
-        manylinux: 2014
-        command: publish
-        args: --no-sdist -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.11
+  linux-p311:
+      runs-on: ubuntu-latest
+      steps:
+      - uses: actions/checkout@v2
+      - uses: PyO3/maturin-action@v1
+        with:
+          maturin-version: 1.6.0
+          manylinux: 2014
+          command: publish
+          args: --no-sdist -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.11
 
-linux-p312:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - uses: messense/maturin-action@v1
-      with:
-        maturin-version: 1.6.0
-        manylinux: 2014
-        command: publish
-        args: --no-sdist -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.12
+  linux-p312:
+      runs-on: ubuntu-latest
+      steps:
+      - uses: actions/checkout@v2
+      - uses: PyO3/maturin-action@v1
+        with:
+          maturin-version: 1.6.0
+          manylinux: 2014
+          command: publish
+          args: --no-sdist -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.12
 
   win-p39:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
-    - uses: messense/maturin-action@v1
+    - uses: PyO3/maturin-action@v1
       with:
         maturin-version: 1.6.0
         command: publish
@@ -64,7 +64,7 @@ linux-p312:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
-    - uses: messense/maturin-action@v1
+    - uses: PyO3/maturin-action@v1
       with:
         maturin-version: 1.6.0
         command: publish
@@ -74,7 +74,7 @@ linux-p312:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
-    - uses: messense/maturin-action@v1
+    - uses: PyO3/maturin-action@v1
       with:
         maturin-version: 1.6.0
         command: publish
@@ -84,7 +84,7 @@ linux-p312:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
-    - uses: messense/maturin-action@v1
+    - uses: PyO3/maturin-action@v1
       with:
         maturin-version: 1.6.0
         command: publish
@@ -99,7 +99,7 @@ linux-p312:
       with:
         toolchain: stable
         target: aarch64-apple-darwin
-    - uses: messense/maturin-action@v1
+    - uses: PyO3/maturin-action@v1
       with:
         maturin-version: 1.6.0
         command: publish
@@ -114,7 +114,7 @@ linux-p312:
       with:
         toolchain: stable
         target: aarch64-apple-darwin
-    - uses: messense/maturin-action@v1
+    - uses: PyO3/maturin-action@v1
       with:
         maturin-version: 1.6.0
         command: publish
@@ -129,7 +129,7 @@ linux-p312:
       with:
         toolchain: stable
         target: aarch64-apple-darwin
-    - uses: messense/maturin-action@v1
+    - uses: PyO3/maturin-action@v1
       with:
         maturin-version: 1.6.0
         command: publish
@@ -144,7 +144,7 @@ linux-p312:
       with:
         toolchain: stable
         target: aarch64-apple-darwin
-    - uses: messense/maturin-action@v1
+    - uses: PyO3/maturin-action@v1
       with:
         maturin-version: 1.6.0
         command: publish

@@ -11,9 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - uses: messense/maturin-action@v1
+    - uses: PyO3/maturin-action@v1
       with:
-        maturin-version: latest
+        maturin-version: 1.6.0
         manylinux: 2014
         command: build
         args: --release --sdist -i python3.12
@@ -22,9 +22,9 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
-    - uses: messense/maturin-action@v1
+    - uses: PyO3/maturin-action@v1
       with:
-        maturin-version: latest
+        maturin-version: 1.6.0
         command: build
         args: --release --sdist -i python3.12
 
@@ -37,7 +37,7 @@ jobs:
       with:
         toolchain: stable
         target: aarch64-apple-darwin
-    - uses: messense/maturin-action@v1
+    - uses: PyO3/maturin-action@v1
       with:
         maturin-version: 1.6.0
         command: build
