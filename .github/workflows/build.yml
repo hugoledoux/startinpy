@@ -41,4 +41,4 @@ jobs:
       with:
         maturin-version: 1.6.0
         command: build
-        args: --release --sdist --universal2 -i python3.12
+        args: --release --sdist -i python3.12
