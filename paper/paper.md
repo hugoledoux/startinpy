@@ -10,7 +10,7 @@ authors:
   - name: Hugo Ledoux
     orcid: 0000-0002-1251-8654
 affiliations:
- - name: Delft University of Technology, the Netherlands
+  - name: Delft University of Technology, the Netherlands
 date: 17 July 2024
 bibliography: ref.bib
 
