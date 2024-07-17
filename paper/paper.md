@@ -11,7 +11,7 @@ authors:
     orcid: 0000-0002-1251-8654
 affiliations:
  - name: Delft University of Technology, the Netherlands
-date: 31 May 2024
+date: 17 July 2024
 bibliography: ref.bib
 
 ---
@@ -38,7 +38,7 @@ When it comes to modelling 2.5D triangulated terrains, the existing Python libra
   1. Libraries written in pure Python are too slow for modern datasets. Indeed, with a recent lidar scanner, we can easily collect 50 samples/$m^2$ (compared to 1 or 2 samples/$m^2$ a mere 15 years ago), which means that a 1$km^2$ area can contain around 50 million samples. Since constructing a DT requires several steps, if those steps are implemented in Python then the library becomes very slow.
   2. The data structure of the DT is not exposed; only a list of vertices and triangles (triplets of vertex identifiers) are returned. This means that the user has to build a graph to be able to find the adjacent triangles of a given one, or to find all the triangles that are incident to a given vertex (eg to calculate the normal).
   3. Both SciPy and Triangle construct a 2D DT in a *batch* operation: the DT for a set of points is constructed and cannot be modified after construction. Constructing *incrementally* a DT has several benefits: one can for instance construct a simplified TIN that best approximates the original terrain with only 10% of the points, see @Garland95 for different strategies. Also, the existing libraries do not allow the removal/deletion of points, which is useful when outliers are identified (by analysing the neighbouring triangles).
-  4. While a 2D DT should be calculated, the *z*-values of the points should also be preserved. Some libraries allow us to attach extra information to a vertex, but most often one has to build auxiliary data structure in Python to manage those, which is error-prone, tedious, and makes operations in 3D complex operations (eg calculating the slope of an area, calculating the normal of a vertex, estimating the elevation with spatial interpolation, calculating volumes).
+  4. While a 2D DT should be calculated, the *z*-values of the points should also be preserved. Some libraries allow us to attach extra information to a vertex, but most often one has to build an auxiliary data structure in Python to manage those. Doing so is error-prone, tedious, and makes operations in 3D more complex (eg calculating the slope of an area, calculating the normal of a vertex, estimating the elevation with spatial interpolation, calculating volumes).
 
 
 # Design and details of startinpy
@@ -59,7 +59,7 @@ The library's name comes from the fact that the data structure implemented is ba
 startinpy exposes methods to obtain the adjacent triangles of a triangle, and the incident triangles to a vertex.
 
 
-## #3: Incremental insertion + deletion are possible
+## #3: Incremental insertion and deletion are possible
 
 The construction algorithm used is an incremental insertion based on flips, and the deletion of a vertex is also possible.
 The algorithm implemented is a modification of @Mostafavi03; I have extended it to allow the deletion of vertices on the boundary of the convex hull.
@@ -127,16 +127,16 @@ Notice also that startinpy is faster and more stable than SciPy (no crash or wro
 # An example use-case
 
 Imagine you have the aerial lidar dataset of your city, and you would like to create the DSM (digital surface model) of it.
-This DSM is a 2.5D triangulation containing all buildings and trees, and you want to export it to GIS software.
+This DSM is a 2.5D triangulation containing all buildings and trees, and you want to export it to a GIS software for visualisation and further analysis.
 
 If a 2D triangulator was used, several points located on the façades of buildings would be very close to each other and/or would be xy-duplicates.
-In the case of xy-duplicates, only the first inserted points would be kept (and not the highest, which is what we want for a DSM!).
+In the case of xy-duplicates, only the first inserted point at a xy-location would be kept (and not necessarily the highest, which is what we want for a DSM!).
 
 With startinpy, this can be performed easily, as the example below shows.
-The LAZ file is read using the Python library [laspy](https://laspy.readthedocs.io), a rather large tolerance for xy-duplicates is set (0.10m), and the highest z-values of the xy-duplicates is kept.
+The LAZ file is read using the Python library [laspy](https://laspy.readthedocs.io), a rather large tolerance for xy-duplicates is set (0.10m), and the highest z-value for each xy-location is kept.
 Furthermore, the intensity property of the input LAZ points is preserved.
 
-The resulting file is exported to the [PLY format](https://en.wikipedia.org/wiki/PLY_(file_format)), which can be read by several software, the open-source [QGIS](https://qgis.org/) being one of them.
+The resulting file is exported to the [PLY format](https://en.wikipedia.org/wiki/PLY_(file_format)), which can be read by several software, the open-source [QGIS](https://qgis.org/) being one of them (see Figure 2).
 
 ```python
 import startinpy
