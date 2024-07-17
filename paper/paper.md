@@ -95,7 +95,7 @@ The [Delaunator package](https://github.com/HakanSeven12/Delaunator-Python) is a
 | efficient searches     |    +       | +     |     +     |   --     |   +       |
 | elevation/2.5D         |    --      | --    |     --    |   --     |   +       |
 | extra attributes       |    --      | --    |     --    |   --     |   +       |
-| fast                   |    --      | --    |     --    |   ++     |   +       |
+| speed                  |    --      | --    |     --    |   ++     |   +       |
 | incremental insertion  |    --      | --    |     +     |   --     |   +       |
 | remove vertices        |    --      | --    |     --    |   --     |   +       |
 | xy-duplicate handling  |    --      | --    |     --    |   --     |   +       |
@@ -160,7 +160,7 @@ The [documentation of startinpy](https://startinpy.rtfd.io) contains several oth
 
 # Acknowledgements
 
-I acknowledge the help of the students following the course *Digital terrain modelling (GEO1015)* at TUDelft over the last few years.
+I acknowledge the help of the students following the course [*Digital terrain modelling (GEO1015)* at TUDelft](https://3d.bk.tudelft.nl/courses/geo1015/) over the last few years.
 Their feedback, questions, and frustrations on preliminary versions of startinpy helped me greatly.
 
 # References
