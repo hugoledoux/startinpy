@@ -38,7 +38,7 @@ startinpy has the following properties, which greatly improves the modelling and
 
 **It is fast for large datasets.**
 With a recent lidar scanner, we can easily collect 50 samples/$m^2$, which means that a 1$km^2$ area will contain 50+ million samples. 
-Since constructing a DT requires several steps, if those steps are implemented in Python then the library becomes very slow.
+Since constructing a DT requires several steps, if those steps are implemented in pure Python then the library becomes very slow.
 As can be seen in the [DT construction comparison], startinpy---because it is 100% developed in Rust---is faster than most other libraries for large datasets.
 
 **Its data structure is exposed.**
@@ -54,8 +54,8 @@ The deletion of vertices in a DT is useful to remove outliers (which are detecte
 **The z-values are stored and xy-duplicates handled.**
 Some libraries allow us to attach extra information to a vertex, but most often one has to build an auxiliary data structure in Python to manage those.
 Doing so is error-prone, tedious, and makes operations in 3D more complex (eg calculating the slope of an area, calculating the normal of a vertex, estimating the elevation with spatial interpolation, calculating volumes).
-Furthermore, startinpy allows the user to determine which z-value should be kept in case of xy-duplicates.
-With lidar datasets of cities, those are very common on the façades of buildings.
+Furthermore, startinpy allows us to merge vertices that are close to each other (in the xy-plane; the tolerance can be defined by the user) and if there are xy-duplicates, then a user-defined z-value can be kept (eg lowest or highest, depending on the application).
+
 
 **Extra attributes can be stored in the DT.**
 It is possible to attach extra attributes with each vertex of the terrain.
