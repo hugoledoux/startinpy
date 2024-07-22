@@ -222,3 +222,30 @@ if __name__ == '__main__':
 :align: center
 ```
 
+
+## Creating a DSM
+
+To create the DSM from an aerial lidar dataset of a city, one wants to preserve the highest z-value for each location.
+
+With startinpy, this can be performed easily, as the example below shows.
+The LAZ file is read using the Python library [laspy](https://laspy.readthedocs.io), a rather large tolerance for xy-duplicates is set (0.10m), and the highest z-value for each xy-location is kept.
+Furthermore, the intensity property of the input LAZ points is preserved.
+
+The resulting file is exported to the [PLY format](https://en.wikipedia.org/wiki/PLY_(file_format)), which can be read by several software, the open-source [QGIS](https://qgis.org/) being one of them.
+
+```python
+import startinpy
+import numpy as np
+import laspy
+
+las = laspy.read("../data/small.laz")
+pts = np.vstack((las.x, las.y, las.z, las.intensity)).transpose()
+dt = startinpy.DT(np.dtype([('intensity', float)]))
+dt.snap_tolerance = 0.10
+dt.duplicates_handling = "Highest"
+for pt in pts:
+    dt.insert_one_pt([pt[0], pt[1], pt[2]], intensity=pt[3])
+dt.write_ply("mydt.ply")
+```
+
+![QGIS is used to visualise the PLY output of the small Python script above.](qgis.png)

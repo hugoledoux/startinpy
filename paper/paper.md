@@ -21,9 +21,13 @@ bibliography: ref.bib
 # Summary
 
 The Python library *startinpy* can construct, modify, and manipulate triangulated terrains, commonly called TINs (triangulated irregular networks).
+
 Given a dataset formed of elevation samples (eg collected with lidar or photogrammetry), it is possible to construct a TIN, remove points (eg outliers), convert to a gridded terrain (with spatial interpolation) or other known formats, attach attributes to the vertex, etc.
+
 Observe that while startinpy is built primarily for points having a *z*-elevation, a Delaunay triangulation (DT) in 2D is computed (a TIN is a so-called 2.5D object); this means that startinpy can be used for applications where a standard 2D DT is necessary.
+
 Moreover, unlike several triangulation libraries, startinpy exposes its data structure, allowing users to obtain incident and adjacent triangles to vertices/triangles.
+
 This can be useful for quality control, to derive properties like slope, to convert to different formats, etc.
 The underlying code of startinpy is written in the language Rust (so it is relatively fast), robust arithmetic is used (so it should not crash), and it uses NumPy for input/output of data, which allows it to integrate with other Python libraries.
 
