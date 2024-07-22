@@ -31,6 +31,7 @@ The core of the library has been used recently to build a global coastal terrain
 
 While startinpy was developed primarily for terrains, it can be used as an easy-to-use and fast 2D Delaunay triangulator (and Voronoi diagram generator), which, as elaborated in @Aurenhammer12, are two structures that play an essential role in several disciplines: astronomy, geology, ecology, engineering, etc.
 
+![A lidar dataset terrain reconstructed with startinpy and visualised with another Python library (Polyscope).](polyscope_gui.jpg)
 
 # Statement of need
 
