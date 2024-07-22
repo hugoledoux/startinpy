@@ -248,4 +248,7 @@ for pt in pts:
 dt.write_ply("mydt.ply")
 ```
 
-![QGIS is used to visualise the PLY output of the small Python script above.](qgis.png)
+```{image} figs/qgis.png
+:width: 60%     
+:align: center
+```

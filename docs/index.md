@@ -63,9 +63,10 @@ print("result: ", zhat[0])
 
 installation
 howitworks
+api
 examples
 attributes
-api
+comparison
 issues
 ```
 
