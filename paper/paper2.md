@@ -21,33 +21,35 @@ bibliography: ref.bib
 *startinpy* is a Python library for modelling and processing terrains using a 2D Delaunay triangulation (DT).
 The triangulation is computed in 2D, but the z-elevation of the vertices is kept (which is referred to as 2.5D modelling).
 
-Given a dataset formed of elevation samples (eg collected with lidar or photogrammetry), it allows us, among others, to reconstruct a terrain, to remove points, to search efficiently in the triangulation, to attach attributes to the vertices, and to convert to a gridded terrain (a few spatial interpolation methods based on the DT and/or its dual structure, the Voronoi diagram, have been implemented: linear interpolation, natural neighbours [@Sibson81], Laplace interpolation [@Belikov97]).
+Given a dataset formed of elevation samples (eg collected with lidar or photogrammetry), it allows us, among other things, to reconstruct a terrain, to remove points, to search efficiently in the triangulation, to attach attributes to the vertices, and to convert to a gridded terrain (a few spatial interpolation methods based on the DT and/or its dual structure, the Voronoi diagram, have been implemented: linear interpolation, natural neighbours [@Sibson81], and Laplace interpolation [@Belikov97]).
 
-The core of the library is written in the language Rust (so it can easily handle large datasets, which are nowadays common), robust arithmetic is used for the modification of the DT (the robust predicates of @Shewchuk96 are used), and it uses NumPy for input/output of data, which allows it to integrate with other Python libraries used by researchers.
+The core of the library is written in the language Rust (so it can process large datasets quickly), robust arithmetic is used for the updating of the DT (the robust predicates of @Shewchuk96 are used), and it uses NumPy for input/output of data, which allows it to integrate with other Python libraries used by researchers.
 
-The core of the library has been used recently to build a global coastal terrain using laser altimetric measurements from the space station [@Pronk24], and it has been used for a few project dealing with aerial and space lidar datasets, eg @Meschin23 and @Kan24.
+The core of the library has been used recently to build a global coastal terrain using laser altimetric measurements from the space station [@Pronk24], and it has been used for a few projects dealing with aerial and space lidar datasets, eg @Meschin23 and @Kan24.
 
-While startinpy was developed primarily for terrains, it can be used as an easy-to-use and fast 2D Delaunay triangulator (and Voronoi diagram generator), which, as elaborated in @Aurenhammer12, are two structures that play an essential role in several disciples: astronomy, geology, ecology, engineering, etc.
+While startinpy was developed primarily for terrains, it can be used as an easy-to-use and fast 2D Delaunay triangulator (and Voronoi diagram generator), which, as elaborated in @Aurenhammer12, are two structures that play an essential role in several disciplines: astronomy, geology, ecology, engineering, etc.
 
 
 # Statement of need
 
-While there exists many Python libraries for computing the DT in 2D (a search for "Delaunay triangulation" in the *Python Package Index* (PyPI) returns 227 packages), most of them are not fully suitable for the modelling of 2.5D triangulated terrain.
+While there exist many Python libraries for computing the DT in 2D (a search for "Delaunay triangulation" in the *Python Package Index* (PyPI) returns 227 packages), most of them are not fully suitable for the modelling of 2.5D triangulated terrain.
 
-startinpy has the following properties, which greatly improves the modelling and processing of 2.5D terrains.
+startinpy has the following properties, which greatly improve the modelling and processing of 2.5D terrains.
 
 **It is fast for large datasets.**
 With a recent lidar scanner, we can easily collect 50 samples/$m^2$, which means that a 1$km^2$ area will contain 50+ million samples. 
 Since constructing a DT requires several steps, if those steps are implemented in pure Python then the library becomes very slow.
-As can be seen in the [DT construction comparison], startinpy---because it is 100% developed in Rust---is faster than most other libraries for large datasets.
+As can be seen in the [DT construction comparison](https://startinpy.readthedocs.io/latest/comparison.html), startinpy is faster than most other libraries for large datasets.
+This is partly because it is 100% developed in Rust; the core library is called "startin" and its the source code is available at https://github.com/hugoledoux/startin.
 
 **Its data structure is exposed.**
 Most libraries only return a list of vertices and triangles (triplets of vertex identifiers), which means that the user has to build an auxiliary graph to be able to find the adjacent triangles of a given one, or to find all the triangles that are incident to a given vertex (eg to calculate the normal).
-startinpy exposes methods to obtain to search triangles, to find the adjacent triangles of a triangle and the incident triangles to a vertex.
+The library's name comes from the fact that the data structure implemented is based on the concept of *stars* in a graph [@Blandford05], which allows us to store adjacency and incidence, and have a very compact data structure.
+startinpy exposes methods to search triangles, to find the adjacent triangles of a triangle and the incident triangles to a vertex.
 
 
 **The DT is incrementally constructed and deletion of vertices is possible.**
-Unlike the majority of 2D DT implementations, startinpy implements an *incremental* insertion algorithm [@Lawson72], which allows to for instance construct a simplified TIN that best approximates the original terrain with only 10% of the points, see @Garland95 for different strategies.
+Unlike the majority of 2D DT implementations, startinpy implements an *incremental* insertion algorithm [@Lawson72], which allows for, for instance, constructing a simplified TIN that best approximates the original terrain with only 10% of the points, see @Garland95 for different strategies.
 startinpy also implements a modification of the deletion algorithm in @Mostafavi03, I have extended it to allow the deletion of vertices on the boundary of the convex hull.
 The deletion of vertices in a DT is useful to remove outliers (which are detected by analysing neighbouring triangles in the DT) and for the implementation of the natural neighbours interpolation method [@Sibson81].
 
@@ -62,7 +64,7 @@ It is possible to attach extra attributes with each vertex of the terrain.
 This can be used to preserve the lidar properties of the input points (eg intensity, RGB, number of returns, etc.).
 
 
-The [documentation of startinpy](https://startinpy.rtfd.io) contains several examples of the library and how it can be used to prepare datasets for input to machine learning algorithm, to convert to different formats used in practice, to interpolate, etc.
+The [documentation of startinpy](https://startinpy.rtfd.io) contains several examples of the library and how it can be used to prepare datasets for input to machine learning algorithms, to convert to different formats used in practice, to interpolate, etc.
 
 
 # Acknowledgements
