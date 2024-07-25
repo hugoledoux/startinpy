@@ -1,6 +1,6 @@
 # How startinpy works
 
-## Original code written in rust
+## Original code written in Rust
 
 The library for calculating the Delaunay triangulation is originally written in [Rust](https://www.rust-lang.org/), it is called 'startin' and its [source code is open](https://github.com/hugoledoux/startin).
 
