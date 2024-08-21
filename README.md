@@ -1,13 +1,12 @@
 
 <img src="docs/figs/polyscope.jpg" width="350">
 
-[![PyPI](https://img.shields.io/pypi/v/startinpy?style=for-the-badge)](https://pypi.org/project/startinpy/) [![docs](https://img.shields.io/badge/docs-startinpy.rtfd.io-brightgreen?style=for-the-badge)](https://startinpy.rtfd.io/) [![GitHub license](https://img.shields.io/github/license/hugoledoux/startinpy?style=for-the-badge)](https://github.com/hugoledoux/startinpy/blob/master/LICENSE) 
-
+[![PyPI](https://img.shields.io/pypi/v/startinpy?style=for-the-badge)](https://pypi.org/project/startinpy/) [![docs](https://img.shields.io/badge/docs-startinpy.rtfd.io-brightgreen?style=for-the-badge)](https://startinpy.rtfd.io/) [![GitHub license](https://img.shields.io/github/license/hugoledoux/startinpy?style=for-the-badge)](https://github.com/hugoledoux/startinpy/blob/master/LICENSE)
 
 startinpy
 =========
 
-A library for modelling and processing 2.5D terrains using a (2D) Delaunay triangulation. 
+A library for modelling and processing 2.5D terrains using a (2D) Delaunay triangulation.
 The triangulation is computed in 2D, but the *z*-elevation of the vertices are kept.
 
 The underlying code is written in [Rust](https://www.rust-lang.org/) (so it's rather fast) and [robust arithmetic](https://crates.io/crates/robust) is used (so it shouldn't crash).
@@ -20,14 +19,12 @@ startinpy allows you to:
   3. interpolate with several methods: TIN, natural neighbours, IDW, Laplace, etc.
   4. use other useful terrain Python libraries that are also NumPy-based, eg [laspy](https://laspy.readthedocs.io), [rasterio](https://rasterio.readthedocs.io), [meshio](https://github.com/nschloe/meshio)
   5. output the TIN to several formats: OBJ, PLY, GeoJSON, and CityJSON
-  6. store extra attributes with the vertices (the ones from LAS/LAZ) 
-
+  6. store extra attributes with the vertices (the ones from LAS/LAZ)
 
 Documentation
 =============
 
-https://startinpy.rtfd.io
-
+<https://startinpy.rtfd.io>
 
 Installation
 ============
@@ -38,7 +35,6 @@ pip
 To install the latest release: `pip install startinpy`
 
 (watch out: this does not work with Linux currently, it installs an old version!)
-
 
 If you want to compile it yourself
 ----------------------------------
@@ -57,6 +53,13 @@ Development
   3. `maturin develop`
   4. move to another folder, and `import startinpy` shouldn't return any error
 
+Testing
+-------
+
+To run the automated test suite:
+
+ 1. install the test requirements: `pip install -r tests/requirements.txt`
+ 2. `pytest`
 
 Examples
 ========
