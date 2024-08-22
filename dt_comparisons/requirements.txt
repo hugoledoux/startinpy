@@ -21,10 +21,13 @@ numpy==2.1.0
     # via
     #   -r requirements.in
     #   laspy
+    #   pdal
     #   rasterio
     #   scipy
     #   snuggs
     #   triangle
+pdal==3.4.5
+    # via -r requirements.in
 py-markdown-table==1.1.0
     # via -r requirements.in
 pyparsing==3.1.2

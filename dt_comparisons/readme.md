@@ -8,6 +8,7 @@ Rough benchmarks of various Delaunay triangulation libraries against random poin
   2. [SciPy](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.Delaunay.html): wrapper around [Qhull](http://qhull.org/), written in C. Using the batch construction in 2D.
   3. [SciPy-inc](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.Delaunay.html): wrapper around [Qhull](http://qhull.org/), written in C. Using the incremental insertion (as startinpy does).
   4. [Triangle](https://pypi.org/project/triangle/): wrapper around the [fast and robust C library](https://www.cs.cmu.edu/~quake/triangle.html) that performs constrained DT and meshing
+  5. [PDAL](https://pdal.io): general point data library that reads, filters, and writes point clouds. Has a [Delaunay triangulation implementation](https://pdal.io/en/2.7.2/stages/filters.delaunay.html) based on [delaunator-cpp](https://github.com/delfrrr/delaunator-cpp).
 
 ## Datasets
 

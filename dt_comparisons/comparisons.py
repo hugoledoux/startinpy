@@ -276,11 +276,68 @@ def t_triangle():
     t[-1]["dem.tiff"] = "{:.3f}".format(t2 - t1)
 
 
+def t_pdal():
+    from pdal import Filter, Reader
+
+    def make_pdal_points(points):
+        return np.array(
+            [(x, y, z) for x, y, z in zip(points[:, 0], points[:, 1], points[:, 2])],
+            dtype=[("X", float), ("Y", float), ("Z", float)],
+        )
+
+    t.append({"library": "pdal"})
+    np.random.default_rng(seed=42)
+
+    points = make_pdal_points(pts_3d_10k)
+    t1 = time.perf_counter()
+    Filter.delaunay().pipeline(points).execute()
+    t2 = time.perf_counter()
+    t[-1]["random_10k"] = "{:.3f}".format(t2 - t1)
+
+    points = make_pdal_points(pts_3d_50k)
+    t1 = time.perf_counter()
+    Filter.delaunay().pipeline(points).execute()
+    t2 = time.perf_counter()
+    t[-1]["random_50k"] = "{:.3f}".format(t2 - t1)
+
+    d = rasterio.open(path_tif)
+    band1 = d.read(1)
+    tr = d.transform
+    pts = []
+    for i in range(band1.shape[0]):
+        for j in range(band1.shape[1]):
+            x = tr[2] + (j * tr[0]) + (tr[0] / 2)
+            y = tr[5] + (i * tr[4]) + (tr[4] / 2)
+            z = band1[i][j]
+            if z != d.nodatavals:
+                pts.append([x, y, z])
+    points = make_pdal_points(np.array(pts))
+    t1 = time.perf_counter()
+    Filter.delaunay().pipeline(points).execute()
+    t2 = time.perf_counter()
+    t[-1]["dem.tiff"] = "{:.3f}".format(t2 - t1)
+
+    pipeline = Reader.las(path_laz_2m).pipeline()
+    pipeline.execute()
+    t1 = time.perf_counter()
+    Filter.delaunay().pipeline(pipeline.arrays[0]).execute()
+    t2 = time.perf_counter()
+    t[-1]["LAZ_2M"] = "{:.3f}".format(t2 - t1)
+
+    pipeline = Reader.las(path_laz_33m).pipeline()
+    pipeline.execute()
+    t1 = time.perf_counter()
+    Filter.delaunay().pipeline(pipeline.arrays[0]).execute()
+    t2 = time.perf_counter()
+    t[-1]["LAZ_33M"] = "{:.3f}".format(t2 - t1)
+
+
 if __name__ == "__main__":
     t_delaunator()
     t_startinpy()
     t_scipy()
     t_scipy_inc()
     t_triangle()
+    t_pdal()
     markdown = markdown_table(t).get_markdown()
     print(markdown)
