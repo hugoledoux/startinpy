@@ -13,8 +13,6 @@ Cargo.lock
 build/
 dist/
 startin.egg-info/
-startin/__pycache__/
 docs/_build
-tests/__pycache__/
-startinpy/__pycache__/
+__pycache__
 startinpy/*.so

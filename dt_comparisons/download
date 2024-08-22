@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+
+set -e 
+
+here="$(cd "$(dirname "$0")"; pwd)/$(basename "$0")"
+root=$(dirname $(dirname $here))
+data="$root/data"
+
+curl https://geotiles.citg.tudelft.nl/AHN4_T/04GN2_21.LAZ > "$data/04GN2_21.LAZ"
+curl https://geotiles.citg.tudelft.nl/AHN4_T/69EZ1_21.LAZ > "$data/69EZ1_21.LAZ"
+curl https://raw.githubusercontent.com/HakanSeven12/Delaunator-Python/master/Delaunator.py > $(dirname $here)/Delaunator.py
