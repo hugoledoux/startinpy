@@ -1,10 +1,15 @@
 
+# Comparison of startinpy with other Python libraries
+
+Rough benchmarks of various Delaunay triangulation libraries against random points, real-world point clouds, and a real world DEM.
+
 ## Python library tested
 
-  1. [Delaunator](https://github.com/HakanSeven12/Delaunator-Python): pure Python port of a proven fast triangulator written original in JavaScript https://github.com/mapbox/delaunator. 
+  1. [Delaunator-py](https://github.com/HakanSeven12/Delaunator-Python): pure Python port of a proven fast triangulator written original in JavaScript <https://github.com/mapbox/delaunator>. 
   2. [SciPy](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.Delaunay.html): wrapper around [Qhull](http://qhull.org/), written in C. Using the batch construction in 2D.
   3. [SciPy-inc](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.Delaunay.html): wrapper around [Qhull](http://qhull.org/), written in C. Using the incremental insertion (as startinpy does).
   4. [Triangle](https://pypi.org/project/triangle/): wrapper around the [fast and robust C library](https://www.cs.cmu.edu/~quake/triangle.html) that performs constrained DT and meshing
+  5. [PDAL](https://pdal.io): general point data library that reads, filters, and writes point clouds. Has a [Delaunay triangulation implementation](https://pdal.io/en/2.7.2/stages/filters.delaunay.html) based on [delaunator-cpp](https://github.com/delfrrr/delaunator-cpp).
 
 
 ## Datasets
@@ -18,30 +23,28 @@
 
 ## Results
 
+Those results were obtained on a MacBook Pro, M3 Pro, 36GB of RAM, running macOS v14.5
 
-|            |random_10k|random_50k|LAZ_2M|LAZ_33M|dem.tiff|
-|:-----------|----------|---------:|-----:|------:|-------:|
-| delaunator |   0.219  |    0.84  | 49.2 | 898.1 |   3.55 |
-| scipy      |   0.017  |    0.09  | 10.1 | 650.3 |   1.79 |
-| scipy-inc  |   0.015  |    0.08  |    X |     X |      X |
-| triangle   |   0.004  |    0.02  |  0.9 |  16.8 |   0.19 |
-| startinpy  |   0.018  |    0.18  |  4.2 |  41.8 |   0.46 |
+
+|               |random_10k|random_50k|dem.tiff|LAZ_2M|LAZ_33M|
+|---------------|----------|----------|--------|------|-------|
+| Delaunator-py |   0.219  |    0.84  |  3.550 |  49.2| 898.1 |   
+|Delaunator-pdal|   0.003  |   0.014  | 27.409 |   1.5|  27.4 |
+| Sciy          |   0.017  |    0.09  | 10.1   | 650.3|   1.8 |
+| SciPy-inc     |   0.015  |    0.08  |    X   |   X  |     X |
+|    triangle   |   0.004  |   0.018  |  0.179 | 0.9  |  16.0 |
+|   startinpy   |   0.017  |   0.175  |  0.437 | 3.9  |  41.2 |
+
+
 
 ## To replicate
 
-  1. install those packages:
-    
-    - numpy
-    - laspy
-    - rasterio
-    - time
-    - startinpy
-    - triangle
-    - scipy
-    - https://github.com/HakanSeven12/Delaunator-Python
-    - py_markdown_table
-
-  2. download the 2 LAZ files
-  3. change the path (lines 17+18)
+  1. `pip install -r requirements.txt` 
+    - make sure you have LAZ for laspy: `pip install 'laspy[lazrs]'`
+    - (for macOS `pip intall triangle` is broken, use `pip install triangle2` instead, see <https://pypi.org/project/triangle2/>)
+  2. put in same folder `Delaunator.py` from <https://github.com/HakanSeven12/Delaunator-Python> (there is no installer)
+  3. download the 2 LAZ files:
+    - `wget https://geotiles.citg.tudelft.nl/AHN4_T/04GN2_21.LAZ`
+    - `wget https://geotiles.citg.tudelft.nl/AHN4_T/69EZ1_21.LAZ`
   4. `python comparisons.py`, this generates a summary table in Markdown
 
