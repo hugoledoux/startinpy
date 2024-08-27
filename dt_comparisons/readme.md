@@ -28,12 +28,12 @@ Those results were obtained on a MacBook Pro, M3 Pro, 36GB of RAM, running macOS
 
 |               |random_10k|random_50k|dem.tiff|LAZ_2M|LAZ_33M|
 |---------------|----------|----------|--------|------|-------|
-| Delaunator-py |   0.219  |    0.84  |  3.550 |  49.2| 898.1 |   
-|Delaunator-pdal|   0.003  |   0.014  | 27.409 |   1.5|  27.4 |
-| Sciy          |   0.017  |    0.09  | 10.1   | 650.3|   1.8 |
-| SciPy-inc     |   0.015  |    0.08  |    X   |   X  |     X |
-|    triangle   |   0.004  |   0.018  |  0.179 | 0.9  |  16.0 |
-|   startinpy   |   0.017  |   0.175  |  0.437 | 3.9  |  41.2 |
+| Delaunator-py |   0.219  |   0.840  |  3.550 | 49.2 | 898.1 |   
+|Delaunator-pdal|   0.003  |   0.014  | 27.409 |  1.5 |  27.4 |
+|     SciPy     |   0.026  |   0.120  |  1.563 |  9.9 | 650.3 |
+|   SciPy-inc   |   0.021  |   0.136  |      X |    X |     X |
+|    triangle   |   0.004  |   0.018  |  0.179 |  0.9 |  16.0 |
+|   startinpy   |   0.017  |   0.175  |  0.437 |  3.9 |  41.2 |
 
 
 
