@@ -65,7 +65,7 @@ for f64, max-values for i64 and u64, "" for String, 0 for bool.
 
 ```python
 dt = startinpy.DT()
-dt.add_attribute_map(np.dtype([("classification", np.uint32)]))
+dt.set_attributes_schema(np.dtype([("classification", np.uint64)]))
 dt.insert_one_pt([85000.0, 444003.2, 2.2], classification=6)
 ...
 dt.attributes[1:]['classification']
