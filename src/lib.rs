@@ -342,14 +342,13 @@ impl DT {
     /// schema are stored.
     ///
     /// Only the following data types for each attribute are allowed:
-    /// 'numpy.bool_', 'numpy.int32', 'numpy.int64', 'numpy.uint32', 'numpy.uint64', unicode (string),
-    /// 'numpy.float32', 'numpy.float64'.
+    /// 'numpy.bool_', 'numpy.int64', 'numpy.uint64', unicode (string), 'numpy.float64'.
     ///
     /// :param dtype: a `NumPy Data type object (dtype) <https://numpy.org/doc/stable/reference/arrays.dtypes.html#arrays-dtypes>`_
     /// :return: True if the schema is valid, otherwise an error is thrown.
     ///
     /// >>> dt = startinpy.DT()
-    /// >>> myschema = np.dtype([('classification', np.uint32), ('intensity', float)])
+    /// >>> myschema = np.dtype([('classification', np.uint64), ('intensity', float)])
     /// >>> dt.set_attributes_schema(myschema)
     /// >>> dt.insert_one_pt([85000.0, 444003.2, 2.2], classification=2, intensity=111.1)
     #[pyo3(signature = (dtype))]
@@ -389,7 +388,7 @@ impl DT {
                     self.dtype.push((name.to_string(), "<u4".to_string()));
                 }
                 "uint64" => {
-                    v.push((name.to_string(), "i64".to_string()));
+                    v.push((name.to_string(), "u64".to_string()));
                     self.dtype.push((name.to_string(), "<u8".to_string()));
                 }
                 other if other.starts_with("<U") => {
@@ -414,11 +413,11 @@ impl DT {
     ///
     /// :return: a NumPy Data type object (dtype)
     ///
-    /// >>> d = np.dtype([('classification', np.float32), ('name', '<U8')])
+    /// >>> d = np.dtype([('classification', np.float64), ('name', '<U8')])
     /// >>> dt.set_attributes_schema(d)
     /// True
     /// >>> dt.get_attributes_schema()
-    /// [('classification', '<f4'), ('name', '<U8')]
+    /// [('classification', '<f8'), ('name', '<U8')]
     fn get_attributes_schema(&self) -> Vec<(String, String)> {
         self.dtype.clone()
     }
@@ -432,7 +431,7 @@ impl DT {
     ///          vertex). The array is empty if the extra attributes don't exist.
     ///
     /// >>> dt = startinpy.DT()
-    /// >>> dt.add_attribute_map(np.dtype([("classification", np.uint32)]))
+    /// >>> dt.add_attribute_map(np.dtype([("classification", np.uint64)]))
     /// >>> dt.insert_one_pt([85000.0, 444003.2, 2.2], classification=6)
     /// >>> ...
     /// >>> dt.attributes[1:]

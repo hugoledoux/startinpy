@@ -8,21 +8,21 @@
 
 It is possible to store extra attributes with each vertex (besides the xyz-coordinates).
 
-Those attributes are stored as a JSON object/dictionary, a key-value pair where the key is a string and the value is one of the following [NumPy data types](https://numpy.org/doc/stable/user/basics.types.html): numpy.bool_, numpy.int32, numpy.int64, numpy.uint32, numpy.uint64, unicode (string), numpy.float32, numpy.float64.
+Those attributes are stored as a JSON object/dictionary, a key-value pair where the key is a string and the value is one of the following [NumPy data types](https://numpy.org/doc/stable/user/basics.types.html): `numpy.bool_`,  `numpy.int64`, `numpy.uint64`, unicode (string), and `numpy.float64`.
 
 To attach extra attributes, you first need to define a *schema*, it a list of the attribute names and their data types.
 [NumPy data types](https://numpy.org/doc/stable/reference/arrays.dtypes.html#arrays-dtypes) must be used to create the schema.
 
 ```python
 dt = startinpy.DT()
-myschema = np.dtype([('classification', np.uint32), ('intensity', float)])
+myschema = np.dtype([('classification', np.uint64), ('intensity', float)])
 dt.set_attributes_schema(myschema)
 ```
 
 or
 
 ```python
-dt = startinpy.DT(np.dtype([('classification', np.uint32), ('intensity', float)]))
+dt = startinpy.DT(np.dtype([('classification', np.uint64), ('intensity', float)]))
 ```
 
 Adding attributes to a triangulation that has no schema defined will result in no extra attributes being stored; only those compliant with the schema are stored.

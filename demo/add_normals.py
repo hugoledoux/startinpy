@@ -1,14 +1,14 @@
+# -- add the normals, as extra attributes (nx, ny, nz), for all the vertices in the DT
 
-#-- add the normals, as extra attributes (nx, ny, nz), for all the vertices in the DT
-
-import startinpy
-import numpy as np
-import laspy
 import json
+
+import laspy
+import numpy as np
+import startinpy
 
 las = laspy.read("../data/small.laz")
 dt = startinpy.DT()
-dt.set_attributes_schema(np.dtype([("nx", np.float32), ("ny", float), ("nz", float)]))
+dt.set_attributes_schema(np.dtype([("nx", np.float64), ("ny", float), ("nz", float)]))
 dt.duplicates_handling = "Highest"
 
 dt.insert(las.xyz)
@@ -32,8 +32,3 @@ print(dt.attributes.dtype)
 # # together = np.stack((dt.points, a))
 # # together = np.concatenate((dt.points, a), axis=1)
 # print(together)
-
-
-
-
-
