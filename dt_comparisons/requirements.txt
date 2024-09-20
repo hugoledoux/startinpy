@@ -5,6 +5,7 @@ click==8.1.7
 click-plugins==1.1.1
 cligj==0.7.2
 laspy==2.5.4
+lazrs==0.6.1
 numpy==2.1.0
 pdal==3.4.5
 py-markdown-table==1.1.0
