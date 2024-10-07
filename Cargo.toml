@@ -11,7 +11,7 @@ edition = "2021"
 
 
 [dependencies]
-startin = "0.8.1"
+startin = "0.8.2"
 # startin = { path = "../startin" }
 # startin = { git = "https://github.com/hugoledoux/startin", branch = "develop" }
 numpy = "0.19"
