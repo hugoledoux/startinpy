@@ -33,7 +33,9 @@ def test_empty():
     with pytest.raises(Exception):
         re = dt.interpolate({"method": "TIN"}, locs, strict=True)
     with pytest.raises(Exception):
-        re = dt.interpolate({"method": "IDW", "radius": 20, "power": 2.0}, locs, strict=True)
+        re = dt.interpolate(
+            {"method": "IDW", "radius": 20, "power": 2.0}, locs, strict=True
+        )
 
 
 def test_outside_convexhull():
@@ -83,6 +85,17 @@ def test_middle():
     assert re[0] == pytest.approx(2.5)
     re = dt.interpolate({"method": "TIN"}, locs)
     assert re[0] == pytest.approx(3.0)
+
+
+def test_nni_precompute():
+    las = laspy.read("data/small.laz")
+    dt = startinpy.DT()
+    dt.insert(las.xyz)
+    locs = [[85723.0, 447225.0]]
+    re = dt.interpolate({"method": "NNI"}, locs)
+    re2 = dt.interpolate({"method": "NNI", "precompute": False}, locs)
+    assert re[0] == re2[0]
+
 
 def test_exisiting_point():
     pts = four_points()

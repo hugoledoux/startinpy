@@ -962,13 +962,14 @@ impl DT {
     /// The interpolation does not modify the triangulation, it only returns an estimation for
     /// the z-values at the xy-location provided as argument.
     ///
-    /// :param interpolant: a JSON/dict Python object with a `"method": "IDW"` (or others). IDW has 2 more params: "power" and "radius"
+    /// :param interpolant: a JSON/dict Python object with a `"method": "IDW"` (or others). IDW has 2 more params: "power" and "radius"; NNI can have the Voronoi cells precomputed with "precompute"
     /// :param locations: an array of [x, y] locations where the function should interpolate
     /// :param strict: (default=False) if the interpolation cannot find a value (because outside convex hull or search radius too small) then strict==True will stop at the first error and return that error. If strict==False then numpy.nan is returned.
     /// :return: a numpy array containing all the interpolation values (same order as input array)
     ///
     /// >>> locs = [ [50.0, 41.1], [101.1, 33.2], [80.0, 66.0] ]
-    /// >>> re = dt.interpolate({"method": "NNI"}, locs)
+    /// >>> re = dt.interpolate({"method": "NNI", "precompute": True}, locs)
+    /// >>> re = dt.interpolate({"method": "Laplace"}, locs)
     /// >>> re = dt.interpolate({"method": "IDW", "radius": 20, "power": 2.0}, locs, strict=True)
     #[pyo3(signature = (interpolant, locations, strict=false))]
     fn interpolate<'py>(
@@ -1056,8 +1057,13 @@ impl DT {
                         Ok(PyArray::from_vec(py, re))
                     }
                     "NNI" => {
+                        let re2 = interpolant.get_item("precompute");
+                        let mut precompute: bool = false;
+                        if re2.is_some() {
+                            precompute = re2.unwrap().extract()?;
+                        }
                         for loc in locations {
-                            let a = self.interpolate_nni(loc);
+                            let a = self.interpolate_nni(loc, precompute);
                             if a.is_ok() {
                                 re.push(a.unwrap());
                             } else {
@@ -1355,8 +1361,10 @@ impl DT {
         Ok(re1.unwrap())
     }
 
-    fn interpolate_nni(&mut self, p2: [f64; 2]) -> PyResult<f64> {
-        let i_nni = startin::interpolation::NNI { precompute: false };
+    fn interpolate_nni(&mut self, p2: [f64; 2], precompute: bool) -> PyResult<f64> {
+        let i_nni = startin::interpolation::NNI {
+            precompute: precompute,
+        };
         let mut re = startin::interpolation::interpolate(&i_nni, &mut self.t, &vec![p2]);
         let re1 = re.pop().expect("no results");
         if re1.is_err() {
