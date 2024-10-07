@@ -48,7 +48,7 @@ This is partly because it is 100% developed in Rust; the core library is called 
 
 **Its data structure is exposed.**
 Most libraries only return a list of vertices and triangles (triplets of vertex identifiers), which means that the user has to build an auxiliary graph to be able to find the adjacent triangles of a given one, or to find all the triangles that are incident to a given vertex (eg to calculate the normal).
-This library's name comes from the fact that the data structure implemented is based on the concept of *stars* in a graph [@Blandford05], which allows us to store adjacency and incidence, and have a very compact data structure.
+The name "startinpy" comes from the fact that the data structure implemented is based on the concept of *stars* in a graph [@Blandford05], which allows us to store adjacency and incidence, and have a very compact data structure.
 startinpy exposes methods to search triangles, find the adjacent triangles of a triangle, and find the incident triangles to a vertex.
 
 **The DT is incrementally constructed and deletion of vertices is possible.**
@@ -59,7 +59,7 @@ The deletion of vertices in a DT is useful to remove outliers (which are detecte
 **The z-values are stored and xy-duplicates handled.**
 Some libraries allow us to attach extra information to a vertex, but most often one has to build an auxiliary data structure in Python to manage those.
 Doing so is error-prone, tedious, and makes operations in 3D more complex (eg calculating the slope of an area, calculating the normal of a vertex, estimating the elevation with spatial interpolation, calculating volumes).
-By storing the z values, startinpy allows us to merge vertices that are close to each other (in the xy-plane; the tolerance can be defined by the user) and if there are xy-duplicates, then a user-defined z-value can be kept (eg lowest or highest, depending on the application).
+By storing the z-values, startinpy allows us to merge vertices that are close to each other (in the xy-plane; the tolerance can be defined by the user) and if there are xy-duplicates, then a user-defined z-value can be kept (eg lowest or highest, depending on the application).
 
 **Extra attributes can be stored in the DT.**
 It is possible to attach extra attributes with each vertex of the terrain.
