@@ -10,11 +10,11 @@ Robust arithmetic for the geometric predicates is used ([Shewchuk's predicates](
 ## Insertion + deletion are possible
 
 It uses an incremental algorithm for the construction of a Delaunay triangulation (constraints are *not* supported), that is each point is inserted one after another and the triangulation is updated between each insertion.
-The algorithm is based on flips.
+The algorithm is based on flips to transform the triangulation (see [Lawson (1972)](https://doi.org/10.1016/0012-365X(72)90093-3)).
 
 The deletion of a vertex is also possible.
-The algorithm implemented is a modification of the one of [Mostafavi, Gold, and Dakowicz (2003)](<https://doi.org/10.1016/S0098-3004(03)00017-7>).
-The ears are filled by flipping, so it's, in theory, more robust.
+The algorithm implemented is a modification of the one of [Mostafavi, Gold, and Dakowicz (2003)](https://doi.org/10.1016/S0098-3004(03)00017-7).
+The ears are also filled by flipping, so it's, in theory, more robust.
 I have also extended the algorithm to allow the deletion of vertices on the boundary of the convex hull.
 The algorithm is sub-optimal, but, in practice, the number of neighbours of a given vertex in a DT is only 6, so it doesn't really matter.
 

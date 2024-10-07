@@ -52,7 +52,7 @@ This library's name comes from the fact that the data structure implemented is b
 startinpy exposes methods to search triangles, find the adjacent triangles of a triangle, and find the incident triangles to a vertex.
 
 **The DT is incrementally constructed and deletion of vertices is possible.**
-Unlike the majority of 2D DT implementations, startinpy implements an *incremental* insertion algorithm [@Lawson72], which allows for constructing a simplified TIN that best approximates the original terrain with only 10% of the points; see @Garland95 for different strategies.
+Unlike the majority of 2D DT implementations, startinpy implements an *incremental* insertion algorithm [@Lawson72-1], which allows for constructing a simplified TIN that best approximates the original terrain with only 10% of the points; see @Garland95 for different strategies.
 startinpy also implements a modification of the deletion algorithm in @Mostafavi03, extended to allow the deletion of vertices on the boundary of the convex hull.
 The deletion of vertices in a DT is useful to remove outliers (which are detected by analysing neighbouring triangles in the DT) and for the implementation of the natural neighbours interpolation method [@Sibson81].
 
