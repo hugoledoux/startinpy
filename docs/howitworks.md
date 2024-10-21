@@ -14,7 +14,7 @@ The algorithm is based on flips to transform the triangulation (see [Lawson (197
 
 The deletion of a vertex is also possible.
 The algorithm implemented is a modification of the one of [Mostafavi, Gold, and Dakowicz (2003)](https://doi.org/10.1016/S0098-3004(03)00017-7).
-The ears are also filled by flipping, so it's, in theory, more robust.
+The ears are also filled by flipping, so it's in theory more robust.
 I have also extended the algorithm to allow the deletion of vertices on the boundary of the convex hull.
 The algorithm is sub-optimal, but, in practice, the number of neighbours of a given vertex in a DT is only 6, so it doesn't really matter.
 
@@ -22,14 +22,14 @@ The algorithm is sub-optimal, but, in practice, the number of neighbours of a gi
 ## The data structure
 
 The data structure of the Rust code is a cheap implementation of the star-based structure defined in [Blandford et al. (2003)](https://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.9.6823); cheap because the link of each vertex is stored a simple array and not in an optimised blob like they did.
-It results in a pretty fast library (comparison will come at some point), but it uses more space than the optimised one.
+It results in a pretty fast library (see [comparison to alternatives](./comparison.md)), but it uses more space than the optimised original data structure.
 
-However, notice that the stars are *not* exposed in startinpy, to keep it a simple and higher-level library.
+However, notice that in startinpy the stars are *not* exposed to the user, to keep it a simple and higher-level library.
 
 The data structure of startinpy is composed of 2 arrays:
 
 1. an array of **Points**, where each entry is an array of 3 floats (x-coordinate, y-coordinate, z-coordinate)
-2. an array of **Triangles**, where each **Triangle** is an array of 3 integers, the values of the indices of the 3 vertices (ordered counter-clockwise) in the array of **Points** ({func}`startinpy.DT.points`, which is 0-based, 0 being the infinite vertex).
+2. an array of **Triangles**, where each **Triangle** is an array of 3 integers, the values of the indices of the 3 vertices (ordered counter-clockwise) in the array of **Points** ({func}`startinpy.DT.points`, which is 0-based, 0 being the [infinite vertex](#infinite-vertex-and-triangles)).
 
 A **Vertex** is an integer, it is the index in the array of points ({func}`startinpy.DT.points`, which is 0-based).
 
@@ -51,7 +51,7 @@ The CGAL library also does this, and [the internal workings are well explained h
 The *infinite vertex* is the first vertex in the array of points ({func}`startinpy.DT.points`), and, thus, it has the index of 0 (zero).
 It has infinite coordinates (`[inf inf inf]`), those are of type [numpy infinity](https://numpy.org/devdocs/reference/constants.html#numpy.inf).
 
-An *infinite triangle* is a triangle having the infinite vertex as one of its vertices; a finite triangle doesn't have the infinite vertex is part of the triangulation of the dataset.
+An *infinite triangle* is a triangle having the infinite vertex as one of its vertices; a finite triangle doesn't have the infinite vertex as one of its 3 vertices.
 
 In the figure, notice that there are 5 finite triangles (126, 236, 346, 456, 516), but the data structure actually stores 5 extra infinite triangles (102, 150, 540, 304, 203).
 Those are adjacent to the 5 edges on the boundary of the convex hull of the dataset.
@@ -142,6 +142,10 @@ True
 
 Finally, you can remove the unused/deleted vertices from the {func}`startinpy.DT.points` array by using {func}`startinpy.DT.collect_garbage`, which will assign a new ID to most vertices, and triangles will be updated too.
 Notice that now 5 vertices are in the array, and only 2 finite triangles are in the DT.
+
+:::{warning} 
+The function {func}`startinpy.DT.collect_garbage` should be used with care as it is a very slow operation that requires copying all points/triangles in an array and recomputing the indices. Apply it before exporting the triangulation, not after each delete operation.
+:::
 
 ```python
 t.collect_garbage()

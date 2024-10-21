@@ -1,4 +1,4 @@
-# Comparison 
+# Comparison to alternatives
 
 The two tables below compare startinpy to a few of its main alternatives:
 

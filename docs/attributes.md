@@ -10,7 +10,7 @@ It is possible to store extra attributes with each vertex (besides the xyz-coord
 
 Those attributes are stored as a JSON object/dictionary, a key-value pair where the key is a string and the value is one of the following [NumPy data types](https://numpy.org/doc/stable/user/basics.types.html): `numpy.bool_`,  `numpy.int64`, `numpy.uint64`, unicode (string), and `numpy.float64`.
 
-To attach extra attributes, you first need to define a *schema*, it a list of the attribute names and their data types.
+To attach extra attributes, you first need to define a *schema*, which is a list of the attribute names and their data types.
 [NumPy data types](https://numpy.org/doc/stable/reference/arrays.dtypes.html#arrays-dtypes) must be used to create the schema.
 
 ```python
@@ -43,7 +43,7 @@ dt.set_vertex_attributes(vi, classification=2, intensity=111.1)
 
 ## Retrieving the extra attributes
 
-It is possible to obtain the attributes attached to a single vertex as a JSON object, eg for the vertex with ID 50:
+It is possible to retrieve the attributes attached to a single vertex as a JSON object, eg for the vertex with ID 50:
 
 ```python
 a = dt.get_vertex_attributes(50)
