@@ -29,7 +29,7 @@ However, notice that in startinpy the stars are *not* exposed to the user, to ke
 The data structure of startinpy is composed of 2 arrays:
 
 1. an array of **Points**, where each entry is an array of 3 floats (x-coordinate, y-coordinate, z-coordinate)
-2. an array of **Triangles**, where each **Triangle** is an array of 3 integers, the values of the indices of the 3 vertices (ordered counter-clockwise) in the array of **Points** ({func}`startinpy.DT.points`, which is 0-based, 0 being the [infinite vertex](#infinite-vertex-and-triangles)).
+2. an array of **Triangles**, where each **Triangle** is an array of 3 integers, the values of the indices of the 3 vertices (ordered counter-clockwise) in the array of **Points** ({func}`startinpy.DT.points`, which is 0-based, 0 being the [infinite vertex](#infinite)).
 
 A **Vertex** is an integer, it is the index in the array of points ({func}`startinpy.DT.points`, which is 0-based).
 
@@ -37,7 +37,6 @@ If you delete a vertex (with {func}`startinpy.DT.remove`), then the entry in the
 
 
 (infinite)=
-
 ## Infinite vertex and triangles
 
 ```{image} figs/infinite.png
