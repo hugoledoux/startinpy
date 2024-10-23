@@ -1,6 +1,6 @@
-import startinpy
-import numpy as np
 import laspy
+import numpy as np
+import startinpy
 
 las = laspy.read("../data/small.laz")
 pts = np.vstack((las.x, las.y, las.z)).transpose()
@@ -8,7 +8,7 @@ pts = np.vstack((las.x, las.y, las.z)).transpose()
 dt = startinpy.DT()
 dt.insert(pts)
 
-#-- remove vertex #4
+# -- remove vertex #4
 try:
     dt.remove(4)
 except Exception as e:

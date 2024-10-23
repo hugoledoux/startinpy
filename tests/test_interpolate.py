@@ -1,21 +1,23 @@
-import pytest
-import startinpy
-import numpy as np
 import math
 
+import laspy
+import numpy as np
+import pytest
+import startinpy
+
+
 def four_points():
-    return np.array([
-        [0.0, 0.0, 1.0],
-        [10.0, 0.0, 2.0],
-        [10.0, 10.0, 3.0],
-        [0.0, 10.0, 4.0]
-     ])
+    return np.array(
+        [[0.0, 0.0, 1.0], [10.0, 0.0, 2.0], [10.0, 10.0, 3.0], [0.0, 10.0, 4.0]]
+    )
+
 
 def random(n=20):
     rng = np.random.default_rng()
     pts = rng.random((n, 3))
     pts = pts * 100
-    return pts    
+    return pts
+
 
 def test_empty():
     locs = np.array([[50.0, 41.1], [101.1, 33.2], [80.0, 66.0]])
@@ -56,16 +58,17 @@ def test_outside_convexhull():
 def test_nn():
     pts = four_points()
     dt = startinpy.DT()
-    dt.insert(pts)    
+    dt.insert(pts)
     dt.insert_one_pt([5.0, 5.0, 11.1])
-    locs = [ [5.1, 5.1] ]
+    locs = [[5.1, 5.1]]
     re = dt.interpolate({"method": "NN"}, locs)
     assert re[0] == pytest.approx(11.1)
+
 
 def test_tin_linear_random():
     pts = random(500)
     dt = startinpy.DT()
-    dt.insert(pts)   
+    dt.insert(pts)
     locs = [[144.0, 48.0], [44.0, 48.0]]
     re = dt.interpolate({"method": "TIN"}, locs)
     assert np.isnan(re[0]) == True
@@ -73,11 +76,10 @@ def test_tin_linear_random():
     assert re[1] > 0.0 and re[1] < 100.0
 
 
-
 def test_middle():
     pts = four_points()
     dt = startinpy.DT()
-    dt.insert(pts)    
+    dt.insert(pts)
     locs = [[5.0, 5.0]]
     re = dt.interpolate({"method": "Laplace"}, locs)
     assert re[0] == pytest.approx(2.5)
@@ -100,7 +102,7 @@ def test_nni_precompute():
 def test_exisiting_point():
     pts = four_points()
     dt = startinpy.DT()
-    dt.insert(pts)    
+    dt.insert(pts)
     dt.insert_one_pt([5.0, 5.0, 11.1])
     locs = [[5.0, 5.0]]
     re = dt.interpolate({"method": "Laplace"}, locs)

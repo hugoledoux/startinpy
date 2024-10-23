@@ -1,7 +1,7 @@
-import startinpy
 import numpy as np
+import startinpy
 
-#-- generate 100 points randomly in the plane
+# -- generate 100 points randomly in the plane
 rng = np.random.default_rng(seed=42)
 pts = rng.random((100, 3))
 dt = startinpy.DT()

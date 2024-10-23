@@ -1,13 +1,16 @@
+import math
+
+import numpy as np
 import pytest
 import startinpy
-import numpy as np
-import math
+
 
 def random(n=20):
     rng = np.random.default_rng()
     pts = rng.random((n, 3))
     pts = pts * 100
     return pts
+
 
 def test_remove_insert():
     pts = random(25)
@@ -16,9 +19,10 @@ def test_remove_insert():
     dt.remove(17)
     assert dt.is_vertex_removed(17) == True
     assert dt.has_garbage() == True
-    dt.insert_one_pt([88., 88., 88.])
+    dt.insert_one_pt([88.0, 88.0, 88.0])
     assert dt.is_vertex_removed(17) == False
     assert dt.has_garbage() == False
+
 
 def test_remove_valid():
     total = 25
@@ -32,6 +36,7 @@ def test_remove_valid():
     dt.remove(12)
     assert dt.number_of_vertices() == (total - 2)
     assert dt.is_vertex_removed(12) == True
+
 
 def test_remove_invalid():
     pts = random()
@@ -90,6 +95,7 @@ def test_garbagecollection():
     assert dt.number_of_vertices() == 97
     assert dt.number_of_triangles() == notr
 
+
 def test_get_point():
     total = 100
     pts = random(total)
@@ -98,5 +104,3 @@ def test_get_point():
     dt.remove(77)
     with pytest.raises(IndexError):
         p = dt.get_point(77)
-
-

@@ -1,6 +1,5 @@
 # -- add the normals, as extra attributes (nx, ny, nz), for all the vertices in the DT
 
-import json
 
 import laspy
 import numpy as np
