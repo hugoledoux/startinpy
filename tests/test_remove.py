@@ -45,32 +45,35 @@ def test_remove_invalid():
     dt.remove(11)
     with pytest.raises(IndexError):
         dt.remove(11)
-    
+
+
 def test_cocircular():
     dt = startinpy.DT()
-    dt.insert_one_pt([0.0, 0.0, 12.5]);
-    dt.insert_one_pt([1.0, 0.0, 7.65]);
-    dt.insert_one_pt([1.0, 1.0, 33.0]);
-    dt.insert_one_pt([0.0, 1.0, 21.0]);
+    dt.insert_one_pt([0.0, 0.0, 12.5])
+    dt.insert_one_pt([1.0, 0.0, 7.65])
+    dt.insert_one_pt([1.0, 1.0, 33.0])
+    dt.insert_one_pt([0.0, 1.0, 21.0])
     y = 0.5 + math.sqrt(0.5 * 0.5 + 0.5 * 0.5)
-    dt.insert_one_pt([0.5, y, 21.0]);
-    dt.insert_one_pt([0.5, 0.5, 33.0]);
+    dt.insert_one_pt([0.5, y, 21.0])
+    dt.insert_one_pt([0.5, 0.5, 33.0])
     dt.remove(6)
     assert dt.number_of_vertices() == 5
     assert dt.number_of_triangles() == 3
 
+
 def test_convexhull():
     dt = startinpy.DT()
-    dt.insert_one_pt([0.0, 0.0, 12.5]);
-    dt.insert_one_pt([1.0, 0.0, 7.65]);
-    dt.insert_one_pt([1.0, 1.0, 33.0]);
-    dt.insert_one_pt([0.0, 1.0, 21.0]);
+    dt.insert_one_pt([0.0, 0.0, 12.5])
+    dt.insert_one_pt([1.0, 0.0, 7.65])
+    dt.insert_one_pt([1.0, 1.0, 33.0])
+    dt.insert_one_pt([0.0, 1.0, 21.0])
     dt.remove(3)
     assert dt.number_of_vertices() == 3
-    assert dt.number_of_triangles() == 1    
+    assert dt.number_of_triangles() == 1
     dt.remove(2)
     assert dt.number_of_vertices() == 2
-    assert dt.number_of_triangles() == 0 
+    assert dt.number_of_triangles() == 0
+
 
 def test_garbagecollection():
     total = 100
