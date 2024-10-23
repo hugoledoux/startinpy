@@ -1,7 +1,7 @@
 
 # Comparison of startinpy with other Python libraries
 
-For results, see [this page of the documentation](https://startinpy.rtfd.io).
+For results, see [this page of the documentation](https://startinpy.readthedocs.io/latest/comparison.html).
 
 
 ## To replicate
