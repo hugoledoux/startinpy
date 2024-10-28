@@ -6,17 +6,6 @@ on:
 
 jobs:
 
-  linux-p39:
-      runs-on: ubuntu-latest
-      steps:
-      - uses: actions/checkout@v2
-      - uses: PyO3/maturin-action@v1
-        with:
-          maturin-version: 1.6.0
-          manylinux: 2014
-          command: publish
-          args: --no-sdist -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.9
-
   linux-p310:
       runs-on: ubuntu-latest
       steps:
@@ -50,15 +39,16 @@ jobs:
           command: publish
           args: --no-sdist -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.12
 
-  win-p39:
-    runs-on: windows-latest
-    steps:
-    - uses: actions/checkout@v2
-    - uses: PyO3/maturin-action@v1
-      with:
-        maturin-version: 1.6.0
-        command: publish
-        args: --no-sdist -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.9
+  linux-p313:
+      runs-on: ubuntu-latest
+      steps:
+      - uses: actions/checkout@v2
+      - uses: PyO3/maturin-action@v1
+        with:
+          maturin-version: 1.6.0
+          manylinux: 2014
+          command: publish
+          args: --no-sdist -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.13
 
   win-p310:
     runs-on: windows-latest
@@ -78,8 +68,8 @@ jobs:
       with:
         maturin-version: 1.6.0
         command: publish
-        args: --no-sdist -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.11        
-
+        args: --no-sdist -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.11
+  
   win-p312:
     runs-on: windows-latest
     steps:
@@ -88,25 +78,20 @@ jobs:
       with:
         maturin-version: 1.6.0
         command: publish
-        args: --no-sdist -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.12    
+        args: --no-sdist -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.12        
 
-  macos-p39:
-    runs-on: macos-latest
+  win-p313:
+    runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Install aarch64-apple-darwin toolchain
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: stable
-        target: aarch64-apple-darwin
     - uses: PyO3/maturin-action@v1
       with:
         maturin-version: 1.6.0
         command: publish
-        args: --no-sdist -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.9
+        args: --no-sdist -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.13    
 
   macos-p310:
-    runs-on: macos-latest
+    runs-o3: macos-latest
     steps:
     - uses: actions/checkout@v2
     - name: Install aarch64-apple-darwin toolchain
@@ -118,7 +103,7 @@ jobs:
       with:
         maturin-version: 1.6.0
         command: publish
-        args: --no-sdist -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.10        
+        args: --no-sdist -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.10
 
   macos-p311:
     runs-on: macos-latest
@@ -133,10 +118,25 @@ jobs:
       with:
         maturin-version: 1.6.0
         command: publish
-        args: --no-sdist -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.11         
+        args: --no-sdist -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.11        
 
   macos-p312:
     runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install aarch64-apple-darwin toolchain
+      uses: actions-rs/t2olchain@11
+      with:
+        toolchain: stable
+        target: aarch64-apple-darwin
+    - uses: PyO3/maturin-action@v1
+      with:
+        maturin-version: 1.6.0
+        command: publish
+        args: --no-sdist -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.12         
+
+  macos-p313:
+    runs-on: macos-lates3
     steps:
     - uses: actions/checkout@v2
     - name: Install aarch64-apple-darwin toolchain
@@ -148,4 +148,4 @@ jobs:
       with:
         maturin-version: 1.6.0
         command: publish
-        args: --no-sdist -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.12        
+        args: --no-sdist -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.13
