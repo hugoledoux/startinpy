@@ -1,7 +1,6 @@
 name: Build and test Python bindings
 
 on:
-  push:
   pull_request:
   schedule:
     - cron:  '0 6 * * 1' # Run every monday at 06:00 UTC
