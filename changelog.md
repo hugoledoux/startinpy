@@ -93,11 +93,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - new name "startinpy" to avoid clashes with the rust lib "startin" on which this project is based on. Since I use a Rust builder (maturin), there were clashes and probably a better idea to call it "startinpy" anyway.
 
 
-[0.12.0]: https://github.com/hugoledoux/startin/compare/0.11.0...0.12.0
-[0.11.0]: https://github.com/hugoledoux/startin/compare/0.10.2...0.11.0
-[0.10.2]: https://github.com/hugoledoux/startin/compare/0.10.1...0.10.2
-[0.10.1]: https://github.com/hugoledoux/startin/compare/0.10.0...0.10.1
-[0.10.0]: https://github.com/hugoledoux/startin/compare/0.9.2...0.10.0
-[0.9.2]: https://github.com/hugoledoux/startin/compare/0.9.1...0.9.2
-[0.9.1]: https://github.com/hugoledoux/startin/compare/0.9.0...0.9.1
-[0.9.0]: https://github.com/hugoledoux/startin/compare/0.8.0...0.9.0
+[0.12.0]: https://github.com/hugoledoux/startinpy/compare/0.11.0...0.12.0
+[0.11.0]: https://github.com/hugoledoux/startinpy/compare/0.10.2...0.11.0
+[0.10.2]: https://github.com/hugoledoux/startinpy/compare/0.10.1...0.10.2
+[0.10.1]: https://github.com/hugoledoux/startinpy/compare/0.10.0...0.10.1
+[0.10.0]: https://github.com/hugoledoux/startinpy/compare/0.9.2...0.10.0
+[0.9.2]: https://github.com/hugoledoux/startinpy/compare/0.9.1...0.9.2
+[0.9.1]: https://github.com/hugoledoux/startinpy/compare/0.9.0...0.9.1
+[0.9.0]: https://github.com/hugoledoux/startinpy/compare/0.8.0...0.9.0
