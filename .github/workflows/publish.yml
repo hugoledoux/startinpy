@@ -136,7 +136,7 @@ jobs:
         args: --no-sdist -u __token__ -p ${{ secrets.PASSWORD_PYPI }} -i python3.12         
 
   macos-p313:
-    runs-on: macos-lates3
+    runs-on: macos-latest
     steps:
     - uses: actions/checkout@v2
     - name: Install aarch64-apple-darwin toolchain
