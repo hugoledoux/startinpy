@@ -98,5 +98,20 @@ print(dt.incident_triangles_to_vertex(vi))
 # -- interpolate at a location with the linear in TIN method
 zhat = dt.interpolate({"method": "TIN"}, [[85718.5, 447211.6]])
 print("result: ", zhat[0])
+```
 
+If you use this software, please cite this article 
+==================================================
+
+```bibtex
+@article{Ledoux24,
+  author = {Ledoux, Hugo},
+  title = {{startinpy}: {A} {P}ython library for modelling and processing {2.5D} triangulated terrains},
+  journal = {Journal of Open Source Software},
+  year = {2024},
+  volume = {9},
+  number = {103},
+  pages = {7123},
+  doi = {10.21105/joss.07123}
+}
 ```
