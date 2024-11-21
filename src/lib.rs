@@ -965,7 +965,7 @@ impl DT {
     /// :param interpolant: a JSON/dict Python object with a `"method": "IDW"` (or others). IDW has 2 more params: "power" and "radius"; NNI can have the Voronoi cells precomputed with "precompute"
     /// :param locations: an array of [x, y] locations where the function should interpolate
     /// :param strict: (default=False) if the interpolation cannot find a value (because outside convex hull or search radius too small) then strict==True will stop at the first error and return that error. If strict==False then numpy.nan is returned.
-    /// :return: a numpy array containing all the interpolation values (same order as input array)
+    /// :return: a numpy array containing all the interpolation values (same order as input array). numpy.nan when location is outside the convexhull of the DT.
     ///
     /// >>> locs = [ [50.0, 41.1], [101.1, 33.2], [80.0, 66.0] ]
     /// >>> re = dt.interpolate({"method": "NNI", "precompute": True}, locs)
