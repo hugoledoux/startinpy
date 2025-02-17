@@ -57,6 +57,60 @@ Those are adjacent to the 5 edges on the boundary of the convex hull of the data
 You can conceptualise the triangulation as being embedded on a sphere, and the infinite vertex is on the other side.
 
 
+## Parameters to setup that will influence the DT
+
+### Snap tolerance
+
+{func}`startinpy.DT.snap_tolerance`
+(default=0.001)
+
+Get/set the snap tolerance used to merge vertices during insertion.
+Two vertices closer than this will be the merged during insertion.
+
+```python
+dt = startinpy.DT()
+dt.snap_tolerance = 0.05 #-- modify to 0.05unit
+print("The snap tolerance is:", dt.snap_tolerance)
+#-- The snap tolerance is: 0.05
+```
+
+
+### Point location: latest triangle or first "jump"?
+
+{func}`startinpy.DT.jump_and_walk`
+(default=False)
+
+Activate/deactivate the jump-and-walk for the point location.
+If deactivated the walk starts from the last inserted triangle; this is the default and should work fine for most real-world datasets.
+If activated, then before a walk (to insert a new points in the DT), a subset of the points (hard-coded value: n<sup>0.25</sup>) are sampled, the Euclidean distance to each are calculated, and the walk starts from the closest one.
+This should be activated when the spatial coherence in the dataset is very low (ie if the points are randomly shuffled).
+
+```python
+dt = startinpy.DT()
+dt.jump_and_walk = True
+```
+
+### How xy-duplicates are handling
+
+{func}`startinpy.DT.duplicates_handling`
+(default="First")
+
+Specify the method to handle xy-duplicates.
+That is, if the insertion of a new point in the DT is impossible because a vertex already exists (based on {func}`startinpy.DT.snap_tolerance`), then we can decide which z-value we want to keep in the DT.
+
+There are 4 options:
+
+1. "First" (default): the z-value of the first point inserted at that xy-location is kept
+2. "Last": the z-value of the last point inserted at that xy-location is kept
+3. "Lowest": the lowest z-value is kept
+4. "Highest": the highest z-value is kept
+
+```python
+dt = startinpy.DT()
+dt.duplicates_handling = "Highest"
+```
+
+
 ## Some examples of the data structure and infinity
 
 ```{image} figs/tr.png
