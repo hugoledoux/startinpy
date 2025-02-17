@@ -269,9 +269,13 @@ impl DT {
     }
 
     /// Activate/deactivate the jump-and-walk for the point location.
-    /// If deactivated the walk starts from the last inserted triangle.
-    /// This should be activate when the spatial coherence in the dataset
-    /// is very low (ie if the points are randomly shuffled)
+    /// If deactivated the walk starts from the last inserted triangle;
+    /// this is the default and should work fine for most real-world datasets.
+    /// If activated, then before a walk (to insert a new points in the DT),
+    /// a subset of the points (hard-coded value: n<sup>0.25</sup>) are sampled, the Euclidean distance
+    /// to each are calculated, and the walk starts from the closest one.
+    /// This should be activated when the spatial coherence in the dataset is
+    /// very low (ie if the points are randomly shuffled).    
     /// (default=False)
     ///
     /// >>> dt = startinpy.DT()
