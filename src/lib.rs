@@ -251,7 +251,8 @@ impl DT {
     }
 
     /// Get/set the snap tolerance used to merge vertices during insertion.
-    /// Two vertices closer than this will be the merged during insertion.
+    /// Two vertices closer than this value (calculated in the xy-plane) will be merged during insertion.
+    /// The z-value preserved for that vertex is based on the :func:`startinpy.DT.duplicates_handling`.
     /// (default=0.001)
     ///
     /// >>> dt = startinpy.DT()

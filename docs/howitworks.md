@@ -59,13 +59,15 @@ You can conceptualise the triangulation as being embedded on a sphere, and the i
 
 ## Parameters to setup that will influence the DT
 
+(snap_tolerance)=
 ### Snap tolerance
 
 {func}`startinpy.DT.snap_tolerance`
 (default=0.001)
 
 Get/set the snap tolerance used to merge vertices during insertion.
-Two vertices closer than this will be the merged during insertion.
+Two vertices closer than this value (calculated in the xy-plane) will be merged during insertion.
+The z-value preserved for that vertex is based on the [`duplicates_handling` parameter](#duplicates_handling). 
 
 ```python
 dt = startinpy.DT()
@@ -75,21 +77,23 @@ print("The snap tolerance is:", dt.snap_tolerance)
 ```
 
 
+(point_location)=
 ### Point location: latest triangle or first "jump"?
 
 {func}`startinpy.DT.jump_and_walk`
 (default=False)
 
 Activate/deactivate the jump-and-walk for the point location.
-If deactivated the walk starts from the last inserted triangle; this is the default and should work fine for most real-world datasets.
-If activated, then before a walk (to insert a new points in the DT), a subset of the points (hard-coded value: n<sup>0.25</sup>) are sampled, the Euclidean distance to each are calculated, and the walk starts from the closest one.
-This should be activated when the spatial coherence in the dataset is very low (ie if the points are randomly shuffled).
+If deactivated, the walk starts from the last inserted triangle; this is the default and should work fine for most real-world datasets.
+If activated, then before a walk starts (to insert a new points in the DT), a subset of the points (a hard-coded value: n<sup>0.25</sup>) are sampled, the Euclidean distance to each is calculated, and the walk starts from the closest one.
+This should be activated when the spatial coherence in the dataset is very low (eg if the points are randomly shuffled).
 
 ```python
 dt = startinpy.DT()
 dt.jump_and_walk = True
 ```
 
+(duplicates_handling)=
 ### How xy-duplicates are handling
 
 {func}`startinpy.DT.duplicates_handling`
@@ -100,10 +104,10 @@ That is, if the insertion of a new point in the DT is impossible because a verte
 
 There are 4 options:
 
-1. "First" (default): the z-value of the first point inserted at that xy-location is kept
-2. "Last": the z-value of the last point inserted at that xy-location is kept
-3. "Lowest": the lowest z-value is kept
-4. "Highest": the highest z-value is kept
+1. **First** (default): the z-value of the first point inserted at that xy-location is kept
+2. **Last**: the z-value of the last point inserted at that xy-location is kept
+3. **Lowest**: the lowest z-value is kept
+4. **Highest**: the highest z-value is kept
 
 ```python
 dt = startinpy.DT()
