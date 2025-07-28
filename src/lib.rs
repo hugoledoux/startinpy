@@ -1,5 +1,3 @@
-extern crate startin;
-
 use numpy::{PyArray, PyArrayDescr};
 use pyo3::exceptions;
 
