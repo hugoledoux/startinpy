@@ -7,6 +7,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.12.2] - 2025-07-28
+### Changed
+- Fixed a bug (#31) when using BBbox and an empty Vec
+- Improved docs
+- Updated versions of rustup and others for the docs
+
 ## [0.12.1] - 2024-12-16
 ### Changed
 - Downgrade the requirement for numpy>2 to numpy>=1.24.0. It wasn't necessary and created a bit of a havoc with other libs that didn't make the jump to v2
@@ -97,6 +103,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - new name "startinpy" to avoid clashes with the rust lib "startin" on which this project is based on. Since I use a Rust builder (maturin), there were clashes and probably a better idea to call it "startinpy" anyway.
 
 
+[0.12.2]: https://github.com/hugoledoux/startinpy/compare/0.12.1...0.12.2
 [0.12.1]: https://github.com/hugoledoux/startinpy/compare/0.12.0...0.12.1
 [0.12.0]: https://github.com/hugoledoux/startinpy/compare/0.11.0...0.12.0
 [0.11.0]: https://github.com/hugoledoux/startinpy/compare/0.10.2...0.11.0
