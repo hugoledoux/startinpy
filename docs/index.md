@@ -32,8 +32,9 @@ startinpy uses the [startin Rust library](https://github.com/hugoledoux/startin)
 :maxdepth: 0
 
 installation
-howitworks
 api
+howitworks
+GitHub <https://github.com/hugoledoux/startinpy>
 examples
 attributes
 comparison
