@@ -1,6 +1,6 @@
 [package]
 name    = "startinpy"
-version = "0.12.2"
+version = "0.12.3"
 authors = ["Hugo Ledoux <h.ledoux@tudelft.nl>"]
 license = "MIT"
 homepage="https://github.com/hugoledoux/startinpy"
@@ -30,5 +30,3 @@ features = ["extension-module"]
 [lib]
 name = "startinpy"
 crate-type = ["cdylib"]
-
-
