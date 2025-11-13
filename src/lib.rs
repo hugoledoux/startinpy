@@ -2,7 +2,7 @@ use numpy::{PyArray, PyArrayDescr};
 use pyo3::exceptions;
 
 use pyo3::prelude::*;
-use pyo3::types::{PyDict, PyList, PyTuple};
+use pyo3::types::{PyAnyMethods, PyDict, PyDictMethods, PyList, PyModule, PyModuleMethods, PyTuple, PyTupleMethods};
 
 use std::fs::File;
 use std::io::Write;
@@ -23,37 +23,38 @@ struct Cityjson {
     vertices: Vec<Vec<i64>>,
 }
 
-fn convert_json_value_to_pyobject(py: Python, value: &Value) -> PyResult<PyObject> {
+fn convert_json_value_to_pyobject(py: Python, value: &Value) -> PyResult<Py<PyAny>> {
     match value {
         Value::Null => Ok(py.None()),
-        Value::Bool(b) => Ok(b.to_object(py)),
+        Value::Bool(b) => {
+            Ok((*b).into_pyobject(py)?.as_any().clone().unbind())
+        }
         Value::Number(num) => {
             if let Some(i) = num.as_i64() {
-                Ok(i.to_object(py))
+                Ok(i.into_pyobject(py)?.as_any().clone().unbind())
             } else if let Some(u) = num.as_u64() {
-                Ok(u.to_object(py))
+                Ok(u.into_pyobject(py)?.as_any().clone().unbind())
             } else if let Some(f) = num.as_f64() {
-                Ok(f.to_object(py))
+                Ok(f.into_pyobject(py)?.as_any().clone().unbind())
             } else {
                 Err(pyo3::exceptions::PyTypeError::new_err("Invalid number"))
             }
         }
-        Value::String(s) => Ok(s.to_object(py)),
+        Value::String(s) => {
+            Ok(s.into_pyobject(py)?.as_any().clone().unbind())
+        }
         Value::Array(arr) => {
-            let py_list = PyList::new(
-                py,
-                arr.iter()
-                    .map(|v| convert_json_value_to_pyobject(py, v))
-                    .collect::<Result<Vec<_>, _>>()?,
-            );
-            Ok(py_list.to_object(py))
+            let items: Vec<Py<PyAny>> = arr.iter()
+                .map(|v| convert_json_value_to_pyobject(py, v))
+                .collect::<Result<Vec<_>, _>>()?;
+            Ok(PyList::new(py, items.iter().map(|item| item.bind(py)))?.unbind().into())
         }
         Value::Object(map) => {
             let py_dict = PyDict::new(py);
             for (k, v) in map {
                 py_dict.set_item(k, convert_json_value_to_pyobject(py, v)?)?;
             }
-            Ok(py_dict.to_object(py))
+            Ok(py_dict.unbind().into())
         }
     }
 }
@@ -64,7 +65,7 @@ fn convert_json_value_to_pyobject(py: Python, value: &Value) -> PyResult<PyObjec
 /// This is the Python bindings of Rust's startin:
 /// (https://github.com/hugoledoux/startin)
 #[pymodule]
-fn startinpy(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
+fn startinpy(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<DT>()?;
     Ok(())
 }
@@ -83,7 +84,8 @@ impl DT {
     /// :param attributes_schema: Optional schema for attributes.
     /// :type attributes_schema: Optional[PyAny]
     #[new]
-    fn new(attributes_schema: Option<&PyAny>) -> Self {
+    #[pyo3(signature = (attributes_schema=None))]
+    fn new(attributes_schema: Option<&Bound<'_, PyAny>>) -> Self {
         let tmp = startin::Triangulation::new();
         let tmp2 = Vec::new();
         let mut dt = DT {
@@ -91,7 +93,7 @@ impl DT {
             dtype: tmp2,
         };
         if attributes_schema.is_some() {
-            let _ = dt.set_attributes_schema(&attributes_schema.unwrap());
+            let _ = dt.set_attributes_schema(attributes_schema.unwrap());
         }
         dt
     }
@@ -111,7 +113,7 @@ impl DT {
     /// >>> dt.points[0]
     /// array([inf, inf, inf])
     #[getter]
-    fn points<'py>(&self, py: Python<'py>) -> PyResult<&'py PyArray<f64, numpy::Ix2>> {
+    fn points<'py>(&self, py: Python<'py>) -> PyResult<Bound<'py, PyArray<f64, numpy::Ix2>>> {
         let vs = self.t.all_vertices();
         Ok(PyArray::from_vec2(py, &vs).unwrap())
     }
@@ -126,7 +128,7 @@ impl DT {
     /// >>> print("x-coordinate of first vertex: ", dt.points[first_vertex])
     /// x-coordinate of first vertex: [25.98 35.12 4.78]
     #[getter]
-    fn triangles<'py>(&self, py: Python<'py>) -> PyResult<&'py PyArray<usize, numpy::Ix2>> {
+    fn triangles<'py>(&self, py: Python<'py>) -> PyResult<Bound<'py, PyArray<usize, numpy::Ix2>>> {
         let mut trs: Vec<Vec<usize>> = Vec::with_capacity(self.t.number_of_triangles());
         for each in self.t.all_finite_triangles() {
             let mut tr = Vec::with_capacity(3);
@@ -168,7 +170,7 @@ impl DT {
     fn insert_one_pt(
         &mut self,
         p3: [f64; 3],
-        py_kwargs: Option<&PyDict>,
+        py_kwargs: Option<&Bound<'_, PyDict>>,
     ) -> PyResult<(usize, bool, bool)> {
         // Result<usize, (usize, bool)>
         let re = self.t.insert_one_pt(p3[0], p3[1], p3[2]);
@@ -355,14 +357,15 @@ impl DT {
     /// >>> dt.set_attributes_schema(myschema)
     /// >>> dt.insert_one_pt([85000.0, 444003.2, 2.2], classification=2, intensity=111.1)
     #[pyo3(signature = (dtype))]
-    fn set_attributes_schema(&mut self, dtype: &PyAny) -> PyResult<bool> {
-        let descr: &PyArrayDescr = dtype.extract()?;
-        let names: &PyTuple = descr.getattr("names")?.extract()?;
+    fn set_attributes_schema(&mut self, dtype: &Bound<'_, PyAny>) -> PyResult<bool> {
+        let descr: &Bound<'_, PyArrayDescr> = dtype.downcast()?;
+        let names: Bound<'_, PyTuple> = descr.getattr("names")?.extract()?;
         let mut v: Vec<(String, String)> = Vec::new();
         self.dtype.clear();
         for name in names.iter() {
             let name: &str = name.extract()?;
-            let field = descr.getattr("fields")?.get_item(name)?;
+            let fields = descr.getattr("fields")?;
+            let field = fields.get_item(name)?;
             let field_type = field.get_item(0)?;
             // println!("{:?}", field_type);
             match field_type.to_string().as_ref() {
@@ -440,16 +443,16 @@ impl DT {
     /// >>> dt.attributes[1:]
     /// array([6, 2, 6, 6, ..., 6, 9])
     #[getter]
-    fn attributes<'py>(&self, py: Python<'py>) -> PyResult<PyObject> {
+    fn attributes<'py>(&self, py: Python<'py>) -> PyResult<Py<PyAny>> {
         let np = py.import("numpy")?;
         let dtype = np.call_method1("dtype", (self.dtype.clone(),))?;
         let allt = self.t.all_attributes();
         if allt.is_none() {
-            let arraydtype = np.call_method1("empty", (0, dtype))?;
-            return Ok(arraydtype.into());
+            let arraydtype = np.call_method1("empty", (0, &dtype))?;
+            return Ok(arraydtype.unbind());
         }
         let allt = allt.unwrap();
-        let arraydtype = np.call_method1("empty", (allt.len(), dtype))?;
+        let arraydtype = np.call_method1("empty", (allt.len(), &dtype))?;
         for (i, each) in allt.iter().enumerate() {
             let item = arraydtype.get_item(i)?;
             let o = each.as_object().unwrap();
@@ -478,7 +481,7 @@ impl DT {
                 }
             }
         }
-        Ok(arraydtype.into())
+        Ok(arraydtype.unbind())
     }
 
     /// Get all the extra attributes stored for a specific vertex.
@@ -492,11 +495,11 @@ impl DT {
     /// >>> dt.get_vertex_attributes(17)
     /// {'intensity': 111.1, 'reflectance': 99.1}
     #[pyo3(signature = (vi))]
-    fn get_vertex_attributes(&self, vi: usize) -> PyResult<PyObject> {
+    fn get_vertex_attributes(&self, vi: usize) -> PyResult<Py<PyAny>> {
         match self.t.get_vertex_attributes(vi) {
             Ok(v) => {
                 // Convert serde_json::Value to Python object
-                Python::with_gil(|py| {
+                Python::attach(|py| {
                     let json_object = convert_json_value_to_pyobject(py, &v)?;
                     Ok(json_object)
                 })
@@ -528,35 +531,34 @@ impl DT {
     /// >>> dt.get_vertex_attributes(17)
     /// {'intensity': 111.1, 'reflectance': 29.9, 'classification': 2, }'    
     #[pyo3(signature = (vi, **py_kwargs))]
-    fn set_vertex_attributes(&mut self, vi: usize, py_kwargs: Option<&PyDict>) -> PyResult<bool> {
+    fn set_vertex_attributes(&mut self, vi: usize, py_kwargs: Option<&Bound<'_, PyDict>>) -> PyResult<bool> {
         let mut m = Map::new();
         if py_kwargs.is_some() {
             let tmp = py_kwargs.unwrap();
-            let keys = tmp.keys();
             let am = self.t.get_attributes_schema();
-            for k in keys {
-                let b: &String = &k.extract()?;
-                let c = am.iter().position(|(first, _)| first == b);
+            for (k, _v) in tmp.iter() {
+                let b: String = k.extract()?;
+                let c = am.iter().position(|(first, _)| first == &b);
                 if c.is_some() {
                     match am[c.unwrap()].1.as_ref() {
                         "f64" => {
-                            let t1: f64 = tmp.get_item(b).unwrap().extract()?;
+                            let t1: f64 = tmp.get_item(&b)?.ok_or_else(|| exceptions::PyKeyError::new_err("Key not found"))?.extract()?;
                             m.insert(b.to_string(), t1.into());
                         }
                         "i64" => {
-                            let t1: i64 = tmp.get_item(b).unwrap().extract()?;
+                            let t1: i64 = tmp.get_item(&b)?.ok_or_else(|| exceptions::PyKeyError::new_err("Key not found"))?.extract()?;
                             m.insert(b.to_string(), t1.into());
                         }
                         "u64" => {
-                            let t1: u64 = tmp.get_item(b).unwrap().extract()?;
+                            let t1: u64 = tmp.get_item(&b)?.ok_or_else(|| exceptions::PyKeyError::new_err("Key not found"))?.extract()?;
                             m.insert(b.to_string(), t1.into());
                         }
                         "bool" => {
-                            let t1: bool = tmp.get_item(b).unwrap().extract()?;
+                            let t1: bool = tmp.get_item(&b)?.ok_or_else(|| exceptions::PyKeyError::new_err("Key not found"))?.extract()?;
                             m.insert(b.to_string(), t1.into());
                         }
                         "String" => {
-                            let t1: String = tmp.get_item(b).unwrap().extract()?;
+                            let t1: String = tmp.get_item(&b)?.ok_or_else(|| exceptions::PyKeyError::new_err("Key not found"))?.extract()?;
                             m.insert(b.to_string(), t1.into());
                         }
                         &_ => continue,
@@ -709,7 +711,7 @@ impl DT {
         &self,
         py: Python<'py>,
         vi: usize,
-    ) -> PyResult<&'py PyArray<f64, numpy::Ix1>> {
+    ) -> PyResult<Bound<'py, PyArray<f64, numpy::Ix1>>> {
         let re = self.t.get_point(vi);
         if re.is_ok() {
             return Ok(PyArray::from_vec(py, re.unwrap()));
@@ -724,7 +726,7 @@ impl DT {
     ///
     /// >>> dt.convex_hull()
     /// array([2, 13, 4, 51, 27], dtype=uint64)
-    fn convex_hull<'py>(&self, py: Python<'py>) -> PyResult<&'py PyArray<usize, numpy::Ix1>> {
+    fn convex_hull<'py>(&self, py: Python<'py>) -> PyResult<Bound<'py, PyArray<usize, numpy::Ix1>>> {
         Ok(PyArray::from_vec(py, self.t.convex_hull()))
     }
 
@@ -734,7 +736,7 @@ impl DT {
     ///
     /// >>> bbox = dt.get_bbox()
     /// array([ 0., 0., 10., 12. ])
-    fn get_bbox<'py>(&self, py: Python<'py>) -> PyResult<&'py PyArray<f64, numpy::Ix1>> {
+    fn get_bbox<'py>(&self, py: Python<'py>) -> PyResult<Bound<'py, PyArray<f64, numpy::Ix1>>> {
         Ok(PyArray::from_vec(py, self.t.get_bbox()))
     }
 
@@ -819,7 +821,7 @@ impl DT {
         &self,
         py: Python<'py>,
         vi: usize,
-    ) -> PyResult<&'py PyArray<usize, numpy::Ix2>> {
+    ) -> PyResult<Bound<'py, PyArray<usize, numpy::Ix2>>> {
         let re = self.t.incident_triangles_to_vertex(vi);
         if re.is_ok() {
             let l = re.unwrap();
@@ -854,7 +856,7 @@ impl DT {
         &self,
         py: Python<'py>,
         t: Vec<usize>,
-    ) -> PyResult<&'py PyArray<usize, numpy::Ix2>> {
+    ) -> PyResult<Bound<'py, PyArray<usize, numpy::Ix2>>> {
         let tr = startin::Triangle {
             v: [t[0], t[1], t[2]],
         };
@@ -886,7 +888,7 @@ impl DT {
         &self,
         py: Python<'py>,
         vi: usize,
-    ) -> PyResult<&'py PyArray<usize, numpy::Ix1>> {
+    ) -> PyResult<Bound<'py, PyArray<usize, numpy::Ix1>>> {
         let re = self.t.adjacent_vertices_to_vertex(vi);
         if re.is_ok() {
             return Ok(PyArray::from_vec(py, re.unwrap()));
@@ -940,7 +942,7 @@ impl DT {
         &mut self,
         py: Python<'py>,
         p2: [f64; 2],
-    ) -> PyResult<&'py PyArray<usize, numpy::Ix1>> {
+    ) -> PyResult<Bound<'py, PyArray<usize, numpy::Ix1>>> {
         let re = self.t.locate(p2[0], p2[1]);
         let mut tr: Vec<usize> = Vec::new();
         if re.is_ok() {
@@ -978,19 +980,19 @@ impl DT {
     fn interpolate<'py>(
         &mut self,
         py: Python<'py>,
-        interpolant: &PyDict,
+        interpolant: &Bound<'_, PyDict>,
         locations: Vec<[f64; 2]>,
         strict: bool,
-    ) -> PyResult<&'py PyArray<f64, numpy::Ix1>> {
-        match interpolant.get_item("method") {
+    ) -> PyResult<Bound<'py, PyArray<f64, numpy::Ix1>>> {
+        match interpolant.get_item("method")? {
             None => return Err(exceptions::PyValueError::new_err("Wrong parameters")),
             Some(m) => {
                 let m: String = m.extract()?;
                 let mut re: Vec<f64> = Vec::with_capacity(locations.len());
                 match m.as_str() {
                     "IDW" => {
-                        let radius = interpolant.get_item("radius");
-                        let power = interpolant.get_item("power");
+                        let radius = interpolant.get_item("radius")?;
+                        let power = interpolant.get_item("power")?;
                         if radius.is_none() || power.is_none() {
                             return Err(exceptions::PyValueError::new_err("Wrong parameters"));
                         } else {
@@ -1018,7 +1020,7 @@ impl DT {
                                     }
                                 }
                             }
-                            Ok(PyArray::from_vec(py, re))
+                            Ok(PyArray::from_vec(py, re).into())
                         }
                     }
                     "Laplace" => {
@@ -1038,7 +1040,7 @@ impl DT {
                                 }
                             }
                         }
-                        Ok(PyArray::from_vec(py, re))
+                        Ok(PyArray::from_vec(py, re).into())
                     }
                     "NN" => {
                         for loc in locations {
@@ -1057,10 +1059,10 @@ impl DT {
                                 }
                             }
                         }
-                        Ok(PyArray::from_vec(py, re))
+                        Ok(PyArray::from_vec(py, re).into())
                     }
                     "NNI" => {
-                        let re2 = interpolant.get_item("precompute");
+                        let re2 = interpolant.get_item("precompute")?;
                         let mut precompute: bool = false;
                         if re2.is_some() {
                             precompute = re2.unwrap().extract()?;
@@ -1081,7 +1083,7 @@ impl DT {
                                 }
                             }
                         }
-                        Ok(PyArray::from_vec(py, re))
+                        Ok(PyArray::from_vec(py, re).into())
                     }
                     "TIN" => {
                         for loc in locations {
@@ -1100,7 +1102,7 @@ impl DT {
                                 }
                             }
                         }
-                        Ok(PyArray::from_vec(py, re))
+                        Ok(PyArray::from_vec(py, re).into())
                     }
                     _ => {
                         return Err(exceptions::PyValueError::new_err(
