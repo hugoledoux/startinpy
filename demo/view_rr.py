@@ -1,9 +1,10 @@
 import laspy
 import numpy as np
-import rerun as rr
+import rerun as rr  # -- pip install rerun-sdk (https://rerun.io)
+
 import startinpy
 
-las = laspy.read("/Users/hugo/data/ahn4/crop.laz")
+las = laspy.read("../data/small.laz")
 
 dt = startinpy.DT(np.dtype([("nx", np.float64), ("ny", float), ("nz", float)]))
 dt.snap_tolerance = 0.10

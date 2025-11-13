@@ -1,10 +1,11 @@
-import json
 import math
+
 import laspy
 import numpy as np
 import rasterio
-import startinpy
 from tqdm import tqdm
+
+import startinpy
 
 
 def main():

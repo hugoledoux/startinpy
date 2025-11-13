@@ -1,4 +1,6 @@
+import matplotlib.pyplot as plt
 import numpy as np
+
 import startinpy
 
 # -- generate 100 points randomly in the plane
@@ -10,8 +12,6 @@ t = startinpy.DT()
 t.insert(pts)
 pts = t.points
 trs = t.triangles
-# -- plot
-import matplotlib.pyplot as plt
 
 plt.triplot(pts[:, 0], pts[:, 1], trs)
 # -- the vertex "0" shouldn't be plotted, so start at 1
