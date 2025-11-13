@@ -358,7 +358,8 @@ impl DT {
     /// >>> dt.insert_one_pt([85000.0, 444003.2, 2.2], classification=2, intensity=111.1)
     #[pyo3(signature = (dtype))]
     fn set_attributes_schema(&mut self, dtype: &Bound<'_, PyAny>) -> PyResult<bool> {
-        let descr: &Bound<'_, PyArrayDescr> = dtype.downcast()?;
+        let dtype_owned = dtype.clone();
+        let descr = dtype_owned.cast::<PyArrayDescr>()?;
         let names: Bound<'_, PyTuple> = descr.getattr("names")?.extract()?;
         let mut v: Vec<(String, String)> = Vec::new();
         self.dtype.clear();
