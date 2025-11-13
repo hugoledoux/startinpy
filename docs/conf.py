@@ -16,9 +16,9 @@ import sys
 
 # -- Project information -----------------------------------------------------
 
-project = 'startinpy'
-copyright = '2024, Hugo Ledoux'
-author = 'Hugo Ledoux'
+project = "startinpy"
+copyright = "2025, Hugo Ledoux"
+author = "Hugo Ledoux"
 
 # The full version, including alpha/beta/rc tags
 import toml
