@@ -10,8 +10,7 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import os
-import sys
+
 # sys.path.insert(0, os.path.abspath('../'))
 
 # -- Project information -----------------------------------------------------
@@ -22,7 +21,8 @@ author = "Hugo Ledoux"
 
 # The full version, including alpha/beta/rc tags
 import toml
-release = 'x'
+
+release = "x"
 with open("../Cargo.toml") as fp:
     f = toml.load(fp)
     release = f["package"]["version"]
@@ -34,9 +34,9 @@ with open("../Cargo.toml") as fp:
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.autodoc',
-    'sphinx_copybutton',
-    'myst_parser',
+    "sphinx.ext.autodoc",
+    "sphinx_copybutton",
+    "myst_parser",
 ]
 
 myst_enable_extensions = [
@@ -45,12 +45,12 @@ myst_enable_extensions = [
 ]
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 
 # -- Options for HTML output -------------------------------------------------
@@ -58,16 +58,14 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'furo'
+html_theme = "furo"
 html_theme_options = {
     "source_repository": "https://github.com/hugoledoux/startinpy/",
     "source_branch": "master",
     "source_directory": "docs/",
 }
 # html_theme = 'piccolo_theme'
-# html_theme_options = {
-#     "source_url": 'https://github.com/hugoledoux/startinpy/'
-# }
+# html_theme_options = {"source_url": "https://github.com/hugoledoux/startinpy/"}
 # html_theme = 'sphinx_celery'
 
 
