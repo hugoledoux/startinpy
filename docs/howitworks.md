@@ -94,7 +94,7 @@ dt.jump_and_walk = True
 ```
 
 (duplicates_handling)=
-### How xy-duplicates are handling
+### How xy-duplicates are handled
 
 {func}`startinpy.DT.duplicates_handling`
 (default="First")
