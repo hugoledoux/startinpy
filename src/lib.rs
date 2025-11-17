@@ -8,6 +8,7 @@ use std::fs::File;
 use std::io::Write;
 
 use geojson::{Feature, FeatureCollection, Geometry, Value as GeoValue};
+use flatgeobuf::{FgbWriter, GeometryType};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use serde_json::Value;
@@ -1218,6 +1219,75 @@ impl DT {
         //-- write the file to disk
         let mut fo = File::create(path)?;
         let _ = write!(fo, "{}", fc.to_string());
+        Ok(())
+    }
+
+    /// Write a `FlatGeoBuf <https://flatgeobuf.org>`_ file of the TIN triangles to the path (a string).
+    /// The triangles are exported as Polygon features with their z-values stored as properties.
+    /// Throws an exception if the path is invalid.
+    ///
+    /// :param path: full path (a string) on disk of the file to create (will overwrite)
+    /// :return: (nothing)
+    ///
+    /// >>> dt.write_flatgeobuf("/home/elvis/myfile.fgb")
+    #[pyo3(signature = (path))]
+    pub fn write_flatgeobuf(&self, path: String) -> PyResult<()> {
+        use std::io::BufWriter;
+        use geozero::geojson::GeoJsonReader;
+        use geozero::GeozeroDatasource;
+
+        // Create a GeoJSON FeatureCollection with triangles only
+        let mut fc = FeatureCollection {
+            bbox: None,
+            features: vec![],
+            foreign_members: None,
+        };
+
+        let allv_f = self.t.all_vertices();
+
+        // Add triangles as Polygon features
+        let trs = self.t.all_finite_triangles();
+        for tr in trs.iter() {
+            let mut l: Vec<Vec<Vec<f64>>> = vec![vec![Vec::with_capacity(1); 4]];
+            l[0][0].push(allv_f[tr.v[0]][0]);
+            l[0][0].push(allv_f[tr.v[0]][1]);
+            l[0][1].push(allv_f[tr.v[1]][0]);
+            l[0][1].push(allv_f[tr.v[1]][1]);
+            l[0][2].push(allv_f[tr.v[2]][0]);
+            l[0][2].push(allv_f[tr.v[2]][1]);
+            l[0][3].push(allv_f[tr.v[0]][0]);
+            l[0][3].push(allv_f[tr.v[0]][1]);
+            let gtr = Geometry::new(GeoValue::Polygon(l));
+
+            // Add z-values as properties
+            let mut attributes = Map::new();
+            attributes.insert(String::from("z0"), to_value(allv_f[tr.v[0]][2]).unwrap());
+            attributes.insert(String::from("z1"), to_value(allv_f[tr.v[1]][2]).unwrap());
+            attributes.insert(String::from("z2"), to_value(allv_f[tr.v[2]][2]).unwrap());
+
+            let f = Feature {
+                bbox: None,
+                geometry: Some(gtr),
+                id: None,
+                properties: Some(attributes),
+                foreign_members: None,
+            };
+            fc.features.push(f);
+        }
+
+        // Convert GeoJSON to FlatGeoBuf
+        let geojson_str = fc.to_string();
+        let mut fgb = FgbWriter::create("triangulation", GeometryType::Polygon)
+            .map_err(|e| exceptions::PyException::new_err(format!("FlatGeoBuf error: {}", e)))?;
+        let mut reader = GeoJsonReader(geojson_str.as_bytes());
+        reader.process(&mut fgb)
+            .map_err(|e| exceptions::PyException::new_err(format!("GeoJSON processing error: {}", e)))?;
+
+        // Write to file
+        let mut fout = BufWriter::new(File::create(path)?);
+        fgb.write(&mut fout)
+            .map_err(|e| exceptions::PyException::new_err(format!("FlatGeoBuf write error: {}", e)))?;
+
         Ok(())
     }
 
