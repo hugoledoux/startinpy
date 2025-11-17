@@ -2,13 +2,15 @@ use numpy::{PyArray, PyArrayDescr};
 use pyo3::exceptions;
 
 use pyo3::prelude::*;
-use pyo3::types::{PyAnyMethods, PyDict, PyDictMethods, PyList, PyModule, PyModuleMethods, PyTuple, PyTupleMethods};
+use pyo3::types::{
+    PyAnyMethods, PyDict, PyDictMethods, PyList, PyModule, PyModuleMethods, PyTuple, PyTupleMethods,
+};
 
 use std::fs::File;
 use std::io::Write;
 
-use geojson::{Feature, FeatureCollection, Geometry, Value as GeoValue};
 use flatgeobuf::{FgbWriter, GeometryType};
+use geojson::{Feature, FeatureCollection, Geometry, Value as GeoValue};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use serde_json::Value;
@@ -27,9 +29,7 @@ struct Cityjson {
 fn convert_json_value_to_pyobject(py: Python, value: &Value) -> PyResult<Py<PyAny>> {
     match value {
         Value::Null => Ok(py.None()),
-        Value::Bool(b) => {
-            Ok((*b).into_pyobject(py)?.as_any().clone().unbind())
-        }
+        Value::Bool(b) => Ok((*b).into_pyobject(py)?.as_any().clone().unbind()),
         Value::Number(num) => {
             if let Some(i) = num.as_i64() {
                 Ok(i.into_pyobject(py)?.as_any().clone().unbind())
@@ -41,14 +41,15 @@ fn convert_json_value_to_pyobject(py: Python, value: &Value) -> PyResult<Py<PyAn
                 Err(pyo3::exceptions::PyTypeError::new_err("Invalid number"))
             }
         }
-        Value::String(s) => {
-            Ok(s.into_pyobject(py)?.as_any().clone().unbind())
-        }
+        Value::String(s) => Ok(s.into_pyobject(py)?.as_any().clone().unbind()),
         Value::Array(arr) => {
-            let items: Vec<Py<PyAny>> = arr.iter()
+            let items: Vec<Py<PyAny>> = arr
+                .iter()
                 .map(|v| convert_json_value_to_pyobject(py, v))
                 .collect::<Result<Vec<_>, _>>()?;
-            Ok(PyList::new(py, items.iter().map(|item| item.bind(py)))?.unbind().into())
+            Ok(PyList::new(py, items.iter().map(|item| item.bind(py)))?
+                .unbind()
+                .into())
         }
         Value::Object(map) => {
             let py_dict = PyDict::new(py);
@@ -533,7 +534,11 @@ impl DT {
     /// >>> dt.get_vertex_attributes(17)
     /// {'intensity': 111.1, 'reflectance': 29.9, 'classification': 2, }'    
     #[pyo3(signature = (vi, **py_kwargs))]
-    fn set_vertex_attributes(&mut self, vi: usize, py_kwargs: Option<&Bound<'_, PyDict>>) -> PyResult<bool> {
+    fn set_vertex_attributes(
+        &mut self,
+        vi: usize,
+        py_kwargs: Option<&Bound<'_, PyDict>>,
+    ) -> PyResult<bool> {
         let mut m = Map::new();
         if py_kwargs.is_some() {
             let tmp = py_kwargs.unwrap();
@@ -544,23 +549,38 @@ impl DT {
                 if c.is_some() {
                     match am[c.unwrap()].1.as_ref() {
                         "f64" => {
-                            let t1: f64 = tmp.get_item(&b)?.ok_or_else(|| exceptions::PyKeyError::new_err("Key not found"))?.extract()?;
+                            let t1: f64 = tmp
+                                .get_item(&b)?
+                                .ok_or_else(|| exceptions::PyKeyError::new_err("Key not found"))?
+                                .extract()?;
                             m.insert(b.to_string(), t1.into());
                         }
                         "i64" => {
-                            let t1: i64 = tmp.get_item(&b)?.ok_or_else(|| exceptions::PyKeyError::new_err("Key not found"))?.extract()?;
+                            let t1: i64 = tmp
+                                .get_item(&b)?
+                                .ok_or_else(|| exceptions::PyKeyError::new_err("Key not found"))?
+                                .extract()?;
                             m.insert(b.to_string(), t1.into());
                         }
                         "u64" => {
-                            let t1: u64 = tmp.get_item(&b)?.ok_or_else(|| exceptions::PyKeyError::new_err("Key not found"))?.extract()?;
+                            let t1: u64 = tmp
+                                .get_item(&b)?
+                                .ok_or_else(|| exceptions::PyKeyError::new_err("Key not found"))?
+                                .extract()?;
                             m.insert(b.to_string(), t1.into());
                         }
                         "bool" => {
-                            let t1: bool = tmp.get_item(&b)?.ok_or_else(|| exceptions::PyKeyError::new_err("Key not found"))?.extract()?;
+                            let t1: bool = tmp
+                                .get_item(&b)?
+                                .ok_or_else(|| exceptions::PyKeyError::new_err("Key not found"))?
+                                .extract()?;
                             m.insert(b.to_string(), t1.into());
                         }
                         "String" => {
-                            let t1: String = tmp.get_item(&b)?.ok_or_else(|| exceptions::PyKeyError::new_err("Key not found"))?.extract()?;
+                            let t1: String = tmp
+                                .get_item(&b)?
+                                .ok_or_else(|| exceptions::PyKeyError::new_err("Key not found"))?
+                                .extract()?;
                             m.insert(b.to_string(), t1.into());
                         }
                         &_ => continue,
@@ -728,7 +748,10 @@ impl DT {
     ///
     /// >>> dt.convex_hull()
     /// array([2, 13, 4, 51, 27], dtype=uint64)
-    fn convex_hull<'py>(&self, py: Python<'py>) -> PyResult<Bound<'py, PyArray<usize, numpy::Ix1>>> {
+    fn convex_hull<'py>(
+        &self,
+        py: Python<'py>,
+    ) -> PyResult<Bound<'py, PyArray<usize, numpy::Ix1>>> {
         Ok(PyArray::from_vec(py, self.t.convex_hull()))
     }
 
@@ -1223,7 +1246,7 @@ impl DT {
     }
 
     /// Write a `FlatGeoBuf <https://flatgeobuf.org>`_ file of the TIN triangles to the path (a string).
-    /// The triangles are exported as Polygon features with their z-values stored as properties.
+    /// The triangles are exported as PolygonZ features with z-coordinates in the geometry.
     /// Throws an exception if the path is invalid.
     ///
     /// :param path: full path (a string) on disk of the file to create (will overwrite)
@@ -1232,62 +1255,103 @@ impl DT {
     /// >>> dt.write_flatgeobuf("/home/elvis/myfile.fgb")
     #[pyo3(signature = (path))]
     pub fn write_flatgeobuf(&self, path: String) -> PyResult<()> {
+        use flatgeobuf::FgbWriterOptions;
+        use geozero::{FeatureProcessor, GeomProcessor};
         use std::io::BufWriter;
-        use geozero::geojson::GeoJsonReader;
-        use geozero::GeozeroDatasource;
-
-        // Create a GeoJSON FeatureCollection with triangles only
-        let mut fc = FeatureCollection {
-            bbox: None,
-            features: vec![],
-            foreign_members: None,
-        };
-
         let allv_f = self.t.all_vertices();
-
-        // Add triangles as Polygon features
         let trs = self.t.all_finite_triangles();
-        for tr in trs.iter() {
-            let mut l: Vec<Vec<Vec<f64>>> = vec![vec![Vec::with_capacity(1); 4]];
-            l[0][0].push(allv_f[tr.v[0]][0]);
-            l[0][0].push(allv_f[tr.v[0]][1]);
-            l[0][1].push(allv_f[tr.v[1]][0]);
-            l[0][1].push(allv_f[tr.v[1]][1]);
-            l[0][2].push(allv_f[tr.v[2]][0]);
-            l[0][2].push(allv_f[tr.v[2]][1]);
-            l[0][3].push(allv_f[tr.v[0]][0]);
-            l[0][3].push(allv_f[tr.v[0]][1]);
-            let gtr = Geometry::new(GeoValue::Polygon(l));
-
-            // Add z-values as properties
-            let mut attributes = Map::new();
-            attributes.insert(String::from("z0"), to_value(allv_f[tr.v[0]][2]).unwrap());
-            attributes.insert(String::from("z1"), to_value(allv_f[tr.v[1]][2]).unwrap());
-            attributes.insert(String::from("z2"), to_value(allv_f[tr.v[2]][2]).unwrap());
-
-            let f = Feature {
-                bbox: None,
-                geometry: Some(gtr),
-                id: None,
-                properties: Some(attributes),
-                foreign_members: None,
-            };
-            fc.features.push(f);
+        // Create FlatGeoBuf writer with 3D support
+        let options = FgbWriterOptions {
+            has_z: true,
+            has_m: false,
+            has_t: false,
+            has_tm: false,
+            ..Default::default()
+        };
+        let mut fgb =
+            FgbWriter::create_with_options("triangulation", GeometryType::Polygon, options)
+                .map_err(|e| {
+                    exceptions::PyException::new_err(format!("FlatGeoBuf error: {}", e))
+                })?;
+        // Manually write each triangle as a 3D polygon
+        for (idx, tr) in trs.iter().enumerate() {
+            // Start feature
+            fgb.feature_begin(idx as u64).map_err(|e| {
+                exceptions::PyException::new_err(format!("Feature begin error: {}", e))
+            })?;
+            // Start geometry processing
+            fgb.geometry_begin().map_err(|e| {
+                exceptions::PyException::new_err(format!("Geometry begin error: {}", e))
+            })?;
+            // Start polygon (standalone=true, 1 ring, index=0)
+            fgb.polygon_begin(true, 1, 0).map_err(|e| {
+                exceptions::PyException::new_err(format!("Polygon begin error: {}", e))
+            })?;
+            // Start exterior ring (standalone=false because it's part of a polygon, 4 coordinates, index=0)
+            fgb.linestring_begin(false, 4, 0).map_err(|e| {
+                exceptions::PyException::new_err(format!("Linestring begin error: {}", e))
+            })?;
+            // Add coordinates with Z values
+            fgb.coordinate(
+                allv_f[tr.v[0]][0],
+                allv_f[tr.v[0]][1],
+                Some(allv_f[tr.v[0]][2]),
+                None,
+                None,
+                None,
+                0,
+            )
+            .map_err(|e| exceptions::PyException::new_err(format!("Coordinate error: {}", e)))?;
+            fgb.coordinate(
+                allv_f[tr.v[1]][0],
+                allv_f[tr.v[1]][1],
+                Some(allv_f[tr.v[1]][2]),
+                None,
+                None,
+                None,
+                1,
+            )
+            .map_err(|e| exceptions::PyException::new_err(format!("Coordinate error: {}", e)))?;
+            fgb.coordinate(
+                allv_f[tr.v[2]][0],
+                allv_f[tr.v[2]][1],
+                Some(allv_f[tr.v[2]][2]),
+                None,
+                None,
+                None,
+                2,
+            )
+            .map_err(|e| exceptions::PyException::new_err(format!("Coordinate error: {}", e)))?;
+            // Close the ring
+            fgb.coordinate(
+                allv_f[tr.v[0]][0],
+                allv_f[tr.v[0]][1],
+                Some(allv_f[tr.v[0]][2]),
+                None,
+                None,
+                None,
+                3,
+            )
+            .map_err(|e| exceptions::PyException::new_err(format!("Coordinate error: {}", e)))?;
+            fgb.linestring_end(false, 0).map_err(|e| {
+                exceptions::PyException::new_err(format!("Linestring end error: {}", e))
+            })?;
+            fgb.polygon_end(true, 0).map_err(|e| {
+                exceptions::PyException::new_err(format!("Polygon end error: {}", e))
+            })?;
+            fgb.geometry_end().map_err(|e| {
+                exceptions::PyException::new_err(format!("Geometry end error: {}", e))
+            })?;
+            // End the feature
+            fgb.feature_end(idx as u64).map_err(|e| {
+                exceptions::PyException::new_err(format!("Feature end error: {}", e))
+            })?;
         }
-
-        // Convert GeoJSON to FlatGeoBuf
-        let geojson_str = fc.to_string();
-        let mut fgb = FgbWriter::create("triangulation", GeometryType::Polygon)
-            .map_err(|e| exceptions::PyException::new_err(format!("FlatGeoBuf error: {}", e)))?;
-        let mut reader = GeoJsonReader(geojson_str.as_bytes());
-        reader.process(&mut fgb)
-            .map_err(|e| exceptions::PyException::new_err(format!("GeoJSON processing error: {}", e)))?;
-
         // Write to file
         let mut fout = BufWriter::new(File::create(path)?);
-        fgb.write(&mut fout)
-            .map_err(|e| exceptions::PyException::new_err(format!("FlatGeoBuf write error: {}", e)))?;
-
+        fgb.write(&mut fout).map_err(|e| {
+            exceptions::PyException::new_err(format!("FlatGeoBuf write error: {}", e))
+        })?;
         Ok(())
     }
 
