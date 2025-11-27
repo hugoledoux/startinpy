@@ -901,7 +901,7 @@ impl DT {
     /// Verify whether a Triangle is finite, or not.
     /// An infinite triangle has the first 0-vertex as one
     /// of its vertices.
-    /// This doesn't verify wether the triangle exists (use is_valid()).
+    /// This doesn't verify wether the triangle exists (use is_triangle()).
     ///
     /// :param t: the Triangle, an array of 3 vertex indices
     /// :return: True if t is finite, False is infinite
