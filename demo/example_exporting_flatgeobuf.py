@@ -14,6 +14,7 @@ dt.insert(pts)
 # The TIN triangles are exported as Polygon features
 # with z-values stored as properties (z0, z1, z2)
 dt.write_flatgeobuf("mytin.fgb")
-dt.write_flatgeobuf("mytin.ply")
+dt.write_ply("mytin.ply")
+dt.write_cityjson("mytin.city.json")
 
 print(f"Exported {dt.number_of_triangles()} triangles to myfile.fgb")
