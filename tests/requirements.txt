@@ -2,17 +2,19 @@
 #    uv pip compile tests/requirements.in
 iniconfig==2.0.0
     # via pytest
-laspy==2.5.4
-    # via -r tests/requirements.in
+laspy[lazrs]==2.5.4
+    # via -r requirements.in
 lazrs==0.6.1
     # via laspy
 numpy==2.1.0
     # via
-    #   -r tests/requirements.in
+    #   -r requirements.in
     #   laspy
 packaging==24.1
     # via pytest
 pluggy==1.5.0
     # via pytest
-pytest==8.3.2
-    # via -r tests/requirements.in
+pygments==2.20.0
+    # via pytest
+pytest==9.0.3
+    # via -r requirements.in
