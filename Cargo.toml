@@ -30,3 +30,7 @@ features = ["extension-module"]
 [lib]
 name = "startinpy"
 crate-type = ["cdylib"]
+
+[profile.release]
+lto = true
+codegen-units = 1

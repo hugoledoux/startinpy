@@ -1,2 +1,3 @@
-include pyproject.toml Cargo.toml
+include pyproject.toml Cargo.toml LICENSE README.md
 recursive-include src *
+recursive-include startinpy *.py

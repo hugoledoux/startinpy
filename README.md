@@ -67,9 +67,8 @@ To run the automated test suite:
   1. activate the virtual environment: `source .venv/bin/activate`
   2. install test dependencies:
      ```bash
-     uv pip install -r tests/requirements.txt
+     uv pip install ".[test]"
      ```
-     (edit `requirements.in` then run `uv pip compile tests/requirements.in -o tests/requirements.txt` to update the lock file)
   3. run the tests:
      ```bash
      python -m pytest tests/ -v

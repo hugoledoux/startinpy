@@ -4,16 +4,35 @@ build-backend = "maturin"
 
 [project]
 name = "startinpy"
-requires-python = ">=3.9"
 version = "0.12.3"
+requires-python = ">=3.9"
+description = "Modelling terrains with Delaunay triangulation"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [
+    { name = "Hugo Ledoux", email = "h.ledoux@tudelft.nl" },
+]
 classifiers = [
     "Programming Language :: Rust",
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
+    "License :: OSI Approved :: MIT License",
 ]
 dependencies = [
-    "toml>=0.10.2", 
-    "numpy>=1.24.0"
+    "toml>=0.10.2",
+    "numpy>=1.24.0",
+]
+
+[project.urls]
+homepage = "https://github.com/hugoledoux/startinpy"
+repository = "https://github.com/hugoledoux/startinpy"
+
+[project.optional-dependencies]
+test = [
+    "laspy",
+    "laszip",
+    "numpy",
+    "pytest",
 ]
 
 [tool.ruff]
