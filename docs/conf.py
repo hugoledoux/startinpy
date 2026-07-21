@@ -16,7 +16,7 @@
 # -- Project information -----------------------------------------------------
 
 project = "startinpy"
-copyright = "2025, Hugo Ledoux"
+copyright = "2026, Hugo Ledoux"
 author = "Hugo Ledoux"
 
 # The full version, including alpha/beta/rc tags
