@@ -2,7 +2,9 @@ use numpy::{PyArray, PyArrayDescr};
 use pyo3::exceptions;
 
 use pyo3::prelude::*;
-use pyo3::types::{PyAnyMethods, PyDict, PyDictMethods, PyList, PyModule, PyModuleMethods, PyTuple, PyTupleMethods};
+use pyo3::types::{
+    PyAnyMethods, PyDict, PyDictMethods, PyList, PyModule, PyModuleMethods, PyTuple, PyTupleMethods,
+};
 
 use std::fs::File;
 use std::io::Write;
@@ -26,9 +28,7 @@ struct Cityjson {
 fn convert_json_value_to_pyobject(py: Python, value: &Value) -> PyResult<Py<PyAny>> {
     match value {
         Value::Null => Ok(py.None()),
-        Value::Bool(b) => {
-            Ok((*b).into_pyobject(py)?.as_any().clone().unbind())
-        }
+        Value::Bool(b) => Ok((*b).into_pyobject(py)?.as_any().clone().unbind()),
         Value::Number(num) => {
             if let Some(i) = num.as_i64() {
                 Ok(i.into_pyobject(py)?.as_any().clone().unbind())
@@ -40,11 +40,10 @@ fn convert_json_value_to_pyobject(py: Python, value: &Value) -> PyResult<Py<PyAn
                 Err(pyo3::exceptions::PyTypeError::new_err("Invalid number"))
             }
         }
-        Value::String(s) => {
-            Ok(s.into_pyobject(py)?.as_any().clone().unbind())
-        }
+        Value::String(s) => Ok(s.into_pyobject(py)?.as_any().clone().unbind()),
         Value::Array(arr) => {
-            let items: Vec<Py<PyAny>> = arr.iter()
+            let items: Vec<Py<PyAny>> = arr
+                .iter()
                 .map(|v| convert_json_value_to_pyobject(py, v))
                 .collect::<Result<Vec<_>, _>>()?;
             Ok(PyList::new(py, items.iter().map(|item| item.bind(py)))?.unbind().into())
@@ -88,10 +87,7 @@ impl DT {
     fn new(attributes_schema: Option<&Bound<'_, PyAny>>) -> Self {
         let tmp = startin::Triangulation::new();
         let tmp2 = Vec::new();
-        let mut dt = DT {
-            t: tmp,
-            dtype: tmp2,
-        };
+        let mut dt = DT { t: tmp, dtype: tmp2 };
         if attributes_schema.is_some() {
             let _ = dt.set_attributes_schema(attributes_schema.unwrap());
         }
@@ -312,18 +308,10 @@ impl DT {
     #[setter(duplicates_handling)]
     fn set_duplicates_handling(&mut self, m: &str) -> PyResult<()> {
         match m {
-            "First" => self
-                .t
-                .set_duplicates_handling(startin::DuplicateHandling::First),
-            "Last" => self
-                .t
-                .set_duplicates_handling(startin::DuplicateHandling::Last),
-            "Highest" => self
-                .t
-                .set_duplicates_handling(startin::DuplicateHandling::Highest),
-            "Lowest" => self
-                .t
-                .set_duplicates_handling(startin::DuplicateHandling::Lowest),
+            "First" => self.t.set_duplicates_handling(startin::DuplicateHandling::First),
+            "Last" => self.t.set_duplicates_handling(startin::DuplicateHandling::Last),
+            "Highest" => self.t.set_duplicates_handling(startin::DuplicateHandling::Highest),
+            "Lowest" => self.t.set_duplicates_handling(startin::DuplicateHandling::Lowest),
 
             _ => {
                 let s = format!(
@@ -347,7 +335,7 @@ impl DT {
     /// schema are stored.
     ///
     /// Only the following data types for each attribute are allowed:
-    /// 'numpy.bool_', 'numpy.int64', 'numpy.uint64', unicode (string), 'numpy.float64'.
+    /// ``numpy.bool``, ``numpy.int64``, ``numpy.uint64``, unicode (string), ``numpy.float64``.
     ///
     /// :param dtype: a `NumPy Data type object (dtype) <https://numpy.org/doc/stable/reference/arrays.dtypes.html#arrays-dtypes>`_
     /// :return: True if the schema is valid, otherwise an error is thrown.
@@ -404,9 +392,10 @@ impl DT {
                 }
                 _ => {
                     return {
-                        Err(PyErr::new::<pyo3::exceptions::PyAttributeError, _>(
-                            format!("{} is not a valid dype for startinpy", field_type),
-                        ))
+                        Err(PyErr::new::<pyo3::exceptions::PyAttributeError, _>(format!(
+                            "{} is not a valid dype for startinpy",
+                            field_type
+                        )))
                     };
                 }
             };
@@ -510,9 +499,7 @@ impl DT {
                     return Err(exceptions::PyIndexError::new_err("Invalid vertex index"))
                 }
                 startin::StartinError::TinHasNoAttributes => {
-                    return Err(exceptions::PyException::new_err(
-                        "TIN has no extra attributes",
-                    ))
+                    return Err(exceptions::PyException::new_err("TIN has no extra attributes"))
                 }
                 _ => return Err(exceptions::PyException::new_err("Error")),
             },
@@ -532,7 +519,11 @@ impl DT {
     /// >>> dt.get_vertex_attributes(17)
     /// {'intensity': 111.1, 'reflectance': 29.9, 'classification': 2, }'    
     #[pyo3(signature = (vi, **py_kwargs))]
-    fn set_vertex_attributes(&mut self, vi: usize, py_kwargs: Option<&Bound<'_, PyDict>>) -> PyResult<bool> {
+    fn set_vertex_attributes(
+        &mut self,
+        vi: usize,
+        py_kwargs: Option<&Bound<'_, PyDict>>,
+    ) -> PyResult<bool> {
         let mut m = Map::new();
         if py_kwargs.is_some() {
             let tmp = py_kwargs.unwrap();
@@ -543,23 +534,38 @@ impl DT {
                 if c.is_some() {
                     match am[c.unwrap()].1.as_ref() {
                         "f64" => {
-                            let t1: f64 = tmp.get_item(&b)?.ok_or_else(|| exceptions::PyKeyError::new_err("Key not found"))?.extract()?;
+                            let t1: f64 = tmp
+                                .get_item(&b)?
+                                .ok_or_else(|| exceptions::PyKeyError::new_err("Key not found"))?
+                                .extract()?;
                             m.insert(b.to_string(), t1.into());
                         }
                         "i64" => {
-                            let t1: i64 = tmp.get_item(&b)?.ok_or_else(|| exceptions::PyKeyError::new_err("Key not found"))?.extract()?;
+                            let t1: i64 = tmp
+                                .get_item(&b)?
+                                .ok_or_else(|| exceptions::PyKeyError::new_err("Key not found"))?
+                                .extract()?;
                             m.insert(b.to_string(), t1.into());
                         }
                         "u64" => {
-                            let t1: u64 = tmp.get_item(&b)?.ok_or_else(|| exceptions::PyKeyError::new_err("Key not found"))?.extract()?;
+                            let t1: u64 = tmp
+                                .get_item(&b)?
+                                .ok_or_else(|| exceptions::PyKeyError::new_err("Key not found"))?
+                                .extract()?;
                             m.insert(b.to_string(), t1.into());
                         }
                         "bool" => {
-                            let t1: bool = tmp.get_item(&b)?.ok_or_else(|| exceptions::PyKeyError::new_err("Key not found"))?.extract()?;
+                            let t1: bool = tmp
+                                .get_item(&b)?
+                                .ok_or_else(|| exceptions::PyKeyError::new_err("Key not found"))?
+                                .extract()?;
                             m.insert(b.to_string(), t1.into());
                         }
                         "String" => {
-                            let t1: String = tmp.get_item(&b)?.ok_or_else(|| exceptions::PyKeyError::new_err("Key not found"))?.extract()?;
+                            let t1: String = tmp
+                                .get_item(&b)?
+                                .ok_or_else(|| exceptions::PyKeyError::new_err("Key not found"))?
+                                .extract()?;
                             m.insert(b.to_string(), t1.into());
                         }
                         &_ => continue,
@@ -567,10 +573,7 @@ impl DT {
                 }
             }
         }
-        match self
-            .t
-            .add_vertex_attributes(vi, serde_json::to_value(m).unwrap())
-        {
+        match self.t.add_vertex_attributes(vi, serde_json::to_value(m).unwrap()) {
             Ok(b) => return Ok(b),
             Err(_) => return Ok(false),
         }
@@ -586,9 +589,7 @@ impl DT {
     /// 22.1
     #[pyo3(signature = (t))]
     fn area2d_triangle(&self, t: Vec<usize>) -> PyResult<f64> {
-        let tr = startin::Triangle {
-            v: [t[0], t[1], t[2]],
-        };
+        let tr = startin::Triangle { v: [t[0], t[1], t[2]] };
         match self.t.area2d_triangle(&tr) {
             Ok(b) => return Ok(b),
             Err(_) => return Err(exceptions::PyIndexError::new_err("Invalid vertex index")),
@@ -605,9 +606,7 @@ impl DT {
     /// 32.2
     #[pyo3(signature = (t))]
     fn area3d_triangle(&self, t: Vec<usize>) -> PyResult<f64> {
-        let tr = startin::Triangle {
-            v: [t[0], t[1], t[2]],
-        };
+        let tr = startin::Triangle { v: [t[0], t[1], t[2]] };
         match self.t.area3d_triangle(&tr) {
             Ok(b) => return Ok(b),
             Err(_) => return Err(exceptions::PyIndexError::new_err("Invalid vertex index")),
@@ -625,9 +624,7 @@ impl DT {
     /// 32.2
     #[pyo3(signature = (t, zplane=0.0))]
     fn volume_triangle(&self, t: Vec<usize>, zplane: f64) -> PyResult<f64> {
-        let tr = startin::Triangle {
-            v: [t[0], t[1], t[2]],
-        };
+        let tr = startin::Triangle { v: [t[0], t[1], t[2]] };
         match self.t.volume_triangle(&tr, zplane) {
             Ok(b) => return Ok(b),
             Err(_) => return Err(exceptions::PyIndexError::new_err("Invalid vertex index")),
@@ -662,9 +659,7 @@ impl DT {
     /// array([15.63303377, 26.9968598 ,  23.4])
     #[pyo3(signature = (t))]
     fn normal_triangle(&self, t: Vec<usize>) -> PyResult<Vec<f64>> {
-        let tr = startin::Triangle {
-            v: [t[0], t[1], t[2]],
-        };
+        let tr = startin::Triangle { v: [t[0], t[1], t[2]] };
         match self.t.normal_triangle(&tr) {
             Ok(b) => return Ok(b),
             Err(_) => return Err(exceptions::PyIndexError::new_err("Invalid Triangle")),
@@ -727,7 +722,10 @@ impl DT {
     ///
     /// >>> dt.convex_hull()
     /// array([2, 13, 4, 51, 27], dtype=uint64)
-    fn convex_hull<'py>(&self, py: Python<'py>) -> PyResult<Bound<'py, PyArray<usize, numpy::Ix1>>> {
+    fn convex_hull<'py>(
+        &self,
+        py: Python<'py>,
+    ) -> PyResult<Bound<'py, PyArray<usize, numpy::Ix1>>> {
         Ok(PyArray::from_vec(py, self.t.convex_hull()))
     }
 
@@ -858,9 +856,7 @@ impl DT {
         py: Python<'py>,
         t: Vec<usize>,
     ) -> PyResult<Bound<'py, PyArray<usize, numpy::Ix2>>> {
-        let tr = startin::Triangle {
-            v: [t[0], t[1], t[2]],
-        };
+        let tr = startin::Triangle { v: [t[0], t[1], t[2]] };
         let re = self.t.adjacent_triangles_to_triangle(&tr);
         if re.is_ok() {
             let l = re.unwrap();
@@ -909,9 +905,7 @@ impl DT {
     /// >>> re = dt.is_finite(np.array([11, 162, 666])))
     #[pyo3(signature = (t))]
     fn is_finite(&self, t: Vec<usize>) -> PyResult<bool> {
-        let tr = startin::Triangle {
-            v: [t[0], t[1], t[2]],
-        };
+        let tr = startin::Triangle { v: [t[0], t[1], t[2]] };
         Ok(self.t.is_finite(&tr))
     }
 
@@ -924,9 +918,7 @@ impl DT {
     /// False
     #[pyo3(signature = (t))]
     fn is_triangle(&self, t: Vec<usize>) -> PyResult<bool> {
-        let tr = startin::Triangle {
-            v: [t[0], t[1], t[2]],
-        };
+        let tr = startin::Triangle { v: [t[0], t[1], t[2]] };
         Ok(self.t.is_triangle(&tr))
     }
 
@@ -1127,9 +1119,7 @@ impl DT {
     fn write_obj(&self, path: String) -> PyResult<()> {
         let re = self.t.write_obj(path.to_string());
         if re.is_err() {
-            return Err(exceptions::PyFileNotFoundError::new_err(
-                "No such file or directory",
-            ));
+            return Err(exceptions::PyFileNotFoundError::new_err("No such file or directory"));
         }
         Ok(())
     }
@@ -1145,9 +1135,7 @@ impl DT {
     fn write_ply(&self, path: String) -> PyResult<()> {
         let re = self.t.write_ply(path.to_string());
         if re.is_err() {
-            return Err(exceptions::PyFileNotFoundError::new_err(
-                "No such file or directory",
-            ));
+            return Err(exceptions::PyFileNotFoundError::new_err("No such file or directory"));
         }
         Ok(())
     }
@@ -1161,11 +1149,7 @@ impl DT {
     /// >>> dt.write_geojson("/home/elvis/myfile.geojson")
     #[pyo3(signature = (path))]
     pub fn write_geojson(&self, path: String) -> PyResult<()> {
-        let mut fc = FeatureCollection {
-            bbox: None,
-            features: vec![],
-            foreign_members: None,
-        };
+        let mut fc = FeatureCollection { bbox: None, features: vec![], foreign_members: None };
         //-- vertices
         let allv_f = self.t.all_vertices();
         for i in 1..allv_f.len() {
@@ -1176,10 +1160,7 @@ impl DT {
             let pt = Geometry::new(GeoValue::Point(vec![allv_f[i][0], allv_f[i][1]]));
             let mut attributes = Map::new();
             attributes.insert(String::from("id"), to_value(i.to_string()).unwrap());
-            attributes.insert(
-                String::from("z"),
-                to_value(allv_f[i][2].to_string()).unwrap(),
-            );
+            attributes.insert(String::from("z"), to_value(allv_f[i][2].to_string()).unwrap());
             let f = Feature {
                 bbox: None,
                 geometry: Some(pt),
@@ -1368,9 +1349,7 @@ impl DT {
     }
 
     fn interpolate_nni(&mut self, p2: [f64; 2], precompute: bool) -> PyResult<f64> {
-        let i_nni = startin::interpolation::NNI {
-            precompute: precompute,
-        };
+        let i_nni = startin::interpolation::NNI { precompute: precompute };
         let mut re = startin::interpolation::interpolate(&i_nni, &mut self.t, &vec![p2]);
         let re1 = re.pop().expect("no results");
         if re1.is_err() {
@@ -1380,10 +1359,7 @@ impl DT {
     }
 
     fn interpolate_idw(&mut self, p2: [f64; 2], radius: f64, pow: f64) -> PyResult<f64> {
-        let i_idw = startin::interpolation::IDW {
-            radius: radius,
-            power: pow,
-        };
+        let i_idw = startin::interpolation::IDW { radius: radius, power: pow };
         let mut re = startin::interpolation::interpolate(&i_idw, &mut self.t, &vec![p2]);
         let re1 = re.pop().expect("no results");
         if re1.is_err() {
