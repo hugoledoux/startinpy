@@ -8,7 +8,7 @@ jobs:
   linux-p310:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: PyO3/maturin-action@v1
         with:
           maturin-version: 1.6.0
@@ -19,7 +19,7 @@ jobs:
   linux-p311:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: PyO3/maturin-action@v1
         with:
           maturin-version: 1.6.0
@@ -30,7 +30,7 @@ jobs:
   linux-p312:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: PyO3/maturin-action@v1
         with:
           maturin-version: 1.6.0
@@ -41,7 +41,7 @@ jobs:
   linux-p313:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: PyO3/maturin-action@v1
         with:
           maturin-version: 1.6.0
@@ -52,7 +52,7 @@ jobs:
   linux-p314:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: PyO3/maturin-action@v1
         with:
           maturin-version: 1.6.0
@@ -63,7 +63,7 @@ jobs:
   win-p310:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: PyO3/maturin-action@v1
         with:
           maturin-version: 1.6.0
@@ -73,7 +73,7 @@ jobs:
   win-p311:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: PyO3/maturin-action@v1
         with:
           maturin-version: 1.6.0
@@ -83,7 +83,7 @@ jobs:
   win-p312:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: PyO3/maturin-action@v1
         with:
           maturin-version: 1.6.0
@@ -93,7 +93,7 @@ jobs:
   win-p313:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: PyO3/maturin-action@v1
         with:
           maturin-version: 1.6.0
@@ -103,7 +103,7 @@ jobs:
   win-p314:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: PyO3/maturin-action@v1
         with:
           maturin-version: 1.6.0
@@ -113,12 +113,7 @@ jobs:
   macos-p310:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Install aarch64-apple-darwin toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          target: aarch64-apple-darwin
+      - uses: actions/checkout@v4
       - uses: PyO3/maturin-action@v1
         with:
           maturin-version: 1.6.0
@@ -128,12 +123,7 @@ jobs:
   macos-p311:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Install aarch64-apple-darwin toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          target: aarch64-apple-darwin
+      - uses: actions/checkout@v4
       - uses: PyO3/maturin-action@v1
         with:
           maturin-version: 1.6.0
@@ -143,12 +133,7 @@ jobs:
   macos-p312:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Install aarch64-apple-darwin toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          target: aarch64-apple-darwin
+      - uses: actions/checkout@v4
       - uses: PyO3/maturin-action@v1
         with:
           maturin-version: 1.6.0
@@ -158,12 +143,7 @@ jobs:
   macos-p313:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Install aarch64-apple-darwin toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          target: aarch64-apple-darwin
+      - uses: actions/checkout@v4
       - uses: PyO3/maturin-action@v1
         with:
           maturin-version: 1.6.0
@@ -173,12 +153,7 @@ jobs:
   macos-p314:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Install aarch64-apple-darwin toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          target: aarch64-apple-darwin
+      - uses: actions/checkout@v4
       - uses: PyO3/maturin-action@v1
         with:
           maturin-version: 1.6.0
