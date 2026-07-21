@@ -35,9 +35,15 @@ with open("../Cargo.toml") as fp:
 # ones.
 extensions = [
     "sphinx.ext.autodoc",
+    "sphinx.ext.intersphinx",
     "sphinx_copybutton",
     "myst_parser",
 ]
+
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3", None),
+    "numpy": ("https://numpy.org/doc/stable", None),
+}
 
 myst_enable_extensions = [
     "colon_fence",
