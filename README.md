@@ -34,10 +34,8 @@ pip
 
 To install the latest release: `pip install startinpy`
 
-(watch out: this does not work with Linux currently, it installs an old version!)
-
 If you want to compile it yourself
-----------------------------------
+---------------------------------
 
   1. install latest [Rust](https://www.rust-lang.org/)
   2. install [maturin](https://github.com/PyO3/maturin)
@@ -48,18 +46,34 @@ If you want to compile it yourself
 Development
 -----------
 
-  1. install [Rust](https://www.rust-lang.org/) (v1.39+)
-  2. install [maturin](https://github.com/PyO3/maturin)
-  3. `maturin develop`
-  4. move to another folder, and `import startinpy` shouldn't return any error
+  1. install [Rust](https://www.rust-lang.org/) (v1.73+)
+  2. install [uv](https://docs.astral.sh/uv/) (recommended) and create a virtual environment:
+     ```bash
+     uv venv
+     source .venv/bin/activate
+     ```
+  3. build and install in editable mode:
+     ```bash
+     maturin develop
+     ```
+     or without activating the venv: `uv run maturin develop`
+  4. `import startinpy` should now work
 
 Testing
 -------
 
 To run the automated test suite:
 
- 1. install the test requirements: `pip install -r tests/requirements.txt`
- 2. `pytest`
+  1. activate the virtual environment: `source .venv/bin/activate`
+  2. install test dependencies:
+     ```bash
+     uv pip install -r tests/requirements.txt
+     ```
+     (edit `requirements.in` then run `uv pip compile tests/requirements.in -o tests/requirements.txt` to update the lock file)
+  3. run the tests:
+     ```bash
+     python -m pytest tests/ -v
+     ```
 
 Examples
 ========
