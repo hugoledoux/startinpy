@@ -7,11 +7,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.12.3] - 2025-11-17
+## [0.12.3] - 2026-07-21
 ### Changed
-- upgrade pyo3 to the latest version
-- add support for Python 3.14
-- Improved docs slightly
+- upgrade pyo3 to 0.29 and numpy (Rust crate) to 0.29 (Python 3.13+ support)
+- modernise packaging: delete legacy `setup.py`, add PEP 621 metadata, use `[project.optional-dependencies]` for test/docs extras
+- move macOS linker config to `.cargo/config.toml` with Apple Silicon coverage
+- update CI: bump `actions/checkout@v4`, replace `pip install -r tests/requirements.txt` with `pip install ".[test]"`
+- improve docs: fix Sphinx numpy.bool warning, add intersphinx, update copyright to 2026
+### Added
+- `AGENTS.md` and `docs/README.md` for developer onboarding
+- `rust-toolchain.toml`, `.rustfmt.toml`, `py.typed` marker
+- `[profile.release]` with LTO in `Cargo.toml`
+- updated development/testing instructions in README with uv
 
 
 ## [0.12.2] - 2025-07-28

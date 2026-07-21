@@ -23,7 +23,7 @@ uv run maturin develop
 
 ```bash
 source .venv/bin/activate
-uv pip install ".[test]"    # installs pytest, numpy, laspy, laszip
+uv pip install ".[test]"    # installs pytest, numpy, laspy, lazrs
 python -m pytest tests/ -v
 ```
 
@@ -37,7 +37,7 @@ uv run sphinx-build docs docs/_build/html
 
 ## LAZ file support
 
-`lazrs` cannot build on Python 3.13 (uses pyo3 0.20). Use **laszip** instead. `[project.optional-dependencies] test` already includes `laszip`, not `lazrs`.
+LAZ files are read via `laspy` with the `lazrs` backend.
 
 ## Linting
 

@@ -30,7 +30,7 @@ repository = "https://github.com/hugoledoux/startinpy"
 [project.optional-dependencies]
 test = [
     "laspy",
-    "laszip",
+    "lazrs",
     "numpy",
     "pytest",
 ]
