@@ -13,7 +13,7 @@ jobs:
   linux:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -27,14 +27,14 @@ jobs:
       - name: Install startinpy
         run: pip install .
       - name: Install test requirements
-        run: pip install -r tests/requirements.txt
+        run: pip install ".[test]"
       - name: Run tests
         run: pytest
 
   windows:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -47,23 +47,18 @@ jobs:
       - name: Install startinpy
         run: pip install .
       - name: Install test requirements
-        run: pip install -r tests/requirements.txt
+        run: pip install ".[test]"
       - name: Run tests
         run: pytest
 
   macos:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: "pip"
-      - name: Install aarch64-apple-darwin toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          target: aarch64-apple-darwin
       - uses: PyO3/maturin-action@v1
         with:
           maturin-version: 1.6.0
@@ -72,6 +67,6 @@ jobs:
       - name: Install startinpy
         run: pip install .
       - name: Install test requirements
-        run: pip install -r tests/requirements.txt
+        run: pip install ".[test]"
       - name: Run tests
         run: pytest
