@@ -34,6 +34,13 @@ test = [
     "numpy",
     "pytest",
 ]
+docs = [
+    "sphinx>=7.4.7",
+    "sphinx-copybutton>=0.5.2",
+    "sphinx-autobuild>=2024.10.3",
+    "furo>=2025.12.19",
+    "myst-parser>=3.0.1",
+]
 
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.
